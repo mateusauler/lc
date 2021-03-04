@@ -448,11 +448,6 @@
 			<read>+</read>
 		</transition>
 		<transition>
-			<from>24</from>
-			<to>25</to>
-			<read>,</read>
-		</transition>
-		<transition>
 			<from>30</from>
 			<to>33</to>
 			<read>!=[&gt;=]</read>
