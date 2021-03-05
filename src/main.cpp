@@ -59,6 +59,7 @@ typedef enum {
 	TK_OP_LE,        // <=
 	TK_OP_GE,        // >=
 	TK_OP_EQ,        // =
+	TK_OP_NE,        // <>
 
 	TK_OP_PLUS,      // +
 	TK_OP_MINUS,     // -
