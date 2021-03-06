@@ -21,62 +21,71 @@ struct hash_bkt {
     }
 };
 
-class hash_tbl {
+class hash_tbl
+{
     public:
     hash_bkt **tabela;
     int tamanho_tbl;
 
-    int hash_function(string chave) {
+    int hash_function(string chave)
+    {
         return chave[0] % this->tamanho_tbl;
     }
 
-    hash_tbl() {
+    hash_tbl()
+    {
         hash_tbl(128);
     }
 
-    hash_tbl(int tamanho) {
-        hash_bkt jorge[tamanho];
+    hash_tbl(int tamanho)
+    {
+        hash_bkt bucket[tamanho];
         this->tamanho_tbl = tamanho;
-        this->tabela = (hash_bkt**)&jorge;
+        this->tabela = (hash_bkt**)&bucket;
 
-        for (int i = 0; i < tamanho; i++) {
+        for (int i = 0; i < tamanho; i++)
             this->tabela[i] = NULL;
-        }
     }
 
-    hash_bkt* inserir(string chave, void* elemento) {
+    hash_bkt* inserir(string chave, void* elemento)
+    {
         int hash_chave = this->hash_function(chave);
         
         hash_bkt *obj = new hash_bkt(elemento, chave);
 
-        if(this->tabela[hash_chave] == NULL) {
+        if (this->tabela[hash_chave] == NULL)
             this->tabela[hash_chave] = obj;    
-        } else {
+        else
+        {
             hash_bkt* tmp = this->tabela[hash_chave];
-            while(tmp->prox != NULL) {
+
+            while(tmp->prox != NULL)
                 tmp = tmp->prox;
-            }
+
             tmp->prox = obj;
         }
 
         return obj;
     }
 
-    hash_bkt* pesquisar(string chave) {
+    hash_bkt* pesquisar(string chave)
+    {
         int hash_chave = this->hash_function(chave);
         
-        if(this->tabela[hash_chave] == NULL) {
+        if(this->tabela[hash_chave] == NULL)
             return NULL;
-        }
+
         hash_bkt* tmp = this->tabela[hash_chave];
-        while(true) {
-            if(chave == tmp->chave) {
+
+        while(true)
+        {
+            if (chave == tmp->chave)
                 return tmp;
-            }
-            if(tmp->prox != NULL) {
+
+            if (tmp->prox != NULL)
                 tmp = tmp->prox;
-            }
-            else return NULL;
+            else 
+                return NULL;
         }
     }
 

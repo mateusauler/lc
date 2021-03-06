@@ -25,11 +25,11 @@ using namespace std;
                           (c >= 'a' && c <= '{') || \
                           (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
-token_t next_token();
-void inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tip_const);
-void inserir_registro_lexico(token_type_t tip_tok, string lexema);
-void inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts);
-void inserir_registro_lexico(token_type_t tip_tok, string lexema, int tamanho, const_type_t tip_const);
+token_t proximo_token();
+void inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tipo_const);
+void inserir_registro_lexico(token_type_t tipo_token, string lexema);
+void inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts);
+void inserir_registro_lexico(token_type_t tipo_token, string lexema, int tamanho, const_type_t tipo_const);
 
 FILE *f;
 int num_linha = 1;
@@ -49,7 +49,7 @@ main(int argc, char* argv[])
 	do
 	{
 		int old_linha = num_linha;
-		tok = next_token();
+		tok = proximo_token();
 		string tkname = "ERRO";
 
 		switch (tok.tipo)
@@ -162,7 +162,7 @@ main(int argc, char* argv[])
 }
 
 token_t
-next_token()
+proximo_token()
 {
 	state_t estado = ST_START;
 
@@ -651,27 +651,27 @@ next_token()
 }
 
 void
-inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tip_const) {
+inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tipo_const) {
 	entrada_registro_lexico obj; 
-	obj.tip_tok = tip_tok;
+	obj.tipo_token = tipo_token;
 	obj.lexema = lexema;
 	obj.endereco_ts = endereco_ts;
 	obj.tamanho = tamanho;
-	obj.tip_const = tip_const;
+	obj.tipo_const = tipo_const;
 
 	registro_lexico->push_back(obj);
 }
 
 void
-inserir_registro_lexico(token_type_t tip_tok, string lexema) {
-	inserir_registro_lexico(tip_tok, lexema, NULL, 0, CONST_NULL);
+inserir_registro_lexico(token_type_t tipo_token, string lexema) {
+	inserir_registro_lexico(tipo_token, lexema, NULL, 0, CONST_NULL);
 }
 
 void
-inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts) {
-	inserir_registro_lexico(tip_tok, lexema, endereco_ts, 0, CONST_NULL);
+inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts) {
+	inserir_registro_lexico(tipo_token, lexema, endereco_ts, 0, CONST_NULL);
 }
 void
-inserir_registro_lexico(token_type_t tip_tok, string lexema, int tamanho, const_type_t tip_const) {
-	inserir_registro_lexico(tip_tok, lexema, NULL, tamanho, tip_const);
+inserir_registro_lexico(token_type_t tipo_token, string lexema, int tamanho, const_type_t tipo_const) {
+	inserir_registro_lexico(tipo_token, lexema, NULL, tamanho, tipo_const);
 }

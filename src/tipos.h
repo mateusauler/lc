@@ -88,25 +88,25 @@ typedef struct {
 
 typedef struct registro_tabela_simbolos registro_tabela_simbolos;
 struct registro_tabela_simbolos {
-    token_type_t tip_tok;
+    token_type_t tipo_token;
 	
     string lexema;
     
     registro_tabela_simbolos() { }
     
     registro_tabela_simbolos(token_type_t t, string l) {
-        this->tip_tok = t;
+        this->tipo_token = t;
         this->lexema = l;
     }
 };
 
 typedef struct entrada_registro_lexico entrada_registro_lexico;
 struct entrada_registro_lexico {
-    token_type_t tip_tok;
+    token_type_t tipo_token;
     string lexema;
     registro_tabela_simbolos* endereco_ts;
     int tamanho;
-    const_type_t tip_const;
+    const_type_t tipo_const;
 };
 
 #endif
