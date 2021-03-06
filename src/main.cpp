@@ -216,9 +216,9 @@ int main(int argc, char* argv[])
 				break;
 		}
 
-		cout << tkname << endl;
+		cout << tkname << ": " << tok.lex << endl;
 
-	} while (tok.tipo != TK_EOF/* && tok.type != TK_ERR*/);
+	} while (tok.tipo != TK_EOF);
 
 	fclose(f);
 
