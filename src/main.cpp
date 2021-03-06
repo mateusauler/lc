@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
 
 	do
 	{
+		int old_linha = num_linha;
 		tok = next_token();
 		string tkname = "ERRO";
 
@@ -216,7 +217,10 @@ int main(int argc, char* argv[])
 				break;
 		}
 
-		cout << tkname << ": " << tok.lex << endl;
+		if (old_linha != num_linha)
+			cout << endl << num_linha << '\t';
+
+		cout << tkname << ": \"" << tok.lex << "\"\t";
 
 	} while (tok.tipo != TK_EOF);
 
