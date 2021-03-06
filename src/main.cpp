@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -234,6 +235,7 @@ token_t next_token()
 
 	token_t tok;
 	const_type_t tipo_const = CONST_NULL;
+	stringstream *stream_lexema = new stringstream();
 
 	while (estado != ST_END && c != EOF)
 	{
@@ -254,6 +256,7 @@ token_t next_token()
 		{
 			case ST_START:
 				lex_len = 1;
+				stream_lexema->str("");
 
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 					estado = ST_ID_NAME;
@@ -610,7 +613,8 @@ token_t next_token()
 			// CR
 			cr = c == 0xD;
 
-			// TODO: Concatenar caractere ao lexema sendo analisado
+			if (!cr && c != 0xA)
+				*stream_lexema << c;
 		}
 
 	} // End while
@@ -621,7 +625,7 @@ token_t next_token()
 		fseek(f, -1, SEEK_CUR);
 	}
 
-	// TODO: Guardar lexema no token
+	tok.lex = stream_lexema->str();
 
 	switch (tok.tipo)
 	{	
