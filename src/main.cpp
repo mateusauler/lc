@@ -125,95 +125,95 @@ int main(int argc, char* argv[])
 		switch (tok.tipo)
 		{
 			case TK_ID:
-				tkname = "TK_ID";
+				tkname = "ID";
 				break;
 
 			case TK_CONST:
-				tkname = "TK_CONST";
+				tkname = "CONST";
 				break;
 
 			case TK_OP_ATTRIB:
-				tkname = "TK_OP_ATTRIB";
+				tkname = "OP_ATTRIB";
 				break;
 
 			case TK_OP_LT:
-				tkname = "TK_OP_LT";
+				tkname = "OP_LT";
 				break;
 
 			case TK_OP_GT:
-				tkname = "TK_OP_GT";
+				tkname = "OP_GT";
 				break;
 
 			case TK_OP_LE:
-				tkname = "TK_OP_LE";
+				tkname = "OP_LE";
 				break;
 
 			case TK_OP_GE:
-				tkname = "TK_OP_GE";
+				tkname = "OP_GE";
 				break;
 
 			case TK_OP_EQ:
-				tkname = "TK_OP_EQ";
+				tkname = "OP_EQ";
 				break;
 
 			case TK_OP_NE:
-				tkname = "TK_OP_NE";
+				tkname = "OP_NE";
 				break;
 
 			case TK_OP_PLUS:
-				tkname = "TK_OP_PLUS";
+				tkname = "OP_PLUS";
 				break;
 
 			case TK_OP_MINUS:
-				tkname = "TK_OP_MINUS";
+				tkname = "OP_MINUS";
 				break;
 
 			case TK_OP_MUL:
-				tkname = "TK_OP_MUL";
+				tkname = "OP_MUL";
 				break;
 
 			case TK_OP_SLASH:
-				tkname = "TK_OP_SLASH";
+				tkname = "OP_SLASH";
 				break;
 
 			case TK_OP_PERCENT:
-				tkname = "TK_OP_PERCENT";
+				tkname = "OP_PERCENT";
 				break;
 
 			case TK_BRA_O_PAR:
-				tkname = "TK_BRA_O_PAR";
+				tkname = "BRA_O_PAR";
 				break;
 
 			case TK_BRA_C_PAR:
-				tkname = "TK_BRA_C_PAR";
+				tkname = "BRA_C_PAR";
 				break;
 
 			case TK_BRA_O_SQR:
-				tkname = "TK_BRA_O_SQR";
+				tkname = "BRA_O_SQR";
 				break;
 
 			case TK_BRA_C_SQR:
-				tkname = "TK_BRA_C_SQR";
+				tkname = "BRA_C_SQR";
 				break;
 
 			case TK_BRA_O_CUR:
-				tkname = "TK_BRA_O_CUR";
+				tkname = "BRA_O_CUR";
 				break;
 
 			case TK_BRA_C_CUR:
-				tkname = "TK_BRA_C_CUR";
+				tkname = "BRA_C_CUR";
 				break;
 
 			case TK_OP_COMMA:
-				tkname = "TK_OP_COMMA";
+				tkname = "OP_COMMA";
 				break;
 
 			case TK_END_STATEMENT:
-				tkname = "TK_END_STATEMENT";
+				tkname = "END_STATEMENT";
 				break;
 
 			case TK_EOF:
-				tkname = "TK_EOF";
+				tkname = "EOF";
 				break;
 		}
 
