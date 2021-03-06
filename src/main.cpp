@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include "hash_tbl.cpp"
 
 using namespace std;
 

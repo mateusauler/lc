@@ -9,7 +9,7 @@ LDFLAGS  =
 
 CC = g++
 
-SRC = main.cpp
+SRC = main.cpp hash_tbl.cpp
 OBJ = ${SRC:%.cpp=${DESTDIR}/%.o}
 
 all: ${DESTDIR} ${TARGET}
