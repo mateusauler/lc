@@ -108,6 +108,118 @@ int num_linha = 1;
 
 int main(int argc, char* argv[])
 {
+	if (argc != 2)
+		return 1;
+
+	f = fopen(argv[1], "r");
+
+	token_t tok;
+
+	do
+	{
+		tok = next_token();
+		string tkname = "ERRO";
+
+		switch (tok.tipo)
+		{
+			case TK_ID:
+				tkname = "TK_ID";
+				break;
+
+			case TK_CONST:
+				tkname = "TK_CONST";
+				break;
+
+			case TK_OP_ATTRIB:
+				tkname = "TK_OP_ATTRIB";
+				break;
+
+			case TK_OP_LT:
+				tkname = "TK_OP_LT";
+				break;
+
+			case TK_OP_GT:
+				tkname = "TK_OP_GT";
+				break;
+
+			case TK_OP_LE:
+				tkname = "TK_OP_LE";
+				break;
+
+			case TK_OP_GE:
+				tkname = "TK_OP_GE";
+				break;
+
+			case TK_OP_EQ:
+				tkname = "TK_OP_EQ";
+				break;
+
+			case TK_OP_NE:
+				tkname = "TK_OP_NE";
+				break;
+
+			case TK_OP_PLUS:
+				tkname = "TK_OP_PLUS";
+				break;
+
+			case TK_OP_MINUS:
+				tkname = "TK_OP_MINUS";
+				break;
+
+			case TK_OP_MUL:
+				tkname = "TK_OP_MUL";
+				break;
+
+			case TK_OP_SLASH:
+				tkname = "TK_OP_SLASH";
+				break;
+
+			case TK_OP_PERCENT:
+				tkname = "TK_OP_PERCENT";
+				break;
+
+			case TK_BRA_O_PAR:
+				tkname = "TK_BRA_O_PAR";
+				break;
+
+			case TK_BRA_C_PAR:
+				tkname = "TK_BRA_C_PAR";
+				break;
+
+			case TK_BRA_O_SQR:
+				tkname = "TK_BRA_O_SQR";
+				break;
+
+			case TK_BRA_C_SQR:
+				tkname = "TK_BRA_C_SQR";
+				break;
+
+			case TK_BRA_O_CUR:
+				tkname = "TK_BRA_O_CUR";
+				break;
+
+			case TK_BRA_C_CUR:
+				tkname = "TK_BRA_C_CUR";
+				break;
+
+			case TK_OP_COMMA:
+				tkname = "TK_OP_COMMA";
+				break;
+
+			case TK_END_STATEMENT:
+				tkname = "TK_END_STATEMENT";
+				break;
+
+			case TK_EOF:
+				tkname = "TK_EOF";
+				break;
+		}
+
+		cout << tkname << endl;
+
+	} while (tok.tipo != TK_EOF/* && tok.type != TK_ERR*/);
+
+	fclose(f);
 
 	return 0;
 }
@@ -506,7 +618,7 @@ token_t next_token()
 	if (backtrack)
 	{
 		lex_len--;
-		// TODO: voltar ponteiro do arquivo
+		fseek(f, -1, SEEK_CUR);
 	}
 
 	// TODO: Guardar lexema no token
