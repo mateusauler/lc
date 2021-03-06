@@ -699,6 +699,10 @@ proximo_token()
 	tok.lex = stream_lexema->str();
 	int lex_len = tok.lex.length();
 
+	tok.tipo_constante = tipo_const;
+	tok.tam_constante = 0;
+	tok.simbolo = NULL;
+
 	switch (tok.tipo)
 	{	
 		case TK_ID:
@@ -715,8 +719,6 @@ proximo_token()
 			break;
 
 		case TK_CONST:
-			tok.tipo_constante = tipo_const;
-
 			switch (tipo_const)
 			{
 				case CONST_NULL:
@@ -746,9 +748,6 @@ proximo_token()
 			break; // case TK_CONST
 
 		default:
-			tok.simbolo = NULL;
-			tok.tam_constante = 0;
-			tok.tipo_constante = CONST_NULL;
 			break;
 	} // switch (tok.tipo)
 
