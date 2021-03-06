@@ -52,29 +52,30 @@ typedef enum {
 	TK_ID,           // Identificador
 	TK_CONST,        // Constante
 
-	TK_OP_ATTRIB,    // :=
+	TK_OP_ATTRIB,     // :=
 
-	TK_OP_LT,        // <
-	TK_OP_GT,        // >
-	TK_OP_LE,        // <=
-	TK_OP_GE,        // >=
-	TK_OP_EQ,        // =
-	TK_OP_NE,        // <>
+	TK_OP_LT,         // <
+	TK_OP_GT,         // >
+	TK_OP_LE,         // <=
+	TK_OP_GE,         // >=
+	TK_OP_EQ,         // =
+	TK_OP_NE,         // <>
 
-	TK_OP_PLUS,      // +
-	TK_OP_MINUS,     // -
-	TK_OP_MUL,       // *
-	TK_OP_SLASH,     // /
-	TK_OP_PERCENT,   // %
+	TK_OP_PLUS,       // +
+	TK_OP_MINUS,      // -
+	TK_OP_MUL,        // *
+	TK_OP_SLASH,      // /
+	TK_OP_PERCENT,    // %
 
-	TK_BRA_O_PAR,    // (
-	TK_BRA_C_PAR,    // )
-	TK_BRA_O_SQR,    // [
-	TK_BRA_C_SQR,    // ]
-	TK_BRA_O_CUR,    // {
-	TK_BRA_C_CUR,    // }
+	TK_BRA_O_PAR,     // (
+	TK_BRA_C_PAR,     // )
+	TK_BRA_O_SQR,     // [
+	TK_BRA_C_SQR,     // ]
+	TK_BRA_O_CUR,     // {
+	TK_BRA_C_CUR,     // }
 
-	TK_END_STATEMENT // ;
+	TK_END_STATEMENT, // ;
+	TK_EOF            // EOF
 } token_type_t;
 
 typedef enum {
