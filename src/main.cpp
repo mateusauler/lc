@@ -224,6 +224,8 @@ int main(int argc, char* argv[])
 
 	} while (tok.tipo != TK_EOF);
 
+	cout << endl;
+
 	fclose(f);
 
 	return 0;
