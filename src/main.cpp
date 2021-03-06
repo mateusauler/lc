@@ -26,14 +26,10 @@ using namespace std;
                           (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
 token_t proximo_token();
-void inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tipo_const);
-void inserir_registro_lexico(token_type_t tipo_token, string lexema);
-void inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts);
-void inserir_registro_lexico(token_type_t tipo_token, string lexema, int tamanho, const_type_t tipo_const);
 
 FILE *f;
 int num_linha = 1;
-list<entrada_registro_lexico> *registro_lexico;
+list<token_t> *registro_lexico;
 tabela_simbolos *tbl_simbolos = new tabela_simbolos();
 
 int
@@ -602,7 +598,10 @@ proximo_token()
 	switch (tok.tipo)
 	{	
 		case TK_ID:
-			// TODO: Guardar endereco na tabela de simbolos
+			tok.simbolo = tbl_simbolos->pesquisar(tok.lex);
+			if (tok.simbolo == NULL)
+				tbl_simbolos->inserir(tok.tipo, tok.lex);
+
 			if (lex_len > 32)
 			{
 				// TODO: Erro
@@ -647,31 +646,7 @@ proximo_token()
 			break;
 	} // switch (tok.tipo)
 
+	registro_lexico->push_back(tok);
+
 	return tok;
-}
-
-void
-inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tipo_const) {
-	entrada_registro_lexico obj; 
-	obj.tipo_token = tipo_token;
-	obj.lexema = lexema;
-	obj.endereco_ts = endereco_ts;
-	obj.tamanho = tamanho;
-	obj.tipo_const = tipo_const;
-
-	registro_lexico->push_back(obj);
-}
-
-void
-inserir_registro_lexico(token_type_t tipo_token, string lexema) {
-	inserir_registro_lexico(tipo_token, lexema, NULL, 0, CONST_NULL);
-}
-
-void
-inserir_registro_lexico(token_type_t tipo_token, string lexema, registro_tabela_simbolos* endereco_ts) {
-	inserir_registro_lexico(tipo_token, lexema, endereco_ts, 0, CONST_NULL);
-}
-void
-inserir_registro_lexico(token_type_t tipo_token, string lexema, int tamanho, const_type_t tipo_const) {
-	inserir_registro_lexico(tipo_token, lexema, NULL, tamanho, tipo_const);
 }

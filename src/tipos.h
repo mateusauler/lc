@@ -100,13 +100,4 @@ struct registro_tabela_simbolos {
     }
 };
 
-typedef struct entrada_registro_lexico entrada_registro_lexico;
-struct entrada_registro_lexico {
-    token_type_t tipo_token;
-    string lexema;
-    registro_tabela_simbolos* endereco_ts;
-    int tamanho;
-    const_type_t tipo_const;
-};
-
 #endif
