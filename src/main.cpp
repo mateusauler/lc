@@ -46,6 +46,7 @@ typedef enum {
 
 	ST_COMMENT,             // Leu /* e esta lendo comentario
 	ST_COMMENT_END,         // Leu * e pode ler /, terminando o comentario
+	ST_COMMENT_NEWLINE,     // Leu \r e pode ler um \n (dentro do comentario, deve contabilizar nova linha)
 
 	ST_NEWLINE,             // Leu \r e pode ler um \n (deve incrementar o contador de linha)
 
@@ -557,15 +558,39 @@ token_t next_token()
 				break;
 
 			case ST_COMMENT:
-				if (c == '*')
-					estado = ST_COMMENT_END;
+				switch(c)
+				{
+					case '*':
+						estado = ST_COMMENT_END;
+						break;
+
+					case '\n':
+						num_linha++;
+						break;
+
+					case '\r':
+						estado = ST_COMMENT_NEWLINE;
+						break;
+				}
 				break;
 			
 			case ST_COMMENT_END:
-				if (c == '/')
-					estado = ST_START;
-				else
-					estado = ST_COMMENT;
+				switch (c)
+				{
+					case '/':
+						estado = ST_START;
+						break;
+
+					case '\r':
+						estado = ST_COMMENT_NEWLINE;
+						break;
+
+					case '\n':
+						num_linha++;
+					default:
+						estado = ST_COMMENT;
+						break;
+				}
 				break;
 
 			case ST_OP_ATTRIB_START:
@@ -624,9 +649,15 @@ token_t next_token()
 				estado = ST_START;
 				break;
 
+			case ST_COMMENT_NEWLINE:
+				backtrack = (c != '\n');
+				num_linha++;
+				estado = ST_COMMENT;
+				break;
+
 			default: // switch (estado)
 				break;
-		}
+		} // switch (estado)
 
 		if (!backtrack)
 			*stream_lexema << c;
