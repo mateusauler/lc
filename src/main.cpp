@@ -1,3 +1,8 @@
+#include <string>
+#include <iostream>
+
+using namespace std;
+
 					  /*    TAB          LF          CR */
 #define VALIDCHAR(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
 					  (c >= ' '  && c <= '"') || \
@@ -87,8 +92,466 @@ typedef enum {
 	CONST_BOOL
 } const_type_t;
 
+typedef struct {
+	token_type_t tipo;
+	string lex;
+	void* simbolo;
+	const_type_t tipo_constante;
+	int tam_constante;
+} token_t;
+
+token_t next_token();
+
+FILE *f;
+int num_linha = 1;
+
 int main(int argc, char* argv[])
 {
 
 	return 0;
+}
+
+token_t next_token()
+{
+	state_t estado = ST_START;
+
+	char c;
+	int lex_len = 0;
+	bool backtrack = false, cr = false;
+
+	token_t tok;
+	const_type_t tipo_const = CONST_NULL;
+
+	while (estado != ST_END && c != EOF)
+	{
+		c = fgetc(f);
+		lex_len++;
+
+		if (c == EOF && estado != ST_START)
+		{
+			// TODO: erro
+		}
+
+		if (!VALIDCHAR(c))
+		{
+			// TODO: erro
+		}
+
+		switch (estado)
+		{
+			case ST_START:
+				lex_len = 1;
+
+				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+					estado = ST_ID_NAME;
+				else if (c >= '0' && c <= '9')
+					estado = ST_CONST_NUM;
+				else
+				{
+					switch(c)
+					{
+						case '_':
+							estado = ST_ID_UNDERSCORE;
+							break;
+
+						case '0':
+							estado = ST_CONST_HEX_START;
+							break;
+
+						case '\'':
+							estado = ST_CONST_CHAR_START;
+							break;
+
+						case '"':
+							estado = ST_CONST_STR_INTERNAL;
+							break;
+
+						case '/':
+							estado = ST_OP_SLASH;
+							break;
+
+						case ':':
+							estado = ST_OP_ATTRIB_START;
+							break;
+
+						case '<':
+							estado = ST_OP_LT;
+							break;
+
+						case '>':
+							estado = ST_OP_GT;
+							break;
+
+						case '{':
+							tok.tipo = TK_BRA_O_CUR;
+							estado = ST_END;
+							break;
+
+						case '}':
+							tok.tipo = TK_BRA_C_CUR;
+							estado = ST_END;
+							break;
+
+						case '[':
+							tok.tipo = TK_BRA_O_SQR;
+							estado = ST_END;
+							break;
+
+						case ']':
+							tok.tipo = TK_BRA_C_SQR;
+							estado = ST_END;
+							break;
+
+						case '(':
+							tok.tipo = TK_BRA_O_PAR;
+							estado = ST_END;
+							break;
+
+						case ')':
+							tok.tipo = TK_BRA_C_PAR;
+							estado = ST_END;
+							break;
+
+						case '%':
+							tok.tipo = TK_OP_PERCENT;
+							estado = ST_END;
+							break;
+
+						case '*':
+							tok.tipo = TK_OP_MUL;
+							estado = ST_END;
+							break;
+
+						case '+':
+							tok.tipo = TK_OP_PLUS;
+							estado = ST_END;
+							break;
+
+						case '-':
+							tok.tipo = TK_OP_MINUS;
+							estado = ST_END;
+							break;
+
+						case ';':
+							tok.tipo = TK_END_STATEMENT;
+							estado = ST_END;
+							break;
+
+						case '=':
+							tok.tipo = TK_OP_EQ;
+							estado = ST_END;
+							break;
+
+						case EOF:
+							tok.tipo = TK_EOF;
+							estado = ST_END;
+							break;
+
+						default:
+							break;
+					}
+				}
+				break;
+
+			case ST_ID_UNDERSCORE:
+				if ((c >= 'a' && c <= 'z') ||
+					(c >= 'A' && c <= 'Z') ||
+					(c >= '0' && c <= '9'))
+					estado = ST_ID_NAME;
+				else if (c == '_')
+					estado = ST_ID_UNDERSCORE;
+				else
+				{
+					// TODO: Erro lexema invalido
+				}
+				break;
+
+			case ST_ID_NAME:
+				if ((c >= 'a' && c <= 'z') ||
+					(c >= 'A' && c <= 'Z') ||
+					(c >= '0' && c <= '9') ||
+					(c == '_'))
+					estado = ST_ID_NAME;
+				else
+				{
+					tok.tipo = TK_ID;
+					estado = ST_END;
+					backtrack = true;
+				}
+				break;
+
+			case ST_CONST_HEX_START:
+				if (c >= '0' && c <= '9')
+					estado = ST_CONST_HEX_NUM1;
+				else if (c >= 'A' && c <= 'F')
+					estado = ST_CONST_HEX_ALPHA1;
+				else
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_INT;
+
+					estado = ST_END;
+					backtrack = true;
+				}
+				break;
+
+			case ST_CONST_HEX_ALPHA1:
+				if ((c >= '0' && c <= '9') || 
+				    (c >= 'A' && c <= 'F'))
+					estado = ST_CONST_HEX_ALPHA2;
+				else
+				{
+					// TODO: erro
+				}
+
+				break;
+
+			case ST_CONST_HEX_NUM1:
+				if (c >= '0' && c <= '9')
+					estado = ST_CONST_HEX_NUM2;
+				else if (c >= 'A' && c <= 'F')
+					estado = ST_CONST_HEX_ALPHA2;
+				else
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_INT;
+					
+					estado = ST_END;
+					backtrack = true;
+				}
+				break;
+
+			case ST_CONST_HEX_ALPHA2:
+				if (c == 'h')
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_HEX;
+					
+					estado = ST_END;
+				}
+				else
+				{
+					// TODO: erro
+				}
+					 
+				break;
+
+			case ST_CONST_HEX_NUM2:
+				if (c >= '0' && c <= '9')
+					estado = ST_CONST_NUM;
+				else if (c == 'h')
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_HEX;
+					
+					estado = ST_END;
+				}
+				else
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_INT;
+					
+					estado = ST_END;
+					backtrack = true;
+				}
+				break;
+
+			case ST_CONST_NUM:
+				if (!(c >= '0' && c <= '9'))
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_INT;
+					
+					estado = ST_END;
+					backtrack = true;
+				}
+				break;
+
+			case ST_CONST_CHAR_START:
+				if (PRINTABLECHAR(c))
+					estado = ST_CONST_CHAR_INTERNAL;
+				else
+				{
+					// TODO: erro
+				}
+				break;
+
+			case ST_CONST_CHAR_INTERNAL:
+				if (c == '\'')
+				{
+					tok.tipo = TK_CONST;
+					tipo_const = CONST_CHAR;
+
+					estado = ST_END;
+				}
+				else
+				{
+					// TODO: erro
+				}
+
+				break;
+
+			case ST_CONST_STR_INTERNAL:
+				if(c == '"')
+				{
+				    tok.tipo = TK_CONST;
+					tipo_const = CONST_STR;
+
+				    estado = ST_END;
+				}
+				else if(c == '\n' || c == '\r' || c == '$')
+				{
+				    //TODO: erro
+				}
+				break;
+
+			case ST_OP_SLASH:
+				if (c == '*')
+					estado = ST_COMMENT;
+				else
+				{
+					tok.tipo = TK_OP_SLASH;
+
+					backtrack = true;
+					estado = ST_END;
+				}
+				break;
+
+			case ST_COMMENT:
+				if (c == '*')
+					estado = ST_COMMENT_END;
+				break;
+			
+			case ST_COMMENT_END:
+				if (c == '/')
+					estado = ST_START;
+				else
+					estado = ST_COMMENT;
+				break;
+
+			case ST_OP_ATTRIB_START:
+			    if(c == '=')
+				{
+			        tok.tipo = TK_OP_ATTRIB;
+			        estado = ST_END;
+			    }
+			    else 
+			    {
+			        //TODO: erro
+			    }
+				break;
+
+			case ST_OP_LT:
+				switch (c)
+				{
+					case '=':
+						tok.tipo = TK_OP_LE;
+						break;
+
+					case '>':
+						tok.tipo = TK_OP_NE;
+						break;
+
+					default:
+						tok.tipo = TK_OP_LT;
+						backtrack = true;
+						break;
+				}
+
+				estado = ST_END;
+
+				break;
+
+			case ST_OP_GT:
+				switch (c)
+				{
+					case '=':
+						tok.tipo = TK_OP_GE;
+						break;
+
+					default:
+						tok.tipo = TK_OP_GT;
+						backtrack = true;
+						break;
+				}
+
+				estado = ST_END;
+
+				break;
+
+			default: // switch (estado)
+				break;
+		}
+
+		if (!backtrack)
+		{
+			// Caso o caractere anterior seja um CR ou o caractere atual seja um LF, isso e uma quebra de linha
+			if (cr || c == 0xA)
+				num_linha++;
+		
+			// CR
+			cr = c == 0xD;
+
+			// TODO: Concatenar caractere ao lexema sendo analisado
+		}
+
+	} // End while
+
+	if (backtrack)
+	{
+		lex_len--;
+		// TODO: voltar ponteiro do arquivo
+	}
+
+	// TODO: Guardar lexema no token
+
+	switch (tok.tipo)
+	{	
+		case TK_ID:
+			// TODO: Guardar endereco na tabela de simbolos
+			if (lex_len > 32)
+			{
+				// TODO: Erro
+			}
+			break;
+
+		case TK_CONST:
+			tok.tipo_constante = tipo_const;
+
+			switch (tipo_const)
+			{
+				case CONST_NULL:
+					tok.tam_constante = 0;
+					break;
+
+				case CONST_INT:
+					tok.tam_constante = 2;
+					break;
+
+				case CONST_CHAR:
+					tok.tam_constante = 1;
+					break;
+
+				case CONST_HEX:
+					tok.tam_constante = 1;
+					break;
+
+				case CONST_STR:
+					tok.tam_constante = lex_len - 1;
+					break;
+
+				case CONST_BOOL:
+					tok.tam_constante = 1;
+					break;
+			}
+			break; // case TK_CONST
+
+		default:
+			tok.simbolo = NULL;
+			tok.tam_constante = 0;
+			tok.tipo_constante = CONST_NULL;
+			break;
+	} // switch (tok.tipo)
+
+	return tok;
 }
