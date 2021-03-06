@@ -44,34 +44,24 @@ main(int argc, char* argv[])
 	tbl_simbolos = new tabela_simbolos(128);
 	registro_lexico = new list<token_t>();
 
-	struct {
-		token_type_t token;
-		string lex;
-	} reservadas[] = {
-		{TK_RES_FINAL,		"final"},
-		{TK_RES_INT,		"int"},
-		{TK_RES_CHAR,		"char"},
-		{TK_RES_BOOLEAN,	"boolean"},
-		{TK_RES_IF,			"if"},
-		{TK_RES_ELSE,		"else"},
-		{TK_RES_THEN,		"then"},
-		{TK_RES_WHILE,		"while"},
-		{TK_RES_FOR,		"for"},
-		{TK_RES_AND,		"and"},
-		{TK_RES_OR,			"or"},
-		{TK_RES_NOT,		"not"},
-		{TK_RES_FALSE,		"FALSE"},
-		{TK_RES_TRUE,		"TRUE"},
-		{TK_RES_WRITE,		"write"},
-		{TK_RES_WRITELN,	"writeln"},
-		{TK_RES_READLN,		"readln"},
-		{TK_RES_MAIN,		"main"}
-	};
-
-	int res_len = sizeof(reservadas)/sizeof(reservadas[0]);
-
-	for (int i = 0; i < res_len; i++)
-		tbl_simbolos->inserir(reservadas[i].token, reservadas[i].lex);
+	tbl_simbolos->inserir(TK_RES_FINAL,   "final");
+	tbl_simbolos->inserir(TK_RES_INT,     "int");
+	tbl_simbolos->inserir(TK_RES_CHAR,    "char");
+	tbl_simbolos->inserir(TK_RES_BOOLEAN, "boolean");
+	tbl_simbolos->inserir(TK_RES_IF,      "if");
+	tbl_simbolos->inserir(TK_RES_ELSE,    "else");
+	tbl_simbolos->inserir(TK_RES_THEN,    "then");
+	tbl_simbolos->inserir(TK_RES_WHILE,   "while");
+	tbl_simbolos->inserir(TK_RES_FOR,     "for");
+	tbl_simbolos->inserir(TK_RES_AND,     "and");
+	tbl_simbolos->inserir(TK_RES_OR,      "or");
+	tbl_simbolos->inserir(TK_RES_NOT,     "not");
+	tbl_simbolos->inserir(TK_RES_FALSE,   "FALSE");
+	tbl_simbolos->inserir(TK_RES_TRUE,    "TRUE");
+	tbl_simbolos->inserir(TK_RES_WRITE,   "write");
+	tbl_simbolos->inserir(TK_RES_WRITELN, "writeln");
+	tbl_simbolos->inserir(TK_RES_READLN,  "readln");
+	tbl_simbolos->inserir(TK_RES_MAIN,    "main");
 
 	token_t tok;
 
