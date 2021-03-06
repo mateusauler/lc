@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <list>
 
 using namespace std;
 
@@ -84,5 +85,28 @@ typedef struct {
 	const_type_t tipo_constante;
 	int tam_constante;
 } token_t;
+
+typedef struct registro_tabela_simbolos registro_tabela_simbolos;
+struct registro_tabela_simbolos {
+    token_type_t tip_tok;
+	
+    string lexema;
+    
+    registro_tabela_simbolos() { }
+    
+    registro_tabela_simbolos(token_type_t t, string l) {
+        this->tip_tok = t;
+        this->lexema = l;
+    }
+};
+
+typedef struct entrada_registro_lexico entrada_registro_lexico;
+struct entrada_registro_lexico {
+    token_type_t tip_tok;
+    string lexema;
+    registro_tabela_simbolos* endereco_ts;
+    int tamanho;
+    const_type_t tip_const;
+};
 
 #endif

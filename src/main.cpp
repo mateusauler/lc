@@ -1,4 +1,4 @@
-#include "hash_tbl.cpp"
+#include "tabela_simbolos.cpp"
 #include "tipos.h"
 
 using namespace std;
@@ -26,9 +26,15 @@ using namespace std;
                           (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
 token_t next_token();
+void inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tip_const);
+void inserir_registro_lexico(token_type_t tip_tok, string lexema);
+void inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts);
+void inserir_registro_lexico(token_type_t tip_tok, string lexema, int tamanho, const_type_t tip_const);
 
 FILE *f;
 int num_linha = 1;
+list<entrada_registro_lexico> *registro_lexico;
+tabela_simbolos *tbl_simbolos = new tabela_simbolos();
 
 int
 main(int argc, char* argv[])
@@ -642,4 +648,30 @@ next_token()
 	} // switch (tok.tipo)
 
 	return tok;
+}
+
+void
+inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts, int tamanho, const_type_t tip_const) {
+	entrada_registro_lexico obj; 
+	obj.tip_tok = tip_tok;
+	obj.lexema = lexema;
+	obj.endereco_ts = endereco_ts;
+	obj.tamanho = tamanho;
+	obj.tip_const = tip_const;
+
+	registro_lexico->push_back(obj);
+}
+
+void
+inserir_registro_lexico(token_type_t tip_tok, string lexema) {
+	inserir_registro_lexico(tip_tok, lexema, NULL, 0, CONST_NULL);
+}
+
+void
+inserir_registro_lexico(token_type_t tip_tok, string lexema, registro_tabela_simbolos* endereco_ts) {
+	inserir_registro_lexico(tip_tok, lexema, endereco_ts, 0, CONST_NULL);
+}
+void
+inserir_registro_lexico(token_type_t tip_tok, string lexema, int tamanho, const_type_t tip_const) {
+	inserir_registro_lexico(tip_tok, lexema, NULL, tamanho, tip_const);
 }
