@@ -237,7 +237,7 @@ token_t next_token()
 	const_type_t tipo_const = CONST_NULL;
 	stringstream *stream_lexema = new stringstream();
 
-	while (estado != ST_END && c != EOF)
+	do
 	{
 		c = fgetc(f);
 		lex_len++;
@@ -617,7 +617,7 @@ token_t next_token()
 				*stream_lexema << c;
 		}
 
-	} // End while
+	} while (estado != ST_END && c != EOF);
 
 	if (backtrack)
 	{
