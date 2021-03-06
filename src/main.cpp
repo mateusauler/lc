@@ -1,5 +1,5 @@
 					  /*    TAB          LF          CR */
-#define VALIDCHAR(c) ((c == 0x9  || c == 0xA || c == 0xD) || \
+#define VALIDCHAR(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
 					  (c >= ' '  && c <= '"') || \
 					  (c >= '\'' && c <= '[') || \
 					  (c >= 'a'  && c <= '{') || \
