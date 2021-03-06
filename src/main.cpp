@@ -238,7 +238,6 @@ token_t next_token()
 	state_t estado = ST_START;
 
 	char c;
-	int lex_len = 0;
 	bool backtrack = false;
 
 	token_t tok;
@@ -248,7 +247,6 @@ token_t next_token()
 	do
 	{
 		c = fgetc(f);
-		lex_len++;
 
 		if (c == EOF && estado != ST_START)
 		{
@@ -263,7 +261,6 @@ token_t next_token()
 		switch (estado)
 		{
 			case ST_START:
-				lex_len = 1;
 				stream_lexema->str("");
 
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
@@ -633,12 +630,10 @@ token_t next_token()
 	} while (estado != ST_END && c != EOF);
 
 	if (backtrack)
-	{
-		lex_len--;
 		fseek(f, -1, SEEK_CUR);
-	}
 
 	tok.lex = stream_lexema->str();
+	int lex_len = tok.lex.length();
 
 	switch (tok.tipo)
 	{	
