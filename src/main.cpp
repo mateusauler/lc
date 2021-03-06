@@ -109,7 +109,8 @@ token_t next_token();
 FILE *f;
 int num_linha = 1;
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
 	if (argc != 2)
 		return 1;
@@ -233,7 +234,8 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-token_t next_token()
+token_t
+next_token()
 {
 	state_t estado = ST_START;
 
