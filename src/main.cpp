@@ -526,16 +526,22 @@ token_t next_token()
 				break;
 
 			case ST_CONST_STR_INTERNAL:
-				if(c == '"')
+				switch (c)
 				{
-				    tok.tipo = TK_CONST;
-					tipo_const = CONST_STR;
+					case '"':
+						tok.tipo = TK_CONST;
+						tipo_const = CONST_STR;
+						estado = ST_END;
+						break;
 
-				    estado = ST_END;
-				}
-				else if(c == '\n' || c == '\r' || c == '$')
-				{
-				    //TODO: erro
+					case '\n':
+					case '\r':
+					case '$':
+						// TODO: erro
+						break;
+
+					default:
+						break;
 				}
 				break;
 
