@@ -275,6 +275,11 @@
 		<transition>
 			<from>24</from>
 			<to>25</to>
+			<read>EOF</read>
+		</transition>
+		<transition>
+			<from>24</from>
+			<to>25</to>
 			<read>[</read>
 		</transition>
 		<transition>
