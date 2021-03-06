@@ -23,28 +23,28 @@ struct hash_bkt {
 
 class hash_tbl
 {
-    public:
+protected:
     hash_bkt **tabela;
     int tamanho_tbl;
 
-    int hash_function(string chave)
-    {
-        return chave[0] % this->tamanho_tbl;
-    }
-
-    hash_tbl()
-    {
-        hash_tbl(128);
-    }
+public:
 
     hash_tbl(int tamanho)
     {
+        if (tamanho <= 0)
+            tamanho = 128;
+
         hash_bkt bucket[tamanho];
         this->tamanho_tbl = tamanho;
         this->tabela = (hash_bkt**)&bucket;
 
         for (int i = 0; i < tamanho; i++)
             this->tabela[i] = NULL;
+    }
+
+    int hash_function(string chave)
+    {
+        return chave[0] % this->tamanho_tbl;
     }
 
     hash_bkt* inserir(string chave, void* elemento)
@@ -88,7 +88,4 @@ class hash_tbl
                 return NULL;
         }
     }
-
-    private:
-
 };

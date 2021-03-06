@@ -30,7 +30,7 @@ token_t proximo_token();
 FILE *f;
 int num_linha = 1;
 list<token_t> *registro_lexico;
-tabela_simbolos *tbl_simbolos = new tabela_simbolos();
+tabela_simbolos *tbl_simbolos;
 
 int
 main(int argc, char* argv[])
@@ -39,6 +39,38 @@ main(int argc, char* argv[])
 		return 1;
 
 	f = fopen(argv[1], "r");
+
+	tbl_simbolos = new tabela_simbolos(128);
+	registro_lexico = new list<token_t>();
+
+	struct {
+		token_type_t token;
+		string lex;
+	} reservadas[] = {
+		{TK_RES_FINAL,		"final"},
+		{TK_RES_INT,		"int"},
+		{TK_RES_CHAR,		"char"},
+		{TK_RES_BOOLEAN,	"boolean"},
+		{TK_RES_IF,			"if"},
+		{TK_RES_ELSE,		"else"},
+		{TK_RES_THEN,		"then"},
+		{TK_RES_WHILE,		"while"},
+		{TK_RES_FOR,		"for"},
+		{TK_RES_AND,		"and"},
+		{TK_RES_OR,			"or"},
+		{TK_RES_NOT,		"not"},
+		{TK_RES_FALSE,		"FALSE"},
+		{TK_RES_TRUE,		"TRUE"},
+		{TK_RES_WRITE,		"write"},
+		{TK_RES_WRITELN,	"writeln"},
+		{TK_RES_READLN,		"readln"},
+		{TK_RES_MAIN,		"main"}
+	};
+
+	int res_len = sizeof(reservadas)/sizeof(reservadas[0]);
+
+	for (int i = 0; i < res_len; i++)
+		tbl_simbolos->inserir(reservadas[i].token, reservadas[i].lex);
 
 	token_t tok;
 
@@ -132,6 +164,78 @@ main(int argc, char* argv[])
 
 			case TK_OP_COMMA:
 				tkname = "OP_COMMA";
+				break;
+
+			case TK_RES_FINAL:
+				tkname = "RES_FINAL";
+				break;
+
+			case TK_RES_INT:
+				tkname = "RES_INT";
+				break;
+
+			case TK_RES_CHAR:
+				tkname = "RES_CHAR";
+				break;
+
+			case TK_RES_BOOLEAN:
+				tkname = "RES_BOOLEAN";
+				break;
+
+			case TK_RES_IF:
+				tkname = "RES_IF";
+				break;
+
+			case TK_RES_ELSE:
+				tkname = "RES_ELSE";
+				break;
+
+			case TK_RES_THEN:
+				tkname = "RES_THEN";
+				break;
+
+			case TK_RES_WHILE:
+				tkname = "RES_WHILE";
+				break;
+
+			case TK_RES_FOR:
+				tkname = "RES_FOR";
+				break;
+
+			case TK_RES_AND:
+				tkname = "RES_AND";
+				break;
+
+			case TK_RES_OR:
+				tkname = "RES_OR";
+				break;
+
+			case TK_RES_NOT:
+				tkname = "RES_NOT";
+				break;
+
+			case TK_RES_FALSE:
+				tkname = "RES_FALSE";
+				break;
+
+			case TK_RES_TRUE:
+				tkname = "RES_TRUE";
+				break;
+
+			case TK_RES_WRITE:
+				tkname = "RES_WRITE";
+				break;
+
+			case TK_RES_WRITELN:
+				tkname = "RES_WRITELN";
+				break;
+
+			case TK_RES_READLN:
+				tkname = "RES_READLN";
+				break;
+
+			case TK_RES_MAIN:
+				tkname = "RES_MAIN";
 				break;
 
 			case TK_END_STATEMENT:
@@ -600,7 +704,9 @@ proximo_token()
 		case TK_ID:
 			tok.simbolo = tbl_simbolos->pesquisar(tok.lex);
 			if (tok.simbolo == NULL)
-				tbl_simbolos->inserir(tok.tipo, tok.lex);
+				tok.simbolo = tbl_simbolos->inserir(tok.tipo, tok.lex);
+			else
+				tok.tipo = tok.simbolo->tipo_token;
 
 			if (lex_len > 32)
 			{

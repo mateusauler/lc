@@ -3,11 +3,11 @@
 
 using namespace std;
 
-class tabela_simbolos : hash_tbl
+class tabela_simbolos : public hash_tbl
 {
     public:
-    hash_bkt **tabela;
-    int tamanho_tbl;
+
+    using hash_tbl::hash_tbl;
 
     registro_tabela_simbolos* inserir(token_type_t tipo_token, string lexema)
     {
@@ -22,9 +22,8 @@ class tabela_simbolos : hash_tbl
     {
         hash_bkt* retorno = hash_tbl::pesquisar(lexema);
 
+        if (retorno == NULL) return NULL;
+
         return (registro_tabela_simbolos*)retorno->elemento;
     }
-
-    private:
-
 };

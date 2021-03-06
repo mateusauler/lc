@@ -65,6 +65,30 @@ typedef enum {
 	TK_BRA_O_CUR,     // {
 	TK_BRA_C_CUR,     // }
 
+	TK_RES_FINAL,     // final
+	TK_RES_INT,       // int
+	TK_RES_CHAR,      // char
+	TK_RES_BOOLEAN,   // boolean
+
+	TK_RES_IF,        // if
+	TK_RES_ELSE,      // else
+	TK_RES_THEN,      // then
+
+	TK_RES_WHILE,     // while
+	TK_RES_FOR,       // for
+
+	TK_RES_AND,       // and
+	TK_RES_OR,        // or
+	TK_RES_NOT,       // not
+
+	TK_RES_FALSE,     // FALSE
+	TK_RES_TRUE,      // TRUE
+
+	TK_RES_WRITE,     // write
+	TK_RES_WRITELN,   // writeln
+	TK_RES_READLN,    // readln
+	TK_RES_MAIN,      // main
+
 	TK_END_STATEMENT, // ;
 	TK_EOF            // EOF
 } token_type_t;
@@ -77,14 +101,6 @@ typedef enum {
 	CONST_STR,
 	CONST_BOOL
 } const_type_t;
-
-typedef struct {
-	token_type_t tipo;
-	string lex;
-	void* simbolo;
-	const_type_t tipo_constante;
-	int tam_constante;
-} token_t;
 
 typedef struct registro_tabela_simbolos registro_tabela_simbolos;
 struct registro_tabela_simbolos {
@@ -99,5 +115,13 @@ struct registro_tabela_simbolos {
         this->lexema = l;
     }
 };
+
+typedef struct {
+	token_type_t tipo;
+	string lex;
+	registro_tabela_simbolos* simbolo;
+	const_type_t tipo_constante;
+	int tam_constante;
+} token_t;
 
 #endif
