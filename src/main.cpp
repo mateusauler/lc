@@ -78,6 +78,7 @@ typedef enum {
 } token_type_t;
 
 typedef enum {
+	CONST_NULL,
 	CONST_INT,
 	CONST_CHAR,
 	CONST_HEX,
