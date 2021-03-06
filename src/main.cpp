@@ -48,6 +48,8 @@ typedef enum {
 	ST_COMMENT,             // Leu /* e esta lendo comentario
 	ST_COMMENT_END,         // Leu * e pode ler /, terminando o comentario
 
+	ST_NEWLINE,             // Leu \r e pode ler um \n (deve incrementar o contador de linha)
+
 	ST_OP_SLASH,            // Leu /
 	ST_OP_ATTRIB_START,     // Leu :
 	ST_OP_LT,               // Leu <
@@ -237,7 +239,7 @@ token_t next_token()
 
 	char c;
 	int lex_len = 0;
-	bool backtrack = false, cr = false;
+	bool backtrack = false;
 
 	token_t tok;
 	const_type_t tipo_const = CONST_NULL;
@@ -367,6 +369,14 @@ token_t next_token()
 						case '=':
 							tok.tipo = TK_OP_EQ;
 							estado = ST_END;
+							break;
+
+						case '\r':
+							estado = ST_NEWLINE;
+							break;
+
+						case '\n':
+							num_linha++;
 							break;
 
 						case EOF:
@@ -606,22 +616,19 @@ token_t next_token()
 
 				break;
 
+			case ST_NEWLINE:
+				if (c != '\n')
+					backtrack = true;
+				num_linha++;
+				estado = ST_START;
+				break;
+
 			default: // switch (estado)
 				break;
 		}
 
 		if (!backtrack)
-		{
-			// Caso o caractere anterior seja um CR ou o caractere atual seja um LF, isso e uma quebra de linha
-			if (cr || c == 0xA)
-				num_linha++;
-		
-			// CR
-			cr = c == 0xD;
-
-			if (!cr && c != 0xA)
-				*stream_lexema << c;
-		}
+			*stream_lexema << c;
 
 	} while (estado != ST_END && c != EOF);
 
