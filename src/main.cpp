@@ -620,8 +620,7 @@ token_t next_token()
 				break;
 
 			case ST_NEWLINE:
-				if (c != '\n')
-					backtrack = true;
+				backtrack = (c != '\n');
 				num_linha++;
 				estado = ST_START;
 				break;
