@@ -71,6 +71,7 @@ typedef enum {
 	TK_OP_MUL,        // *
 	TK_OP_SLASH,      // /
 	TK_OP_PERCENT,    // %
+	TK_OP_COMMA,      // ,
 
 	TK_BRA_O_PAR,     // (
 	TK_BRA_C_PAR,     // )
@@ -229,6 +230,11 @@ token_t next_token()
 
 						case '-':
 							tok.tipo = TK_OP_MINUS;
+							estado = ST_END;
+							break;
+
+						case ',':
+							tok.tipo = TK_OP_COMMA;
 							estado = ST_END;
 							break;
 
