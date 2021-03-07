@@ -24,6 +24,6 @@ ${DESTDIR}:
 	mkdir -p ${DESTDIR}
 
 clean:
-	rm -rf ${DESTDIR}/ ${TARGET}
+	rm -rf ${DESTDIR}/* ${TARGET}
 
 .PHONY: all clean
