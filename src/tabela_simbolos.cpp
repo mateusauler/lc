@@ -1,12 +1,12 @@
 #include "hash_tbl.cpp"
 #include "tipos.h"
+#include <list>
 
 using namespace std;
 
 class tabela_simbolos : public hash_tbl
 {
-    public:
-
+public:
     using hash_tbl::hash_tbl;
 
     registro_tabela_simbolos* inserir(token_type_t tipo_token, string lexema)
@@ -25,5 +25,19 @@ class tabela_simbolos : public hash_tbl
         if (retorno == NULL) return NULL;
 
         return (registro_tabela_simbolos*)retorno->elemento;
+    }
+
+    list<registro_tabela_simbolos> listar_simbolos()
+    {
+        list<hash_bkt> lb = hash_tbl::listar_elementos();
+        list<registro_tabela_simbolos> *l = new list<registro_tabela_simbolos>;
+
+        for (hash_bkt const &i: lb)
+        {
+            registro_tabela_simbolos r = *(registro_tabela_simbolos*)i.elemento;
+            l->push_back(r);
+        }
+
+        return *l;
     }
 };

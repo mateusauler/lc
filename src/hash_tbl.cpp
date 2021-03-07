@@ -1,4 +1,5 @@
 #include <sstream>
+#include <list>
 
 using namespace std;
 
@@ -87,5 +88,23 @@ public:
             else 
                 return NULL;
         }
+    }
+
+    list<hash_bkt> listar_elementos()
+    {
+        list<hash_bkt> *l = new list<hash_bkt>();
+
+        for (int i = 0; i < tamanho_tbl; i++)
+        {
+            hash_bkt *tmp = tabela[i];
+
+            while (tmp != NULL)
+            {
+                l->push_back(*tmp);
+                tmp = tmp->prox;
+            }
+        }
+
+        return *l;
     }
 };

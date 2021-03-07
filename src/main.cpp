@@ -80,6 +80,15 @@ main(int argc, char* argv[])
 
 	} while (tok.tipo != TK_EOF);
 
+	cout << endl << "Tabela de simbolos:" << endl << endl;
+
+	list<registro_tabela_simbolos> l = tbl_simbolos->listar_simbolos();
+
+	for (registro_tabela_simbolos const &i: l)
+	{
+		cout << nome_tipo_token(i.tipo_token) << "  (" << i.lexema << ")" << endl;
+	}
+
 	fclose(f);
 
 	return 0;
