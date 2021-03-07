@@ -26,7 +26,6 @@ using namespace std;
                           (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
 token_t proximo_token();
-string nome_tipo_token(token_type_t tipo);
 
 FILE *f;
 int num_linha = 1;
@@ -85,10 +84,26 @@ main(int argc, char* argv[])
 	list<registro_tabela_simbolos> l = tbl_simbolos->listar_simbolos();
 
 	for (registro_tabela_simbolos const &i: l)
-	{
-		cout << nome_tipo_token(i.tipo_token) << "  (" << i.lexema << ")" << endl;
-	}
+		cout 
+			<< registro_tabela_simbolos::imprimir_registro_ts(i)
+			<< endl;
 
+	cout << endl << endl << "Registro lexico:" << endl << endl << endl;
+
+	for (token_t const &i: *registro_lexico)
+		cout
+			<< nome_tipo_token(i.tipo)
+			<< " \" "
+			<< i.lex
+			<< " \" | "
+			<< registro_tabela_simbolos::imprimir_registro_ts(i.simbolo)
+			<< " | "
+			<< nome_tipo_constante(i.tipo_constante)
+			<< ": "
+			<< i.tam_constante
+			<< endl
+			<< endl;
+	
 	fclose(f);
 
 	return 0;
@@ -761,4 +776,39 @@ nome_tipo_token(token_type_t tipo)
 	}
 
 	return tkname;
+}
+
+string
+nome_tipo_constante(const_type_t tipo)
+{
+	string s = "ERRO";
+
+	switch (tipo)
+	{
+		case CONST_NULL:
+			s = "CONST_NULL";
+			break;
+
+		case CONST_INT:
+			s = "CONST_INT";
+			break;
+
+		case CONST_CHAR:
+			s = "CONST_CHAR";
+			break;
+
+		case CONST_HEX:
+			s = "CONST_HEX";
+			break;
+
+		case CONST_STR:
+			s = "CONST_STR";
+			break;
+
+		case CONST_BOOL:
+			s = "CONST_BOOL";
+			break;
+	}
+
+	return s;
 }

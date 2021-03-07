@@ -102,6 +102,9 @@ typedef enum {
 	CONST_BOOL
 } const_type_t;
 
+string nome_tipo_token(token_type_t tipo);
+string nome_tipo_constante(const_type_t tipo);
+
 typedef struct registro_tabela_simbolos registro_tabela_simbolos;
 struct registro_tabela_simbolos {
     token_type_t tipo_token;
@@ -114,6 +117,23 @@ struct registro_tabela_simbolos {
         this->tipo_token = t;
         this->lexema = l;
     }
+
+	static string imprimir_registro_ts(registro_tabela_simbolos *rts)
+	{
+		if (rts == NULL)
+			return "";
+
+		return imprimir_registro_ts(*rts);
+	}
+
+	static string imprimir_registro_ts(registro_tabela_simbolos rts)
+	{
+		stringstream stream;
+
+		stream << nome_tipo_token(rts.tipo_token) << " (" << rts.lexema << ")";
+
+		return stream.str();
+	}
 };
 
 typedef struct {
