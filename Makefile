@@ -2,7 +2,7 @@ SRCDIR = src
 DESTDIR = out
 TARGET = lc
 
-WARNINGS = -Wall #-Wno-unused-variable -Wno-unused-but-set-variable
+WARNINGS = -Wall
 
 CFLAGS   = -g -O0 ${WARNINGS}
 LDFLAGS  =
@@ -14,7 +14,7 @@ OBJ = ${SRC:%.cpp=${DESTDIR}/%.o}
 
 all: ${DESTDIR} ${TARGET}
 
-${OBJ}: ${DESTDIR}/%.o : ${SRCDIR}/%.cpp
+${OBJ}: ${DESTDIR}/%.o:${SRCDIR}/%.cpp ${SRCDIR}/*.h
 	${CC} -c -o $@ $< ${CFLAGS}
 
 ${TARGET}: ${OBJ}
