@@ -1,5 +1,5 @@
 #include "tabela_simbolos.cpp"
-#include "tipos.h"
+#include "main.h"
 
 using namespace std;
 

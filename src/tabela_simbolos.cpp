@@ -1,5 +1,5 @@
 #include "hash_tbl.cpp"
-#include "tipos.h"
+#include "main.h"
 #include <list>
 
 using namespace std;
