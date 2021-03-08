@@ -1,5 +1,5 @@
-#ifndef TIPOS_H
-#define TIPOS_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <iostream>
 #include <sstream>
