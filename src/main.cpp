@@ -30,11 +30,13 @@ using namespace std;
                           (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
 token_t proximo_token();
+void imprimir_erro(string lex);
 
 FILE *f;
 int num_linha = 1;
 list<token_t> *registro_lexico;
 tabela_simbolos *tbl_simbolos;
+tipo_erro_t erro = ERR_OK;
 
 int
 main(int argc, char* argv[])
@@ -76,6 +78,11 @@ main(int argc, char* argv[])
 #endif
 
 		tok = proximo_token();
+		if (tok.tipo == TK_ERRO)
+		{
+			imprimir_erro(tok.lex);
+			return -1;
+		}
 
 #ifdef DBG_LEX_RETURN
 		if (old_linha != num_linha)
@@ -117,6 +124,8 @@ main(int argc, char* argv[])
 			<< endl;
 #endif
 
+	cout << num_linha << " linhas compiladas." << endl;
+
 	fclose(f);
 
 	return 0;
@@ -140,12 +149,18 @@ proximo_token()
 
 		if (c == EOF && estado != ST_START)
 		{
-			// TODO: erro
+			tok.tipo = TK_ERRO;
+			estado = ST_END;
+			erro = ERR_EOF_INESPERADO;
+			break;
 		}
 
 		if (!VALIDCHAR(c))
 		{
-			// TODO: erro
+			tok.tipo = TK_ERRO;
+			estado = ST_END;
+			erro = ERR_CHAR_INVALIDO;
+			break;
 		}
 
 		switch (estado)
@@ -286,7 +301,10 @@ proximo_token()
 					estado = ST_ID_UNDERSCORE;
 				else
 				{
-					// TODO: Erro lexema invalido
+					tok.tipo = TK_ERRO;
+					estado = ST_END;
+					erro = ERR_LEX_NAO_IDENTIFICADO;
+					backtrack = true;
 				}
 				break;
 
@@ -325,7 +343,9 @@ proximo_token()
 					estado = ST_CONST_HEX_ALPHA2;
 				else
 				{
-					// TODO: erro
+					tok.tipo = TK_ERRO;
+					estado = ST_END;
+					erro = ERR_LEX_NAO_IDENTIFICADO;
 				}
 
 				break;
@@ -355,7 +375,9 @@ proximo_token()
 				}
 				else
 				{
-					// TODO: erro
+					tok.tipo = TK_ERRO;
+					estado = ST_END;
+					erro = ERR_LEX_NAO_IDENTIFICADO;
 				}
 					 
 				break;
@@ -396,7 +418,9 @@ proximo_token()
 					estado = ST_CONST_CHAR_INTERNAL;
 				else
 				{
-					// TODO: erro
+					tok.tipo = TK_ERRO;
+					estado = ST_END;
+					erro = ERR_CHAR_INVALIDO;
 				}
 				break;
 
@@ -410,7 +434,9 @@ proximo_token()
 				}
 				else
 				{
-					// TODO: erro
+					tok.tipo = TK_ERRO;
+					estado = ST_END;
+					erro = ERR_LEX_NAO_IDENTIFICADO;
 				}
 
 				break;
@@ -427,7 +453,9 @@ proximo_token()
 					case '\n':
 					case '\r':
 					case '$':
-						// TODO: erro
+						tok.tipo = TK_ERRO;
+						estado = ST_END;
+						erro = ERR_LEX_NAO_IDENTIFICADO;
 						break;
 
 					default:
@@ -491,7 +519,9 @@ proximo_token()
 			    }
 			    else 
 			    {
-			        //TODO: erro
+			        tok.tipo = TK_ERRO;
+					estado = ST_END;
+					erro = ERR_LEX_NAO_IDENTIFICADO;
 			    }
 				break;
 
@@ -560,6 +590,9 @@ proximo_token()
 	tok.lex = stream_lexema->str();
 	int lex_len = tok.lex.length();
 
+	if (tok.tipo == TK_ERRO)
+		tipo_const = CONST_NULL;
+
 	tok.tipo_constante = tipo_const;
 	tok.tam_constante = 0;
 	tok.simbolo = NULL;
@@ -575,7 +608,9 @@ proximo_token()
 
 			if (lex_len > 32)
 			{
-				// TODO: Erro
+				tok.tipo = TK_ERRO;
+				estado = ST_END;
+				erro = ERR_LEX_NAO_IDENTIFICADO;
 			}
 			break;
 
@@ -615,6 +650,32 @@ proximo_token()
 	registro_lexico->push_back(tok);
 
 	return tok;
+}
+
+void
+imprimir_erro(string lex)
+{
+	stringstream mensagem;
+	switch (erro)
+	{
+		case ERR_OK:
+			break;
+
+		case ERR_CHAR_INVALIDO:
+			mensagem << "caractere invalido.";
+			break;
+
+		case ERR_LEX_NAO_IDENTIFICADO:
+			mensagem << "lexema nao identificado [" << lex << "].";
+			break;
+
+		case ERR_EOF_INESPERADO:
+			mensagem << "fim de arquivo nao esperado.";
+			break;
+	}
+
+	cerr << num_linha << endl;
+	cerr << mensagem.str() << endl;
 }
 
 string

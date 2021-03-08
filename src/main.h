@@ -104,6 +104,13 @@ typedef enum {
 	CONST_BOOL
 } const_type_t;
 
+typedef enum {
+	ERR_OK,
+	ERR_CHAR_INVALIDO,
+	ERR_LEX_NAO_IDENTIFICADO,
+	ERR_EOF_INESPERADO
+} tipo_erro_t;
+
 string nome_tipo_token(token_type_t tipo);
 string nome_tipo_constante(const_type_t tipo);
 
