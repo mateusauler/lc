@@ -2,7 +2,7 @@
 //#define DBG_SIM_TAB
 //#define DBG_REG_LEX
 
-#include "tabela_simbolos.cpp"
+#include "tabela_simbolos.h"
 #include "main.h"
 
 using namespace std;
