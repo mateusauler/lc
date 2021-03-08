@@ -607,9 +607,13 @@ proximo_token()
 string
 nome_tipo_token(token_type_t tipo)
 {
-	string tkname = "ERRO";
+	string tkname = "VAZIO";
 	switch (tipo)
 	{
+		case TK_ERRO:
+			tkname = "ERRO";
+			break;
+
 		case TK_ID:
 			tkname = "ID";
 			break;

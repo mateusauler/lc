@@ -39,6 +39,8 @@ typedef enum {
 } state_t;
 
 typedef enum {
+	TK_ERRO,         // Erro
+
 	TK_ID,           // Identificador
 	TK_CONST,        // Constante
 
