@@ -83,9 +83,6 @@ typedef enum {
 	TK_RES_OR,        // or
 	TK_RES_NOT,       // not
 
-	TK_RES_FALSE,     // FALSE
-	TK_RES_TRUE,      // TRUE
-
 	TK_RES_WRITE,     // write
 	TK_RES_WRITELN,   // writeln
 	TK_RES_READLN,    // readln

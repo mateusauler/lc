@@ -61,8 +61,8 @@ main(int argc, char* argv[])
 	tbl_simbolos->inserir(TK_RES_AND,     "and");
 	tbl_simbolos->inserir(TK_RES_OR,      "or");
 	tbl_simbolos->inserir(TK_RES_NOT,     "not");
-	tbl_simbolos->inserir(TK_RES_FALSE,   "FALSE");
-	tbl_simbolos->inserir(TK_RES_TRUE,    "TRUE");
+	tbl_simbolos->inserir(TK_CONST,       "FALSE");
+	tbl_simbolos->inserir(TK_CONST,       "TRUE");
 	tbl_simbolos->inserir(TK_RES_WRITE,   "write");
 	tbl_simbolos->inserir(TK_RES_WRITELN, "writeln");
 	tbl_simbolos->inserir(TK_RES_READLN,  "readln");
@@ -319,6 +319,16 @@ proximo_token()
 					tok.tipo = TK_ID;
 					estado = ST_END;
 					backtrack = true;
+
+					tok.simbolo = tbl_simbolos->pesquisar(stream_lexema->str());
+
+					if (tok.simbolo == NULL)
+						tok.simbolo = tbl_simbolos->inserir(tok.tipo, stream_lexema->str());
+					else
+						tok.tipo = tok.simbolo->tipo_token;
+
+					if (tok.tipo == TK_CONST) // boleano
+						tipo_const = CONST_BOOL;
 				}
 				break;
 
@@ -600,12 +610,6 @@ proximo_token()
 	switch (tok.tipo)
 	{	
 		case TK_ID:
-			tok.simbolo = tbl_simbolos->pesquisar(tok.lex);
-			if (tok.simbolo == NULL)
-				tok.simbolo = tbl_simbolos->inserir(tok.tipo, tok.lex);
-			else
-				tok.tipo = tok.simbolo->tipo_token;
-
 			if (lex_len > 32)
 			{
 				tok.tipo = TK_ERRO;
@@ -818,14 +822,6 @@ nome_tipo_token(token_type_t tipo)
 
 		case TK_RES_NOT:
 			tkname = "RES_NOT";
-			break;
-
-		case TK_RES_FALSE:
-			tkname = "RES_FALSE";
-			break;
-
-		case TK_RES_TRUE:
-			tkname = "RES_TRUE";
 			break;
 
 		case TK_RES_WRITE:
