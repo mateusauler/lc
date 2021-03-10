@@ -513,6 +513,10 @@ proximo_token()
 						estado = ST_COMMENT_NEWLINE;
 						break;
 
+					case '*':
+						estado = ST_COMMENT_END;
+						break;
+
 					case '\n':
 						num_linha++;
 					default:
