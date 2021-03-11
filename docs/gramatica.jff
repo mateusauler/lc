@@ -1,280 +1,220 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with JFLAP 7.1.--><structure>&#13;
-	<type>grammar</type>&#13;
-	<!--The list of productions.-->&#13;
-	<production>&#13;
-		<left>&lt;programa&gt;</left>&#13;
-		<right>&lt;declaracoes&gt; main &lt;blocoDeComandos&gt; eof</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;declaracoes&gt;</left>&#13;
-		<right/>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;declaracoes&gt; </left>&#13;
-		<right>&lt;tipo&gt; &lt;listaIds&gt;; &lt;declaracoes&gt; </right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;tipo&gt;</left>&#13;
-		<right>int</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;tipo&gt;</left>&#13;
-		<right>char</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;tipo&gt;</left>&#13;
-		<right>boolean</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;tipo&gt;</left>&#13;
-		<right>final</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaIds&gt;</left>&#13;
-		<right>ID</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaIds&gt;</left>&#13;
-		<right>ID = &lt;literal&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaIds&gt;</left>&#13;
-		<right>ID[CONST]</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaIds&gt;</left>&#13;
-		<right>ID, &lt;listaIds&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaIds&gt;</left>&#13;
-		<right>ID = &lt;literal&gt;, &lt;listaIds&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaIds&gt;</left>&#13;
-		<right>ID[CONST], &lt;listaIds&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;literal&gt;</left>&#13;
-		<right>-CONST</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;literal&gt;</left>&#13;
-		<right>CONST</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;blocoDeComandos&gt;</left>&#13;
-		<right>{ &lt;listaComandos&gt; } </right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaComandos&gt;</left>&#13;
-		<right/>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaComandos&gt;</left>&#13;
-		<right>&lt;comandoTerminado&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaComandos&gt;</left>&#13;
-		<right>&lt;comandoTerminado&gt;  &lt;listaComandos&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoSimples&gt;</left>&#13;
-		<right>ID := &lt;expressao&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoSimples&gt;</left>&#13;
-		<right>ID[&lt;expressao&gt;] := &lt;expressao&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoSimples&gt;</left>&#13;
-		<right>readln(ID)</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoSimples&gt;</left>&#13;
-		<right>readln(ID[&lt;expressao&gt;])</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoSimples&gt;</left>&#13;
-		<right>writeln(&lt;listaExpressoes&gt;)</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoSimples&gt;</left>&#13;
-		<right>write(&lt;listaExpressoes&gt;)</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoFor&gt;</left>&#13;
-		<right>for(&lt;listaComandoSimples&gt; ; &lt;espressao&gt; ; &lt;listaComandoSimples&gt;) &lt;comandoOuBloco&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoIf&gt;</left>&#13;
-		<right>if(&lt;expressao&gt;) then &lt;comandoOuBloco&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoIf&gt;</left>&#13;
-		<right>if(&lt;expressao&gt;) then &lt;cmdSimplesOuBloco&gt; else &lt;comandoOuBloco&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoOuBloco&gt;</left>&#13;
-		<right>&lt;comandoTerminado&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoOuBloco&gt;</left>&#13;
-		<right>&lt;blocoDeComandos&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;cmdSimplesOuBloco&gt;</left>&#13;
-		<right>&lt;comandoSimples&gt;;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;cmdSimplesOuBloco&gt;</left>&#13;
-		<right>&lt;blocoDeComandos&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;cmdSimplesOuBloco&gt;</left>&#13;
-		<right>;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaComandoSimples&gt;</left>&#13;
-		<right>&lt;comandoSimples&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaComandoSimples&gt;</left>&#13;
-		<right>&lt;comandoSimples&gt; &lt;listaCmdSimplesInterno&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaComandoSimples&gt;</left>&#13;
-		<right/>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaCmdSimplesInterno&gt;</left>&#13;
-		<right>, &lt;comandoSimples&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaCmdSimplesInterno&gt;</left>&#13;
-		<right>, &lt;comandoSimples&gt; &lt;listaCmdSimplesInterno&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoTerminado&gt;</left>&#13;
-		<right>;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoTerminado&gt;</left>&#13;
-		<right>&lt;comandoSimples&gt;;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoTerminado&gt;</left>&#13;
-		<right>&lt;comandoFor&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;comandoTerminado&gt;</left>&#13;
-		<right>&lt;comandoIf&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;expressao&gt;</left>&#13;
-		<right>&lt;compLogica&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;parenteses&gt;</left>&#13;
-		<right>(&lt;expressao&gt;)</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;negacao&gt;</left>&#13;
-		<right>not &lt;negacao&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;multiplica&gt;</left>&#13;
-		<right>&lt;multiplica&gt; * &lt;multiplica&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;multiplica&gt;</left>&#13;
-		<right>&lt;multiplica&gt; and &lt;multiplica&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;multiplica&gt;</left>&#13;
-		<right>&lt;multiplica&gt; / &lt;multiplica&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;multiplica&gt;</left>&#13;
-		<right>&lt;multiplica&gt; % &lt;multiplica&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;soma&gt;</left>&#13;
-		<right>&lt;soma&gt;  - &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;soma&gt;</left>&#13;
-		<right>&lt;soma&gt; + &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;soma&gt;</left>&#13;
-		<right>&lt;soma&gt; or &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt; = &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt; &lt;&gt; &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt; &gt; &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt; &lt; &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt; &lt;= &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt; &gt;= &lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;compLogica&gt;</left>&#13;
-		<right>&lt;soma&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;soma&gt;</left>&#13;
-		<right>&lt;multiplica&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;multiplica&gt;</left>&#13;
-		<right>&lt;negacao&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;negacao&gt;</left>&#13;
-		<right>&lt;parenteses&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;parenteses&gt;</left>&#13;
-		<right>ID</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;parenteses&gt;</left>&#13;
-		<right>&lt;literal&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaExpressoes&gt;</left>&#13;
-		<right/>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaExpressoes&gt;</left>&#13;
-		<right>&lt;expressao&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaExpressoes&gt;</left>&#13;
-		<right>&lt;expressao&gt; &lt;listaExprInterna&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaExprInterna&gt;</left>&#13;
-		<right>, &lt;expressao&gt;</right>&#13;
-	</production>&#13;
-	<production>&#13;
-		<left>&lt;listaExprInterna&gt;</left>&#13;
-		<right>, &lt;expressao&gt; &lt;listaExprInterna&gt;</right>&#13;
-	</production>&#13;
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with JFLAP 7.1.--><structure>
+	<type>grammar</type>
+	<!--The list of productions.-->
+	<production>
+		<left>&lt;programa&gt;</left>
+		<right>&lt;declaracoes&gt; main &lt;blocoComandos&gt; EOF</right>
+	</production>
+	<production>
+		<left>&lt;declaracoes&gt;</left>
+		<right/>
+	</production>
+	<production>
+		<left>&lt;declaracoes&gt; </left>
+		<right>&lt;tipo&gt; &lt;listaIds&gt;; &lt;declaracoes&gt; </right>
+	</production>
+	<production>
+		<left>&lt;tipo&gt;</left>
+		<right>int | char | boolean | final</right>
+	</production>
+	<production>
+		<left>&lt;listaIds&gt;</left>
+		<right>ID</right>
+	</production>
+	<production>
+		<left>&lt;listaIds&gt;</left>
+		<right>ID = &lt;literal&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaIds&gt;</left>
+		<right>ID [ CONST ]</right>
+	</production>
+	<production>
+		<left>&lt;listaIds&gt;</left>
+		<right>ID, &lt;listaIds&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaIds&gt;</left>
+		<right>ID = &lt;literal&gt;, &lt;listaIds&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaIds&gt;</left>
+		<right>ID [ CONST ] , &lt;listaIds&gt;</right>
+	</production>
+	<production>
+		<left>&lt;literal&gt;</left>
+		<right>CONST | - CONST</right>
+	</production>
+	<production>
+		<left>&lt;blocoComandos&gt;</left>
+		<right>{ &lt;listaComandos&gt; } </right>
+	</production>
+	<production>
+		<left>&lt;listaComandos&gt;</left>
+		<right/>
+	</production>
+	<production>
+		<left>&lt;listaComandos&gt;</left>
+		<right>&lt;comandoTerminado&gt;  &lt;listaComandos&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoSimples&gt;</left>
+		<right>ID := &lt;expressao&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoSimples&gt;</left>
+		<right>ID [ &lt;expressao&gt; ] := &lt;expressao&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoSimples&gt;</left>
+		<right>readln ( ID )</right>
+	</production>
+	<production>
+		<left>&lt;comandoSimples&gt;</left>
+		<right>readln ( ID [ &lt;expressao&gt; ] )</right>
+	</production>
+	<production>
+		<left>&lt;comandoSimples&gt;</left>
+		<right>writeln ( &lt;listaExpressoes&gt; )</right>
+	</production>
+	<production>
+		<left>&lt;comandoSimples&gt;</left>
+		<right>write ( &lt;listaExpressoes&gt; )</right>
+	</production>
+	<production>
+		<left>&lt;comandoFor&gt;</left>
+		<right>for ( &lt;listaComandoSimples&gt; ; &lt;espressao&gt; ; &lt;listaComandoSimples&gt; ) &lt;comandoOuBloco&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoIf&gt;</left>
+		<right>if ( &lt;expressao&gt; ) then &lt;comandoOuBloco&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoIf&gt;</left>
+		<right>if ( &lt;expressao&gt; ) then &lt;comandoOuBloco&gt; else &lt;comandoOuBloco&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoOuBloco&gt;</left>
+		<right>&lt;comandoTerminado&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoOuBloco&gt;</left>
+		<right>&lt;blocoComandos&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaComandoSimples&gt;</left>
+		<right>&lt;comandoSimples&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaComandoSimples&gt;</left>
+		<right>&lt;comandoSimples&gt; &lt;listaCmdSimplesInterno&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaComandoSimples&gt;</left>
+		<right/>
+	</production>
+	<production>
+		<left>&lt;listaCmdSimplesInterno&gt;</left>
+		<right>, &lt;comandoSimples&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaCmdSimplesInterno&gt;</left>
+		<right>, &lt;comandoSimples&gt; &lt;listaCmdSimplesInterno&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoTerminado&gt;</left>
+		<right>;</right>
+	</production>
+	<production>
+		<left>&lt;comandoTerminado&gt;</left>
+		<right>&lt;comandoSimples&gt; ;</right>
+	</production>
+	<production>
+		<left>&lt;comandoTerminado&gt;</left>
+		<right>&lt;comandoFor&gt;</right>
+	</production>
+	<production>
+		<left>&lt;comandoTerminado&gt;</left>
+		<right>&lt;comandoIf&gt;</right>
+	</production>
+	<production>
+		<left>&lt;expressao&gt;</left>
+		<right>&lt;compLogica&gt;</right>
+	</production>
+	<production>
+		<left>&lt;parenteses&gt;</left>
+		<right>(&lt;expressao&gt;)</right>
+	</production>
+	<production>
+		<left>&lt;negacao&gt;</left>
+		<right>not &lt;negacao&gt;</right>
+	</production>
+	<production>
+		<left>&lt;multiplica&gt;</left>
+		<right>&lt;multiplica&gt; &lt;opMul&gt; &lt;multiplica&gt;</right>
+	</production>
+	<production>
+		<left>&lt;soma&gt;</left>
+		<right>&lt;soma&gt; &lt;opSoma&gt; &lt;soma&gt;</right>
+	</production>
+	<production>
+		<left>&lt;compLogica&gt;</left>
+		<right>&lt;soma&gt; &lt;opCmp&gt; &lt;soma&gt;</right>
+	</production>
+	<production>
+		<left>&lt;compLogica&gt;</left>
+		<right>&lt;soma&gt;</right>
+	</production>
+	<production>
+		<left>&lt;soma&gt;</left>
+		<right>&lt;multiplica&gt;</right>
+	</production>
+	<production>
+		<left>&lt;multiplica&gt;</left>
+		<right>&lt;negacao&gt;</right>
+	</production>
+	<production>
+		<left>&lt;negacao&gt;</left>
+		<right>&lt;parenteses&gt;</right>
+	</production>
+	<production>
+		<left>&lt;parenteses&gt;</left>
+		<right>ID</right>
+	</production>
+	<production>
+		<left>&lt;parenteses&gt;</left>
+		<right>&lt;literal&gt;</right>
+	</production>
+	<production>
+		<left>&lt;parenteses&gt;</left>
+		<right>ID [ &lt;expressao&gt; ]</right>
+	</production>
+	<production>
+		<left>&lt;opMul&gt;</left>
+		<right>* | / | % | and</right>
+	</production>
+	<production>
+		<left>&lt;opSoma&gt;</left>
+		<right>+ | - | or</right>
+	</production>
+	<production>
+		<left>&lt;opCmp&gt;</left>
+		<right>= | &lt;&gt; | &gt; | &lt; | &gt;= | &lt;=</right>
+	</production>
+	<production>
+		<left>&lt;listaExpressoes&gt;</left>
+		<right>&lt;expressao&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaExpressoes&gt;</left>
+		<right>&lt;expressao&gt; &lt;listaExprInterna&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaExprInterna&gt;</left>
+		<right>, &lt;expressao&gt;</right>
+	</production>
+	<production>
+		<left>&lt;listaExprInterna&gt;</left>
+		<right>, &lt;expressao&gt; &lt;listaExprInterna&gt;</right>
+	</production>
 </structure>
