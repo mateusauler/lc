@@ -7,27 +7,21 @@
 
 using namespace std;
 
-					  /*    TAB          LF          CR */
-#define VALIDCHAR(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
-					  (c >= ' '  && c <= '"') || \
-					  (c >= '\'' && c <= '[') || \
-					  (c >= 'a'  && c <= '{') || \
-					  (c == '$'  || c == '%') || \
-					  (c == ']'  || c == '_') || \
-					  (c == '}'))
+					    /*    TAB          LF          CR */
+#define CHAR_VALIDO(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
+					   (c >= ' '  && c <= '"') || \
+					   (c >= '\'' && c <= '[') || \
+					   (c >= 'a'  && c <= '{') || \
+					   (c == '$'  || c == '%') || \
+					   (c == ']'  || c == '_') || \
+					   (c == '}'))
 
-						    /* TAB */
-#define VALIDSTRCHAR(c) ((c == 0x9) || \
-                         (c >= '(' && c <= '[') || \
-                         (c >= 'a' && c <= '{') || \
-                         (c == ' ' || c == '!' || c == '%' || c == ']' || c == '_' || c == '}'))
-
-						     /* TAB */
-#define PRINTABLECHAR(c) ((c == 0x9) || \
-						  (c >= ' ' && c <= '"') || \
-                          (c >= '(' && c <= '[') || \
-                          (c >= 'a' && c <= '{') || \
-                          (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
+						         /* TAB */
+#define CHAR_VALIDO_CONST(c) ((c == 0x9) || \
+						     (c >= ' ' && c <= '"') || \
+                             (c >= '(' && c <= '[') || \
+                             (c >= 'a' && c <= '{') || \
+                             (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
 token_t proximo_token();
 void imprimir_erro(string lex);
@@ -155,7 +149,7 @@ proximo_token()
 			break;
 		}
 
-		if (!VALIDCHAR(c))
+		if (!CHAR_VALIDO(c))
 		{
 			tok.tipo = TK_ERRO;
 			estado = ST_END;
@@ -424,7 +418,7 @@ proximo_token()
 				break;
 
 			case ST_CONST_CHAR_START:
-				if (PRINTABLECHAR(c))
+				if (CHAR_VALIDO_CONST(c))
 					estado = ST_CONST_CHAR_INTERNAL;
 				else
 				{
