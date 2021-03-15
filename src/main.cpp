@@ -73,9 +73,9 @@ main(int argc, char* argv[])
 	do
 	{
 
-#ifdef DBG_LEX_RETURN
+		#ifdef DBG_LEX_RETURN
 		int old_linha = num_linha;
-#endif
+		#endif
 
 		tok = proximo_token();
 		if (tok.tipo == TK_ERRO)
@@ -84,7 +84,7 @@ main(int argc, char* argv[])
 			return -1;
 		}
 
-#ifdef DBG_LEX_RETURN
+		#ifdef DBG_LEX_RETURN
 		if (old_linha != num_linha)
 			cout << endl << num_linha << '\t';
 
@@ -92,11 +92,11 @@ main(int argc, char* argv[])
 			cout << nome_tipo_token(tok.tipo) << ": \"" << tok.lex << "\"\t";
 		else
 			cout << nome_tipo_token(tok.tipo) << endl;
-#endif
+		#endif
 
 	} while (tok.tipo != TK_EOF);
 
-#ifdef DBG_SIM_TAB
+	#ifdef DBG_SIM_TAB
 	cout << endl << "Tabela de simbolos:" << endl << endl;
 
 	list<registro_tabela_simbolos> l = tbl_simbolos->listar_simbolos();
@@ -105,8 +105,8 @@ main(int argc, char* argv[])
 		cout 
 			<< registro_tabela_simbolos::imprimir_registro_ts(i)
 			<< endl;
-#endif
-#ifdef DBG_REG_LEX
+	#endif
+	#ifdef DBG_REG_LEX
 	cout << endl << endl << "Registro lexico:" << endl << endl << endl;
 
 	for (token_t const &i: *registro_lexico)
@@ -122,7 +122,7 @@ main(int argc, char* argv[])
 			<< i.tam_constante
 			<< endl
 			<< endl;
-#endif
+	#endif
 
 	cout << num_linha << " linhas compiladas." << endl;
 
