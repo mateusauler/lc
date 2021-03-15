@@ -21,7 +21,7 @@ int tabela_hash::hash_function(string chave)
 hash_bkt* tabela_hash::inserir(string chave, void* elemento)
 {
     int hash_chave = this->hash_function(chave);
-    
+
     hash_bkt *obj = new hash_bkt(elemento, chave);
 
     if (this->tabela[hash_chave] == NULL)
@@ -42,7 +42,7 @@ hash_bkt* tabela_hash::inserir(string chave, void* elemento)
 hash_bkt* tabela_hash::pesquisar(string chave)
 {
     int hash_chave = this->hash_function(chave);
-    
+
     if(this->tabela[hash_chave] == NULL)
         return NULL;
 

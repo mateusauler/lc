@@ -8,16 +8,16 @@ using namespace std;
 
 typedef struct hash_bkt hash_bkt;
 struct hash_bkt {
-	void *elemento;
-	
+    void *elemento;
+
     hash_bkt *prox;
-    
+
     string chave;
-    
+
     hash_bkt() {
         this->prox = NULL;
     }
-    
+
     hash_bkt(void* e, string c) {
         this->chave = c;
         this->elemento = e;
