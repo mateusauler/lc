@@ -1,17 +1,17 @@
 #ifndef TABELA_SIMBOLOS_H
 #define TABELA_SIMBOLOS_H
 
-#include "hash_tbl.h"
+#include "tabela_hash.h"
 #include "main.h"
 #include <list>
 
 using namespace std;
 
-class tabela_simbolos : hash_tbl
+class tabela_simbolos : tabela_hash
 {
 
 public:
-    using hash_tbl::hash_tbl;
+    using tabela_hash::tabela_hash;
     registro_tabela_simbolos* inserir(token_type_t tipo_token, string lexema);
     registro_tabela_simbolos* pesquisar(string lexema);
     list<registro_tabela_simbolos> listar_simbolos();

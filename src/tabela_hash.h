@@ -25,7 +25,7 @@ struct hash_bkt {
     }
 };
 
-class hash_tbl
+class tabela_hash
 {
 
 protected:
@@ -33,7 +33,7 @@ protected:
     int tamanho_tbl;
 
 public:
-    hash_tbl(int tamanho);
+    tabela_hash(int tamanho);
     int hash_function(string chave);
     hash_bkt* inserir(string chave, void* elemento);
     hash_bkt* pesquisar(string chave);

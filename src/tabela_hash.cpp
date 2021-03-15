@@ -1,6 +1,6 @@
-#include "hash_tbl.h"
+#include "tabela_hash.h"
 
-hash_tbl::hash_tbl(int tamanho)
+tabela_hash::tabela_hash(int tamanho)
 {
     if (tamanho <= 0)
         tamanho = 128;
@@ -13,12 +13,12 @@ hash_tbl::hash_tbl(int tamanho)
         this->tabela[i] = NULL;
 }
 
-int hash_tbl::hash_function(string chave)
+int tabela_hash::hash_function(string chave)
 {
     return chave[0] % this->tamanho_tbl;
 }
 
-hash_bkt* hash_tbl::inserir(string chave, void* elemento)
+hash_bkt* tabela_hash::inserir(string chave, void* elemento)
 {
     int hash_chave = this->hash_function(chave);
     
@@ -39,7 +39,7 @@ hash_bkt* hash_tbl::inserir(string chave, void* elemento)
     return obj;
 }
 
-hash_bkt* hash_tbl::pesquisar(string chave)
+hash_bkt* tabela_hash::pesquisar(string chave)
 {
     int hash_chave = this->hash_function(chave);
     
@@ -60,7 +60,7 @@ hash_bkt* hash_tbl::pesquisar(string chave)
     }
 }
 
-list<hash_bkt> hash_tbl::listar_elementos()
+list<hash_bkt> tabela_hash::listar_elementos()
 {
     list<hash_bkt> *l = new list<hash_bkt>();
 
