@@ -3,7 +3,6 @@
 
 #include "tabela_hash.h"
 #include "main.h"
-#include <list>
 
 using namespace std;
 
