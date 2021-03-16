@@ -1,6 +1,6 @@
 /* Exemplo de Programa na linguagem L */
 
-int n[3], max=0, i;
+int n[3], max:=0, i;
 
 main
 {

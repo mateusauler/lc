@@ -1,4 +1,4 @@
-boolean b = TRUE;
+boolean b := TRUE;
 
 main
 {

@@ -2,7 +2,7 @@
 
 int n;
 char nome[40];
-final MAXITER=10;
+final MAXITER:=10;
 
 main {
 /* Programa Principal */
