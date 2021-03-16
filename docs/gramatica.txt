@@ -1,0 +1,22 @@
+Prog -> Dec main BlocoCmd EOF
+
+Dec -> (int | char | boolean) ID [:= [+|-] CONST | "[" CONST "]" ] {, ID [:= [+|-] CONST | "[" CONST "]" ]} ; Dec
+Dec -> final ID = [+|-] CONST {, ID = [+|-] CONST} ; Dec
+Dec -> λ
+
+BlocoCmd -> "{" {CmdT} "}"
+
+CmdS -> ID [ "[" Exp "]" ] := Exp
+CmdS -> readln "(" ID [ "[" Exp "]" ] ")"
+CmdS -> write "(" Exp {, Exp} ")"
+CmdS -> writeln "(" Exp {, Exp} ")"
+
+CmdFor -> for "(" CmdS {, CmdS} ; Exp ; CmdS {, CmdS} ")" (CmdT | BlocoCmd)
+CmdIf -> if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
+
+CmdT -> [CmdS] ; | CmdFor | CmdIf
+
+Exp -> Soma [(=|<>|>|<|>=|<=) Soma]
+Soma -> [+|-] Termo {(+|-|or) Termo}
+Termo -> Fator {(*|/|%|and) Fator}
+Fator -> not N | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
