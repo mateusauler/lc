@@ -50,7 +50,6 @@ main(int argc, char* argv[])
     tbl_simbolos->inserir(TK_RES_IF,      "if");
     tbl_simbolos->inserir(TK_RES_ELSE,    "else");
     tbl_simbolos->inserir(TK_RES_THEN,    "then");
-    tbl_simbolos->inserir(TK_RES_WHILE,   "while");
     tbl_simbolos->inserir(TK_RES_FOR,     "for");
     tbl_simbolos->inserir(TK_RES_AND,     "and");
     tbl_simbolos->inserir(TK_RES_OR,      "or");
@@ -800,10 +799,6 @@ nome_tipo_token(token_type_t tipo)
 
         case TK_RES_THEN:
             tkname = "RES_THEN";
-            break;
-
-        case TK_RES_WHILE:
-            tkname = "RES_WHILE";
             break;
 
         case TK_RES_FOR:

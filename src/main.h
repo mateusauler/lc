@@ -76,7 +76,6 @@ typedef enum {
     TK_RES_ELSE,      // else
     TK_RES_THEN,      // then
 
-    TK_RES_WHILE,     // while
     TK_RES_FOR,       // for
 
     TK_RES_AND,       // and
