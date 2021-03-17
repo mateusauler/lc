@@ -266,14 +266,6 @@ proximo_token()
                             estado = ST_END;
                             break;
 
-                        case '\r':
-                            estado = ST_NEWLINE;
-                            break;
-
-                        case '\n':
-                            num_linha++;
-                            break;
-
                         case EOF:
                             tok.tipo = TK_EOF;
                             estado = ST_END;
@@ -479,20 +471,8 @@ proximo_token()
                 break;
 
             case ST_COMMENT:
-                switch(c)
-                {
-                    case '*':
-                        estado = ST_COMMENT_END;
-                        break;
-
-                    case '\n':
-                        num_linha++;
-                        break;
-
-                    case '\r':
-                        estado = ST_COMMENT_NEWLINE;
-                        break;
-                }
+				if (c == '*')
+					estado = ST_COMMENT_END;
                 break;
 
             case ST_COMMENT_END:
@@ -502,16 +482,9 @@ proximo_token()
                         estado = ST_START;
                         break;
 
-                    case '\r':
-                        estado = ST_COMMENT_NEWLINE;
-                        break;
-
                     case '*':
-                        estado = ST_COMMENT_END;
                         break;
 
-                    case '\n':
-                        num_linha++;
                     default:
                         estado = ST_COMMENT;
                         break;
@@ -570,21 +543,12 @@ proximo_token()
 
                 break;
 
-            case ST_NEWLINE:
-                backtrack = (c != '\n');
-                num_linha++;
-                estado = ST_START;
-                break;
-
-            case ST_COMMENT_NEWLINE:
-                backtrack = (c != '\n');
-                num_linha++;
-                estado = ST_COMMENT;
-                break;
-
             default: // switch (estado)
                 break;
         } // switch (estado)
+
+		if (c == '\n')
+			num_linha++;
 
         if (!backtrack)
             *stream_lexema << c;

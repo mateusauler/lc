@@ -28,9 +28,6 @@ typedef enum {
 
     ST_COMMENT,             // Leu /* e esta lendo comentario
     ST_COMMENT_END,         // Leu * e pode ler /, terminando o comentario
-    ST_COMMENT_NEWLINE,     // Leu \r e pode ler um \n (dentro do comentario, deve contabilizar nova linha)
-
-    ST_NEWLINE,             // Leu \r e pode ler um \n (deve incrementar o contador de linha)
 
     ST_OP_SLASH,            // Leu /
     ST_OP_ATTRIB_START,     // Leu :
