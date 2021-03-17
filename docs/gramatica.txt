@@ -1,7 +1,7 @@
 Prog -> Dec main BlocoCmd EOF
 
 Dec -> (int | char | boolean) ID [:= [+|-] CONST | "[" CONST "]" ] {, ID [:= [+|-] CONST | "[" CONST "]" ]} ; Dec
-Dec -> final ID = [+|-] CONST {, ID = [+|-] CONST} ; Dec
+Dec -> final ID = [+|-] CONST ; Dec
 Dec -> λ
 
 BlocoCmd -> "{" {CmdT} "}"
