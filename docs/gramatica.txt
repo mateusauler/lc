@@ -11,7 +11,7 @@ CmdS -> readln "(" ID [ "[" Exp "]" ] ")"
 CmdS -> write "(" Exp {, Exp} ")"
 CmdS -> writeln "(" Exp {, Exp} ")"
 
-CmdFor -> for "(" CmdS {, CmdS} ; Exp ; CmdS {, CmdS} ")" (CmdT | BlocoCmd)
+CmdFor -> for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
 CmdIf -> if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
 
 CmdT -> [CmdS] ; | CmdFor | CmdIf
