@@ -19,4 +19,4 @@ CmdT -> [CmdS] ; | CmdFor | CmdIf
 Exp -> Soma [(=|<>|>|<|>=|<=) Soma]
 Soma -> [+|-] Termo {(+|-|or) Termo}
 Termo -> Fator {(*|/|%|and) Fator}
-Fator -> not N | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
+Fator -> not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
