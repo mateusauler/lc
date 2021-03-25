@@ -85,7 +85,7 @@ main(int argc, char* argv[])
             cout << endl << num_linha << '\t';
 
         if (tok.tipo != TK_EOF)
-            cout << nome_tipo_token(tok.tipo) << ": \"" << tok.lex << "\"\t";
+            cout << "(" << nome_tipo_token(tok.tipo) << ")" << ": \"" << tok.lex << "\"\t";
         else
             cout << nome_tipo_token(tok.tipo) << endl;
         #endif
@@ -660,143 +660,143 @@ nome_tipo_token(token_type_t tipo)
             break;
 
         case TK_OP_ATTRIB:
-            tkname = "OP_ATTRIB";
+            tkname = ":=";
             break;
 
         case TK_OP_LT:
-            tkname = "OP_LT";
+            tkname = "<";
             break;
 
         case TK_OP_GT:
-            tkname = "OP_GT";
+            tkname = ">";
             break;
 
         case TK_OP_LE:
-            tkname = "OP_LE";
+            tkname = "<=";
             break;
 
         case TK_OP_GE:
-            tkname = "OP_GE";
+            tkname = ">=";
             break;
 
         case TK_OP_EQ:
-            tkname = "OP_EQ";
+            tkname = "=";
             break;
 
         case TK_OP_NE:
-            tkname = "OP_NE";
+            tkname = "<>";
             break;
 
         case TK_OP_PLUS:
-            tkname = "OP_PLUS";
+            tkname = "+";
             break;
 
         case TK_OP_MINUS:
-            tkname = "OP_MINUS";
+            tkname = "-";
             break;
 
         case TK_OP_MUL:
-            tkname = "OP_MUL";
+            tkname = "*";
             break;
 
         case TK_OP_SLASH:
-            tkname = "OP_SLASH";
+            tkname = "/";
             break;
 
         case TK_OP_PERCENT:
-            tkname = "OP_PERCENT";
+            tkname = "%";
             break;
 
         case TK_BRA_O_PAR:
-            tkname = "BRA_O_PAR";
+            tkname = "(";
             break;
 
         case TK_BRA_C_PAR:
-            tkname = "BRA_C_PAR";
+            tkname = ")";
             break;
 
         case TK_BRA_O_SQR:
-            tkname = "BRA_O_SQR";
+            tkname = "[";
             break;
 
         case TK_BRA_C_SQR:
-            tkname = "BRA_C_SQR";
+            tkname = "]";
             break;
 
         case TK_BRA_O_CUR:
-            tkname = "BRA_O_CUR";
+            tkname = "{";
             break;
 
         case TK_BRA_C_CUR:
-            tkname = "BRA_C_CUR";
+            tkname = "}";
             break;
 
         case TK_OP_COMMA:
-            tkname = "OP_COMMA";
+            tkname = ",";
             break;
 
         case TK_RES_FINAL:
-            tkname = "RES_FINAL";
+            tkname = "final";
             break;
 
         case TK_RES_INT:
-            tkname = "RES_INT";
+            tkname = "int";
             break;
 
         case TK_RES_CHAR:
-            tkname = "RES_CHAR";
+            tkname = "char";
             break;
 
         case TK_RES_BOOLEAN:
-            tkname = "RES_BOOLEAN";
+            tkname = "boolean";
             break;
 
         case TK_RES_IF:
-            tkname = "RES_IF";
+            tkname = "if";
             break;
 
         case TK_RES_ELSE:
-            tkname = "RES_ELSE";
+            tkname = "else";
             break;
 
         case TK_RES_THEN:
-            tkname = "RES_THEN";
+            tkname = "then";
             break;
 
         case TK_RES_FOR:
-            tkname = "RES_FOR";
+            tkname = "for";
             break;
 
         case TK_RES_AND:
-            tkname = "RES_AND";
+            tkname = "and";
             break;
 
         case TK_RES_OR:
-            tkname = "RES_OR";
+            tkname = "or";
             break;
 
         case TK_RES_NOT:
-            tkname = "RES_NOT";
+            tkname = "not";
             break;
 
         case TK_RES_WRITE:
-            tkname = "RES_WRITE";
+            tkname = "write";
             break;
 
         case TK_RES_WRITELN:
-            tkname = "RES_WRITELN";
+            tkname = "writeln";
             break;
 
         case TK_RES_READLN:
-            tkname = "RES_READLN";
+            tkname = "readln";
             break;
 
         case TK_RES_MAIN:
-            tkname = "RES_MAIN";
+            tkname = "main";
             break;
 
         case TK_END_STATEMENT:
-            tkname = "END_STATEMENT";
+            tkname = ";";
             break;
 
         case TK_EOF:
@@ -815,27 +815,27 @@ nome_tipo_constante(const_type_t tipo)
     switch (tipo)
     {
         case CONST_NULL:
-            s = "CONST_NULL";
+            s = "NULL";
             break;
 
         case CONST_INT:
-            s = "CONST_INT";
+            s = "INT";
             break;
 
         case CONST_CHAR:
-            s = "CONST_CHAR";
+            s = "CHAR";
             break;
 
         case CONST_HEX:
-            s = "CONST_HEX";
+            s = "HEX";
             break;
 
         case CONST_STR:
-            s = "CONST_STR";
+            s = "STR";
             break;
 
         case CONST_BOOL:
-            s = "CONST_BOOL";
+            s = "BOOL";
             break;
     }
 
