@@ -23,6 +23,9 @@ using namespace std;
                              (c >= 'a' && c <= '{') || \
                              (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
+#define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+#define IS_DIGIT(c) (c >= '0' && c <= '9')
+
 token_t proximo_token();
 void imprimir_erro(string lex);
 
@@ -161,9 +164,9 @@ proximo_token()
             case ST_START:
                 stream_lexema->str("");
 
-                if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                if (IS_CHAR(c))
                     estado = ST_ID_NAME;
-                else if (c >= '0' && c <= '9')
+                else if (c > '0' && IS_DIGIT(c))
                     estado = ST_CONST_NUM;
                 else
                 {
@@ -278,13 +281,10 @@ proximo_token()
                 break;
 
             case ST_ID_UNDERSCORE:
-                if ((c >= 'a' && c <= 'z') ||
-                    (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9'))
+                if (IS_CHAR(c)
+                 || IS_DIGIT(c))
                     estado = ST_ID_NAME;
-                else if (c == '_')
-                    estado = ST_ID_UNDERSCORE;
-                else
+                else if (c != '_')
                 {
                     tok.tipo = TK_ERRO;
                     estado = ST_END;
@@ -294,10 +294,9 @@ proximo_token()
                 break;
 
             case ST_ID_NAME:
-                if ((c >= 'a' && c <= 'z') ||
-                    (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9') ||
-                    (c == '_'))
+                if (IS_CHAR(c)
+                 || IS_DIGIT(c)
+                 || (c == '_'))
                     estado = ST_ID_NAME;
                 else
                 {
@@ -318,7 +317,7 @@ proximo_token()
                 break;
 
             case ST_CONST_HEX_START:
-                if (c >= '0' && c <= '9')
+                if (IS_DIGIT(c))
                     estado = ST_CONST_HEX_NUM1;
                 else if (c >= 'A' && c <= 'F')
                     estado = ST_CONST_HEX_ALPHA1;
@@ -333,8 +332,8 @@ proximo_token()
                 break;
 
             case ST_CONST_HEX_ALPHA1:
-                if ((c >= '0' && c <= '9') || 
-                    (c >= 'A' && c <= 'F'))
+                if (IS_DIGIT(c)
+                || (c >= 'A' && c <= 'F'))
                     estado = ST_CONST_HEX_ALPHA2;
                 else
                 {
@@ -346,7 +345,7 @@ proximo_token()
                 break;
 
             case ST_CONST_HEX_NUM1:
-                if (c >= '0' && c <= '9')
+                if (IS_DIGIT(c))
                     estado = ST_CONST_HEX_NUM2;
                 else if (c >= 'A' && c <= 'F')
                     estado = ST_CONST_HEX_ALPHA2;
@@ -378,7 +377,7 @@ proximo_token()
                 break;
 
             case ST_CONST_HEX_NUM2:
-                if (c >= '0' && c <= '9')
+                if (IS_DIGIT(c))
                     estado = ST_CONST_NUM;
                 else if (c == 'h')
                 {
@@ -398,7 +397,7 @@ proximo_token()
                 break;
 
             case ST_CONST_NUM:
-                if (!(c >= '0' && c <= '9'))
+                if (!IS_DIGIT(c))
                 {
                     tok.tipo = TK_CONST;
                     tipo_const = CONST_INT;
@@ -433,7 +432,6 @@ proximo_token()
                     estado = ST_END;
                     erro = ERR_LEX_NAO_IDENTIFICADO;
                 }
-
                 break;
 
             case ST_CONST_STR_INTERNAL:
