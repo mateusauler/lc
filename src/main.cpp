@@ -98,7 +98,7 @@ main(int argc, char* argv[])
     list<registro_tabela_simbolos> l = tbl_simbolos->listar_simbolos();
 
     for (registro_tabela_simbolos const &i: l)
-        cout 
+        cout
             << registro_tabela_simbolos::imprimir_registro_ts(i)
             << endl;
     #endif
@@ -495,7 +495,7 @@ proximo_token()
                     tok.tipo = TK_OP_ATTRIB;
                     estado = ST_END;
                 }
-                else 
+                else
                 {
                     tok.tipo = TK_ERRO;
                     estado = ST_END;
@@ -567,7 +567,7 @@ proximo_token()
     tok.simbolo = NULL;
 
     switch (tok.tipo)
-    {	
+    {
         case TK_ID:
             if (lex_len > 32)
             {

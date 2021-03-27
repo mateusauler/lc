@@ -25,7 +25,7 @@ hash_bkt* tabela_hash::inserir(string chave, void* elemento)
     hash_bkt *obj = new hash_bkt(elemento, chave);
 
     if (this->tabela[hash_chave] == NULL)
-        this->tabela[hash_chave] = obj;    
+        this->tabela[hash_chave] = obj;
     else
     {
         hash_bkt* tmp = this->tabela[hash_chave];
@@ -55,7 +55,7 @@ hash_bkt* tabela_hash::pesquisar(string chave)
 
         if (tmp->prox != NULL)
             tmp = tmp->prox;
-        else 
+        else
             return NULL;
     }
 }
