@@ -63,7 +63,7 @@ main(int argc, char* argv[])
         parser *p = new parser();
         p->execParser();
     }
-    catch (excProgramaFonte e)
+    catch (const excProgramaFonte& e)
     {
         imprimir_erro(e.l, e.terro);
 
