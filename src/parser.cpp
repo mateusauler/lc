@@ -6,11 +6,11 @@ void parser::execParser()
     prog();
 }
 
-void parser::consomeToken( token_type_t token )
+void parser::consomeToken(token_type_t token)
 {
     if      (ultimo_token->tipo == token)  *ultimo_token = proximo_token();
-    else if (ultimo_token->tipo == TK_EOF) throw exception();
-    else                                   throw exception();
+    else if (ultimo_token->tipo == TK_EOF) throw excProgramaFonte(ERR_EOF_INESPERADO);
+    else                                   throw excProgramaFonte(ultimo_token->lex, ERR_TOKEN_NAO_ESPERADO);
 }
 
 void parser::prog()

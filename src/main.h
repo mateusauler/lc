@@ -101,6 +101,7 @@ typedef enum {
     ERR_OK,
     ERR_CHAR_INVALIDO,
     ERR_LEX_NAO_IDENTIFICADO,
+    ERR_TOKEN_NAO_ESPERADO,
     ERR_EOF_INESPERADO
 } tipo_erro_t;
 

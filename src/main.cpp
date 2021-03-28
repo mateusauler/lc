@@ -4,6 +4,7 @@
 
 #include "tabela_simbolos.h"
 #include "parser.h"
+#include "excessoes.h"
 #include "main.h"
 
 using namespace std;
@@ -28,13 +29,12 @@ using namespace std;
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
 
-void imprimir_erro(string lex);
+void imprimir_erro(string lex, tipo_erro_t terro);
 
 FILE *f;
 int num_linha = 1;
 list<token_t> *registro_lexico;
 tabela_simbolos *tbl_simbolos;
-tipo_erro_t erro = ERR_OK;
 
 int
 main(int argc, char* argv[])
@@ -65,12 +65,22 @@ main(int argc, char* argv[])
     tbl_simbolos->inserir(TK_RES_READLN,  "readln");
     tbl_simbolos->inserir(TK_RES_MAIN,    "main");
 
-    parser *p = new parser();
-    p->execParser();
+    try
+    {
+        parser *p = new parser();
+        p->execParser();
+    }
+    catch (excProgramaFonte e)
+    {
+        imprimir_erro(e.l, e.terro);
+
+        fclose(f);
+        return -1;
+    }
 
 /*
     token_t tok;
-  
+
     do
     {
 
@@ -143,7 +153,7 @@ proximo_token()
 
     token_t tok;
     tok.simbolo = nullptr;
-    
+
     const_type_t tipo_const = CONST_NULL;
     stringstream *stream_lexema = new stringstream();
 
@@ -152,20 +162,10 @@ proximo_token()
         c = fgetc(f);
 
         if (c == EOF && estado != ST_START)
-        {
-            tok.tipo = TK_ERRO;
-            estado = ST_END;
-            erro = ERR_EOF_INESPERADO;
-            break;
-        }
+            throw excProgramaFonte(ERR_EOF_INESPERADO);
 
         if (!CHAR_VALIDO(c))
-        {
-            tok.tipo = TK_ERRO;
-            estado = ST_END;
-            erro = ERR_CHAR_INVALIDO;
-            break;
-        }
+            throw excProgramaFonte(ERR_CHAR_INVALIDO);
 
         switch (estado)
         {
@@ -293,12 +293,8 @@ proximo_token()
                  || IS_DIGIT(c))
                     estado = ST_ID_NAME;
                 else if (c != '_')
-                {
-                    tok.tipo = TK_ERRO;
-                    estado = ST_END;
-                    erro = ERR_LEX_NAO_IDENTIFICADO;
-                    backtrack = true;
-                }
+                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+
                 break;
 
             case ST_ID_NAME:
@@ -345,9 +341,8 @@ proximo_token()
                     estado = ST_CONST_HEX_ALPHA2;
                 else
                 {
-                    tok.tipo = TK_ERRO;
-                    estado = ST_END;
-                    erro = ERR_LEX_NAO_IDENTIFICADO;
+                    *stream_lexema << c;
+                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
                 }
 
                 break;
@@ -377,9 +372,8 @@ proximo_token()
                 }
                 else
                 {
-                    tok.tipo = TK_ERRO;
-                    estado = ST_END;
-                    erro = ERR_LEX_NAO_IDENTIFICADO;
+                    *stream_lexema << c;
+                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
                 }
 
                 break;
@@ -418,12 +412,8 @@ proximo_token()
             case ST_CONST_CHAR_START:
                 if (CHAR_VALIDO_CONST(c))
                     estado = ST_CONST_CHAR_INTERNAL;
-                else
-                {
-                    tok.tipo = TK_ERRO;
-                    estado = ST_END;
-                    erro = ERR_CHAR_INVALIDO;
-                }
+                else throw excProgramaFonte(ERR_CHAR_INVALIDO);
+
                 break;
 
             case ST_CONST_CHAR_INTERNAL:
@@ -436,9 +426,8 @@ proximo_token()
                 }
                 else
                 {
-                    tok.tipo = TK_ERRO;
-                    estado = ST_END;
-                    erro = ERR_LEX_NAO_IDENTIFICADO;
+                    *stream_lexema << c;
+                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
                 }
                 break;
 
@@ -451,13 +440,11 @@ proximo_token()
                         estado = ST_END;
                         break;
 
+                    case '$':
+                        *stream_lexema << c;
                     case '\n':
                     case '\r':
-                    case '$':
-                        tok.tipo = TK_ERRO;
-                        estado = ST_END;
-                        erro = ERR_LEX_NAO_IDENTIFICADO;
-                        break;
+                        throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
 
                     default:
                         break;
@@ -505,9 +492,8 @@ proximo_token()
                 }
                 else
                 {
-                    tok.tipo = TK_ERRO;
-                    estado = ST_END;
-                    erro = ERR_LEX_NAO_IDENTIFICADO;
+                    *stream_lexema << c;
+                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
                 }
                 break;
 
@@ -577,11 +563,7 @@ proximo_token()
     {
         case TK_ID:
             if (lex_len > 32)
-            {
-                tok.tipo = TK_ERRO;
-                estado = ST_END;
-                erro = ERR_LEX_NAO_IDENTIFICADO;
-            }
+                throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
             break;
 
         case TK_CONST:
@@ -623,7 +605,7 @@ proximo_token()
 }
 
 void
-imprimir_erro(string lex)
+imprimir_erro(string lex, tipo_erro_t erro)
 {
     stringstream mensagem;
     switch (erro)
@@ -637,6 +619,10 @@ imprimir_erro(string lex)
 
         case ERR_LEX_NAO_IDENTIFICADO:
             mensagem << "lexema nao identificado [" << lex << "].";
+            break;
+
+        case ERR_TOKEN_NAO_ESPERADO:
+            mensagem << "token nao esperado [" << lex << "].";
             break;
 
         case ERR_EOF_INESPERADO:
