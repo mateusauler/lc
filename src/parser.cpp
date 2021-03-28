@@ -115,6 +115,7 @@ void parser::cmdS()
     }
     else if (ultimo_token->tipo == TK_RES_READLN)
     {
+        consomeToken(TK_RES_READLN);
         consomeToken(TK_BRA_O_PAR);
         consomeToken(TK_ID);
 
@@ -180,7 +181,6 @@ void parser::cmdFor()
     else                                    cmdT();
 }
 
-
 void parser::cmdIf()
 {
     consomeToken(TK_RES_IF);
@@ -201,7 +201,6 @@ void parser::cmdIf()
 
         if (ultimo_token->tipo == TK_BRA_O_CUR) blocoCmd();
         else                                    cmdT();
-
     }
 
 }
@@ -211,7 +210,11 @@ void parser::cmdT()
     if      (ultimo_token->tipo == TK_END_STATEMENT) consomeToken(TK_END_STATEMENT);
     else if (ultimo_token->tipo == TK_RES_FOR)       cmdFor();
     else if (ultimo_token->tipo == TK_RES_IF)        cmdIf();
-    else                                             cmdS();
+    else
+    {
+        cmdS();
+        consomeToken(TK_END_STATEMENT);
+    }
 }
 
 void parser::exp()
@@ -230,7 +233,6 @@ void parser::exp()
         consomeToken(ultimo_token->tipo);
         soma();
     }
-
 }
 
 void parser::soma()
@@ -287,10 +289,9 @@ void parser::fator()
 
         if(ultimo_token->tipo == TK_BRA_O_SQR)
         {
-            consomeToken(TK_BRA_O_CUR);
+            consomeToken(TK_BRA_O_SQR);
             exp();
-            consomeToken(TK_BRA_C_CUR);
-
+            consomeToken(TK_BRA_C_SQR);
         }
     }
     else consomeToken(TK_CONST);
