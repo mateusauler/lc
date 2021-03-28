@@ -242,16 +242,6 @@ proximo_token()
                     tok.tipo = TK_ID;
                     estado = ST_END;
                     backtrack = true;
-
-                    tok.simbolo = tbl_simbolos->pesquisar(stream_lexema->str());
-
-                    if (tok.simbolo == NULL)
-                        tok.simbolo = tbl_simbolos->inserir(tok.tipo, stream_lexema->str());
-                    else
-                        tok.tipo = tok.simbolo->tipo_token;
-
-                    if (tok.tipo == TK_CONST) // boleano
-                        tipo_const = CONST_BOOL;
                 }
                 break;
 
@@ -491,45 +481,52 @@ proximo_token()
     tok.tipo_constante = tipo_const;
     tok.tam_constante = 0;
 
-    switch (tok.tipo)
+    if (tok.tipo == TK_ID)
     {
-        case TK_ID:
-            if (lex_len > 32)
-                throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
-            break;
+        if (lex_len > 32)
+            tok.lex.erase(32, tok.lex.length() - 32);
 
-        case TK_CONST:
-            switch (tipo_const)
-            {
-                case CONST_NULL:
-                    tok.tam_constante = 0;
-                    break;
+        tok.simbolo = tbl_simbolos->pesquisar(tok.lex);
 
-                case CONST_INT:
-                    tok.tam_constante = 2;
-                    break;
+        if (tok.simbolo == nullptr)
+            tok.simbolo = tbl_simbolos->inserir(tok.tipo, tok.lex);
+        else
+        {
+            tok.tipo = tok.simbolo->tipo_token;
+            if (tok.tipo == TK_CONST) // boleano
+                tipo_const = CONST_BOOL;
+        }
+    }
 
-                case CONST_CHAR:
-                    tok.tam_constante = 1;
-                    break;
+    if (tok.tipo == TK_CONST)
+    {
+        switch (tipo_const)
+        {
+            case CONST_NULL:
+                tok.tam_constante = 0;
+                break;
 
-                case CONST_HEX:
-                    tok.tam_constante = 1;
-                    break;
+            case CONST_INT:
+                tok.tam_constante = 2;
+                break;
 
-                case CONST_STR:
-                    tok.tam_constante = lex_len - 1;
-                    break;
+            case CONST_CHAR:
+                tok.tam_constante = 1;
+                break;
 
-                case CONST_BOOL:
-                    tok.tam_constante = 1;
-                    break;
-            }
-            break; // case TK_CONST
+            case CONST_HEX:
+                tok.tam_constante = 1;
+                break;
 
-        default:
-            break;
-    } // switch (tok.tipo)
+            case CONST_STR:
+                tok.tam_constante = lex_len - 1;
+                break;
+
+            case CONST_BOOL:
+                tok.tam_constante = 1;
+                break;
+        }
+    }
 
     registro_lexico->push_back(tok);
 
