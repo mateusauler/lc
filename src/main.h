@@ -7,7 +7,8 @@
 
 using namespace std;
 
-typedef enum {
+enum state_t
+{
     ST_START, // Inicio
     ST_END,   // Fim, deve retornar o token
 
@@ -33,9 +34,10 @@ typedef enum {
     ST_OP_ATTRIB_START,     // Leu :
     ST_OP_LT,               // Leu <
     ST_OP_GT,               // Leu >
-} state_t;
+};
 
-typedef enum {
+enum token_type_t
+{
     TK_ERRO,         // Erro
 
     TK_ID,           // Identificador
@@ -86,67 +88,50 @@ typedef enum {
 
     TK_END_STATEMENT, // ;
     TK_EOF            // EOF
-} token_type_t;
+};
 
-typedef enum {
+enum const_type_t
+{
     CONST_NULL,
     CONST_INT,
     CONST_CHAR,
     CONST_HEX,
     CONST_STR,
     CONST_BOOL
-} const_type_t;
+};
 
-typedef enum {
+enum tipo_erro_t
+{
     ERR_OK,
     ERR_CHAR_INVALIDO,
     ERR_LEX_NAO_IDENTIFICADO,
     ERR_TOKEN_NAO_ESPERADO,
     ERR_EOF_INESPERADO
-} tipo_erro_t;
+};
 
-string nome_tipo_token(token_type_t tipo);
-string nome_tipo_constante(const_type_t tipo);
-
-
-typedef struct registro_tabela_simbolos registro_tabela_simbolos;
-struct registro_tabela_simbolos {
+struct registro_tabela_simbolos
+{
     token_type_t tipo_token;
 
     string lexema;
 
     registro_tabela_simbolos() { }
 
-    registro_tabela_simbolos(token_type_t t, string l) {
+    registro_tabela_simbolos(token_type_t t, string l)
+    {
         this->tipo_token = t;
         this->lexema = l;
     }
-
-    static string imprimir_registro_ts(registro_tabela_simbolos *rts)
-    {
-        if (rts == NULL)
-            return "";
-
-        return imprimir_registro_ts(*rts);
-    }
-
-    static string imprimir_registro_ts(registro_tabela_simbolos rts)
-    {
-        stringstream stream;
-
-        stream << nome_tipo_token(rts.tipo_token) << " (" << rts.lexema << ")";
-
-        return stream.str();
-    }
 };
 
-typedef struct {
+struct token_t
+{
     token_type_t tipo;
     string lex;
     registro_tabela_simbolos* simbolo;
     const_type_t tipo_constante;
     int tam_constante;
-} token_t;
+} ;
 
 token_t proximo_token();
 
