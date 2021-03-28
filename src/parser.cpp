@@ -1,14 +1,10 @@
 #include "parser.h"
 
-
 void parser::execParser()
 {
     *ultimo_token = proximo_token();
     prog();
 }
-
-
-
 
 void parser::consomeToken( token_type_t token )
 {
@@ -19,16 +15,10 @@ void parser::consomeToken( token_type_t token )
 
 void parser::prog()
 {
-    while(ultimo_token->tipo != TK_RES_MAIN){
-
-        if(TK_RES_FINAL == ultimo_token->tipo){
-            decConst();
-        }
-        else
-        {
-            decVar();
-        }
-
+    while (ultimo_token->tipo != TK_RES_MAIN)
+    {
+        if (TK_RES_FINAL == ultimo_token->tipo) decConst();
+        else                                    decVar();
     }
 
     consomeToken(TK_RES_MAIN);
@@ -44,7 +34,7 @@ void parser::decVar()
 
     consomeToken(TK_ID);
 
-    if(ultimo_token->tipo == TK_OP_ATTRIB)
+    if (ultimo_token->tipo == TK_OP_ATTRIB)
     {
         consomeToken(TK_OP_ATTRIB);
 
@@ -52,14 +42,12 @@ void parser::decVar()
         else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
 
         consomeToken(TK_CONST);
-
     }
-    else if(ultimo_token->tipo == TK_BRA_O_SQR)
+    else if (ultimo_token->tipo == TK_BRA_O_SQR)
     {
         consomeToken(TK_BRA_O_SQR);
         consomeToken(TK_CONST);
         consomeToken(TK_BRA_C_SQR);
-
     }
 
     while(ultimo_token->tipo == TK_OP_COMMA)
@@ -67,7 +55,7 @@ void parser::decVar()
         consomeToken(TK_OP_COMMA);
         consomeToken(TK_ID);
 
-        if(ultimo_token->tipo == TK_OP_ATTRIB)
+        if (ultimo_token->tipo == TK_OP_ATTRIB)
         {
             consomeToken(TK_OP_ATTRIB);
 
@@ -75,16 +63,15 @@ void parser::decVar()
             else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
 
             consomeToken(TK_CONST);
-
         }
-        else if(ultimo_token->tipo == TK_BRA_O_SQR)
+        else if (ultimo_token->tipo == TK_BRA_O_SQR)
         {
             consomeToken(TK_BRA_O_SQR);
             consomeToken(TK_CONST);
             consomeToken(TK_BRA_C_SQR);
-
         }
     }
+
     consomeToken(TK_END_STATEMENT);
 }
 
@@ -98,7 +85,6 @@ void parser::decConst()
     else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
 
     consomeToken(TK_CONST);
-
     consomeToken(TK_END_STATEMENT);
 }
 
@@ -106,20 +92,18 @@ void parser::blocoCmd()
 {
     consomeToken(TK_BRA_O_CUR);
 
-    while(ultimo_token->tipo != TK_BRA_C_CUR)
-    {
-        cmdT();
-    }
+    while (ultimo_token->tipo != TK_BRA_C_CUR) cmdT();
+
     consomeToken(TK_BRA_C_CUR);
 }
 
 void parser::cmdS()
 {
-    if(ultimo_token->tipo == TK_ID)
+    if (ultimo_token->tipo == TK_ID)
     {
         consomeToken(TK_ID);
 
-        if(ultimo_token->tipo == TK_BRA_O_SQR)
+        if (ultimo_token->tipo == TK_BRA_O_SQR)
         {
             consomeToken(TK_BRA_O_SQR);
             exp();
@@ -127,15 +111,14 @@ void parser::cmdS()
         }
 
         consomeToken(TK_OP_ATTRIB);
-
         exp();
     }
-    else if(ultimo_token->tipo == TK_RES_READLN)
+    else if (ultimo_token->tipo == TK_RES_READLN)
     {
         consomeToken(TK_BRA_O_PAR);
         consomeToken(TK_ID);
 
-        if(ultimo_token->tipo == TK_BRA_O_SQR)
+        if (ultimo_token->tipo == TK_BRA_O_SQR)
         {
             consomeToken(TK_BRA_O_SQR);
             exp();
@@ -153,7 +136,7 @@ void parser::cmdS()
         consomeToken(TK_BRA_O_PAR);
         exp();
 
-        while(ultimo_token->tipo == TK_OP_COMMA)
+        while (ultimo_token->tipo == TK_OP_COMMA)
         {
             consomeToken(TK_OP_COMMA);
             exp();
@@ -167,10 +150,10 @@ void parser::cmdFor()
     consomeToken(TK_RES_FOR);
     consomeToken(TK_BRA_O_PAR);
 
-    if(ultimo_token->tipo != TK_END_STATEMENT)
+    if (ultimo_token->tipo != TK_END_STATEMENT)
     {
         cmdS();
-        while(ultimo_token->tipo == TK_OP_COMMA)
+        while (ultimo_token->tipo == TK_OP_COMMA)
         {
             consomeToken(TK_OP_COMMA);
             cmdS();
@@ -184,12 +167,13 @@ void parser::cmdFor()
     if(ultimo_token->tipo != TK_BRA_C_PAR)
     {
         cmdS();
-        while(ultimo_token->tipo == TK_OP_COMMA)
+        while (ultimo_token->tipo == TK_OP_COMMA)
         {
             consomeToken(TK_OP_COMMA);
             cmdS();
         }
     }
+
     consomeToken(TK_BRA_C_PAR);
 
     if (ultimo_token->tipo == TK_BRA_O_CUR) blocoCmd();
@@ -211,7 +195,7 @@ void parser::cmdIf()
     if (ultimo_token->tipo == TK_BRA_O_CUR) blocoCmd();
     else                                    cmdT();
 
-    if(ultimo_token->tipo == TK_RES_ELSE)
+    if (ultimo_token->tipo == TK_RES_ELSE)
     {
         consomeToken(TK_RES_ELSE);
 
@@ -234,12 +218,14 @@ void parser::exp()
 {
     soma();
 
-    if(     (ultimo_token->tipo == TK_OP_EQ)
-        ||  (ultimo_token->tipo == TK_OP_NE)
-        ||  (ultimo_token->tipo == TK_OP_GT)
-        ||  (ultimo_token->tipo == TK_OP_LT)
-        ||  (ultimo_token->tipo == TK_OP_GE)
-        ||  (ultimo_token->tipo == TK_OP_LE) )
+    if (
+           (ultimo_token->tipo == TK_OP_EQ) ||
+           (ultimo_token->tipo == TK_OP_NE) ||
+           (ultimo_token->tipo == TK_OP_GT) ||
+           (ultimo_token->tipo == TK_OP_LT) ||
+           (ultimo_token->tipo == TK_OP_GE) ||
+           (ultimo_token->tipo == TK_OP_LE)
+       )
     {
         consomeToken(ultimo_token->tipo);
         soma();
@@ -255,9 +241,11 @@ void parser::soma()
 
     termo();
 
-    while(  (ultimo_token->tipo == TK_OP_PLUS)
-        ||  (ultimo_token->tipo == TK_OP_MINUS)
-        ||  (ultimo_token->tipo == TK_RES_OR) )
+    while (
+            (ultimo_token->tipo == TK_OP_PLUS)  ||
+            (ultimo_token->tipo == TK_OP_MINUS) ||
+            (ultimo_token->tipo == TK_RES_OR)
+          )
     {
         consomeToken(ultimo_token->tipo);
         termo();
@@ -268,31 +256,32 @@ void parser::termo()
 {
     fator();
 
-    while(  (ultimo_token->tipo == TK_OP_MUL)
-        ||  (ultimo_token->tipo == TK_OP_SLASH)
-        ||  (ultimo_token->tipo == TK_OP_PERCENT)
-        ||  (ultimo_token->tipo == TK_RES_AND) )
+    while (
+            (ultimo_token->tipo == TK_OP_MUL)     ||
+            (ultimo_token->tipo == TK_OP_SLASH)   ||
+            (ultimo_token->tipo == TK_OP_PERCENT) ||
+            (ultimo_token->tipo == TK_RES_AND)
+          )
     {
         consomeToken(ultimo_token->tipo);
         fator();
     }
-
 }
 
 void parser::fator()
 {
-    if(ultimo_token->tipo == TK_RES_NOT)
+    if (ultimo_token->tipo == TK_RES_NOT)
     {
         consomeToken(TK_RES_NOT);
         fator();
     }
-    else if(ultimo_token->tipo == TK_BRA_O_PAR)
+    else if (ultimo_token->tipo == TK_BRA_O_PAR)
     {
         consomeToken(TK_BRA_O_PAR);
         exp();
         consomeToken(TK_BRA_C_PAR);
     }
-    else if(ultimo_token->tipo == TK_ID)
+    else if (ultimo_token->tipo == TK_ID)
     {
         consomeToken(TK_ID);
 
@@ -305,5 +294,4 @@ void parser::fator()
         }
     }
     else consomeToken(TK_CONST);
-
 }

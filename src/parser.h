@@ -4,8 +4,8 @@
 #include "main.h"
 #include <exception>
 
-
-class parser{
+class parser
+{
 
 public:
 
@@ -30,10 +30,5 @@ private:
     void fator();
 
 };
-
-
-
-
-
 
 #endif
