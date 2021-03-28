@@ -6,18 +6,18 @@
 
 struct excProgramaFonte : public exception
 {
-    string l;
+    string lex;
     tipo_erro_t terro;
 
     excProgramaFonte(string _l, tipo_erro_t _terro)
     {
-        l = _l;
+        lex = _l;
         terro = _terro;
     }
 
     excProgramaFonte(tipo_erro_t _terro)
     {
-        l = "";
+        lex = "";
         terro = _terro;
     }
 };

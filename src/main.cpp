@@ -65,7 +65,7 @@ main(int argc, char* argv[])
     }
     catch (const excProgramaFonte& e)
     {
-        imprimir_erro(e.l, e.terro);
+        imprimir_erro(e.lex, e.terro);
 
         fclose(f);
         return -1;
