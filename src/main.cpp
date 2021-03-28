@@ -464,11 +464,13 @@ proximo_token()
                 break;
         } // switch (estado)
 
-		if (c == '\n')
-			num_linha++;
-
         if (!backtrack)
+        {
+            if (c == '\n')
+                num_linha++;
+
             *stream_lexema << c;
+        }
 
     } while (estado != ST_END && c != EOF);
 
