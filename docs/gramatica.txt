@@ -7,8 +7,8 @@ BlocoCmd -> "{" {CmdT} "}"
 
 CmdS -> ID [ "[" Exp "]" ] := Exp
 CmdS -> readln "(" ID [ "[" Exp "]" ] ")"
-CmdS -> write "(" Exp {, Exp} ")"
-CmdS -> writeln "(" Exp {, Exp} ")"
+CmdS -> (write | writeln) "(" Exp {, Exp} ")"
+
 
 CmdFor -> for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
 CmdIf -> if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]

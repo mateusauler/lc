@@ -107,6 +107,7 @@ typedef enum {
 string nome_tipo_token(token_type_t tipo);
 string nome_tipo_constante(const_type_t tipo);
 
+
 typedef struct registro_tabela_simbolos registro_tabela_simbolos;
 struct registro_tabela_simbolos {
     token_type_t tipo_token;
@@ -145,5 +146,7 @@ typedef struct {
     const_type_t tipo_constante;
     int tam_constante;
 } token_t;
+
+token_t proximo_token();
 
 #endif

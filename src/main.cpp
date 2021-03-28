@@ -3,6 +3,7 @@
 //#define DBG_REG_LEX
 
 #include "tabela_simbolos.h"
+#include "parser.h"
 #include "main.h"
 
 using namespace std;
@@ -26,7 +27,7 @@ using namespace std;
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
-token_t proximo_token();
+
 void imprimir_erro(string lex);
 
 FILE *f;
@@ -64,8 +65,13 @@ main(int argc, char* argv[])
     tbl_simbolos->inserir(TK_RES_READLN,  "readln");
     tbl_simbolos->inserir(TK_RES_MAIN,    "main");
 
-    token_t tok;
+    parser *p = new parser();
+    cout<<"erro"<<endl;
+    p->execParser();
 
+/*
+    token_t tok;
+  
     do
     {
 
@@ -92,6 +98,7 @@ main(int argc, char* argv[])
 
     } while (tok.tipo != TK_EOF);
 
+    */
     #ifdef DBG_SIM_TAB
     cout << endl << "Tabela de simbolos:" << endl << endl;
 
