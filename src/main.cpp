@@ -142,6 +142,8 @@ proximo_token()
     bool backtrack = false;
 
     token_t tok;
+    tok.simbolo = nullptr;
+    
     const_type_t tipo_const = CONST_NULL;
     stringstream *stream_lexema = new stringstream();
 
@@ -570,7 +572,6 @@ proximo_token()
 
     tok.tipo_constante = tipo_const;
     tok.tam_constante = 0;
-    tok.simbolo = NULL;
 
     switch (tok.tipo)
     {
