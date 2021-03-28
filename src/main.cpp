@@ -66,7 +66,6 @@ main(int argc, char* argv[])
     tbl_simbolos->inserir(TK_RES_MAIN,    "main");
 
     parser *p = new parser();
-    cout<<"erro"<<endl;
     p->execParser();
 
 /*

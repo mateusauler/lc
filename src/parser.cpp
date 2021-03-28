@@ -2,7 +2,7 @@
 
 void parser::execParser()
 {
-    *ultimo_token = proximo_token();
+    ultimo_token = new token_t(proximo_token());
     prog();
 }
 
