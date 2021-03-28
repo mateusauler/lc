@@ -488,9 +488,6 @@ proximo_token()
     tok.lex = stream_lexema->str();
     int lex_len = tok.lex.length();
 
-    if (tok.tipo == TK_ERRO)
-        tipo_const = CONST_NULL;
-
     tok.tipo_constante = tipo_const;
     tok.tam_constante = 0;
 

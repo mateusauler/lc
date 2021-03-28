@@ -38,8 +38,6 @@ enum state_t
 
 enum token_type_t
 {
-    TK_ERRO,         // Erro
-
     TK_ID,           // Identificador
     TK_CONST,        // Constante
 
