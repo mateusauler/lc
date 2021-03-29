@@ -24,7 +24,8 @@ sed -E -i "/#include \".+\"/d" $tmpfile
 sed -E -i "/#include <.+>/d" $tmpfile
 sed -E -i "/using namespace std;/d" $tmpfile
 
-printf "%b" "$includes\n\n" > $filename
+echo "#define VERDE" > $filename
+printf "%b" "$includes\n\n" >> $filename
 printf "%b" "using namespace std;\n\n" >> $filename
 
 cat $tmpfile >> $filename
