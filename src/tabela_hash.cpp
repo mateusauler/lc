@@ -5,32 +5,37 @@ tabela_hash::tabela_hash(int tamanho)
     if (tamanho <= 0)
         tamanho = 128;
 
-    hash_bkt bucket[tamanho];
-    this->tamanho_tbl = tamanho;
-    this->tabela = (hash_bkt**)&bucket;
+    tamanho_tbl = tamanho;
+    tabela = (hash_bkt**) malloc(tamanho * sizeof(void*));
 
     for (int i = 0; i < tamanho; i++)
-        this->tabela[i] = NULL;
+        tabela[i] = nullptr;
+}
+
+tabela_hash::~tabela_hash()
+{
+    free(tabela);
+    tabela = nullptr;
 }
 
 int tabela_hash::hash_function(string chave)
 {
-    return chave[0] % this->tamanho_tbl;
+    return chave[0] % tamanho_tbl;
 }
 
 hash_bkt* tabela_hash::inserir(string chave, void* elemento)
 {
-    int hash_chave = this->hash_function(chave);
+    int hash_chave = hash_function(chave);
 
     hash_bkt *obj = new hash_bkt(elemento, chave);
 
-    if (this->tabela[hash_chave] == NULL)
-        this->tabela[hash_chave] = obj;
+    if (tabela[hash_chave] == nullptr)
+        tabela[hash_chave] = obj;
     else
     {
-        hash_bkt* tmp = this->tabela[hash_chave];
+        hash_bkt* tmp = tabela[hash_chave];
 
-        while(tmp->prox != NULL)
+        while(tmp->prox != nullptr)
             tmp = tmp->prox;
 
         tmp->prox = obj;
@@ -41,22 +46,22 @@ hash_bkt* tabela_hash::inserir(string chave, void* elemento)
 
 hash_bkt* tabela_hash::pesquisar(string chave)
 {
-    int hash_chave = this->hash_function(chave);
+    int hash_chave = hash_function(chave);
 
-    if(this->tabela[hash_chave] == NULL)
-        return NULL;
+    if (tabela[hash_chave] == nullptr)
+        return nullptr;
 
-    hash_bkt* tmp = this->tabela[hash_chave];
+    hash_bkt* tmp = tabela[hash_chave];
 
-    while(true)
+    while (true)
     {
         if (chave == tmp->chave)
             return tmp;
 
-        if (tmp->prox != NULL)
+        if (tmp->prox != nullptr)
             tmp = tmp->prox;
         else
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -68,7 +73,7 @@ list<hash_bkt> tabela_hash::listar_elementos()
     {
         hash_bkt *tmp = tabela[i];
 
-        while (tmp != NULL)
+        while (tmp != nullptr)
         {
             l->push_back(*tmp);
             tmp = tmp->prox;
