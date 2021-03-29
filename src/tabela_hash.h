@@ -6,8 +6,8 @@
 
 using namespace std;
 
-typedef struct hash_bkt hash_bkt;
-struct hash_bkt {
+struct hash_bkt
+{
     void *elemento;
 
     hash_bkt *prox;
