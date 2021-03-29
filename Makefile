@@ -7,9 +7,9 @@ WARNINGS = -Wall
 CFLAGS   = -g -O0 ${WARNINGS}
 LDFLAGS  =
 
-CC = g++
+CC = c++
 
-SRC = main.cpp tabela_hash.cpp tabela_simbolos.cpp parser.cpp
+SRC = main.cpp tabela_hash.cpp tabela_simbolos.cpp parser.cpp source_iterator.cpp
 OBJ = ${SRC:%.cpp=${DESTDIR}/%.o}
 
 all: ${DESTDIR} ${TARGET}

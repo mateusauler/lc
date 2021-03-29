@@ -1,6 +1,7 @@
 #include "tabela_simbolos.h"
 #include "parser.h"
 #include "excessoes.h"
+#include "source_iterator.h"
 #include "main.h"
 
                         /*    TAB          LF          CR */
@@ -24,7 +25,7 @@
 
 void imprimir_erro(string lex, tipo_erro_t terro);
 
-FILE *f;
+source_iterator *si;
 int num_linha = 1;
 list<token_t> *registro_lexico;
 tabela_simbolos *tbl_simbolos;
@@ -32,10 +33,18 @@ tabela_simbolos *tbl_simbolos;
 int
 main(int argc, char* argv[])
 {
-    if (argc != 2)
-        return 1;
+    #ifdef VERDE
 
-    f = fopen(argv[1], "r");
+    si = new source_iterator();
+
+    #else
+
+    if (argc == 2)
+        si = new source_iterator(argv[1]);
+    else
+        si = new source_iterator();
+
+    #endif
 
     tbl_simbolos = new tabela_simbolos(128);
     registro_lexico = new list<token_t>();
@@ -66,14 +75,10 @@ main(int argc, char* argv[])
     catch (const excProgramaFonte& e)
     {
         imprimir_erro(e.lex, e.terro);
-
-        fclose(f);
         return -1;
     }
 
     cout << num_linha << " linhas compiladas." << endl;
-
-    fclose(f);
 
     return 0;
 }
@@ -94,7 +99,7 @@ proximo_token()
 
     do
     {
-        c = fgetc(f);
+        c = si->proximo_char();
 
         if (c == EOF && estado != ST_START)
             throw excProgramaFonte(ERR_EOF_INESPERADO);
@@ -475,7 +480,7 @@ proximo_token()
     } while (estado != ST_END && c != EOF);
 
     if (backtrack)
-        fseek(f, -1, SEEK_CUR);
+        si->seekInput(-1);
 
     tok.lex = stream_lexema->str();
     int lex_len = tok.lex.length();
