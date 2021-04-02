@@ -129,7 +129,7 @@ struct token_t
     registro_tabela_simbolos* simbolo;
     const_type_t tipo_constante;
     int tam_constante;
-} ;
+};
 
 token_t proximo_token();
 

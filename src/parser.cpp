@@ -1,8 +1,13 @@
 #include "parser.h"
 
+parser::parser(FILE *f)
+{
+    lxr = new lexer(f);
+}
+
 void parser::execParser()
 {
-    ultimo_token = new token_t(proximo_token());
+    ultimo_token = new token_t(lxr->proximo_token());
     prog();
 }
 
@@ -11,7 +16,7 @@ void parser::consomeToken(token_type_t token)
     if (ultimo_token->tipo == token)
     {
         if (ultimo_token->tipo != TK_EOF)
-            *ultimo_token = proximo_token();
+            *ultimo_token = lxr->proximo_token();
     }  
     else if (ultimo_token->tipo == TK_EOF) throw excProgramaFonte(ERR_EOF_INESPERADO);
     else                                   throw excProgramaFonte(ultimo_token->lex, ERR_TOKEN_NAO_ESPERADO);

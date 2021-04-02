@@ -3,11 +3,16 @@
 
 #include "excessoes.h"
 #include "main.h"
+#include "lexer.h"
 
 class parser
 {
 
 public:
+
+    lexer *lxr;
+
+    parser(FILE *f);
 
     void execParser();
 

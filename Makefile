@@ -9,7 +9,7 @@ LDFLAGS  =
 
 CC = c++
 
-SRC = main.cpp tabela_hash.cpp tabela_simbolos.cpp parser.cpp source_iterator.cpp
+SRC = main.cpp tabela_hash.cpp tabela_simbolos.cpp parser.cpp lexer.cpp
 OBJ = ${SRC:%.cpp=${DESTDIR}/%.o}
 
 all: ${DESTDIR} ${TARGET}
