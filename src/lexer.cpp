@@ -63,10 +63,10 @@ token_t lexer::proximo_token()
         c = fgetc(f);
 
         if (c == EOF && estado != ST_START)
-            throw excProgramaFonte(ERR_EOF_INESPERADO);
+            throw eof_inesperado();
 
         if (!CHAR_VALIDO(c))
-            throw excProgramaFonte(ERR_CHAR_INVALIDO);
+            throw char_invalido();
 
         switch (estado)
         {
@@ -194,7 +194,7 @@ token_t lexer::proximo_token()
                  || IS_DIGIT(c))
                     estado = ST_ID_NAME;
                 else if (c != '_')
-                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+                    throw lex_nao_identificado(stream_lexema->str());
 
                 break;
 
@@ -233,7 +233,7 @@ token_t lexer::proximo_token()
                 else
                 {
                     *stream_lexema << c;
-                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+                    throw lex_nao_identificado(stream_lexema->str());
                 }
 
                 break;
@@ -264,7 +264,7 @@ token_t lexer::proximo_token()
                 else
                 {
                     *stream_lexema << c;
-                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+                    throw lex_nao_identificado(stream_lexema->str());
                 }
 
                 break;
@@ -303,7 +303,7 @@ token_t lexer::proximo_token()
             case ST_CONST_CHAR_START:
                 if (CHAR_VALIDO_CONST(c))
                     estado = ST_CONST_CHAR_INTERNAL;
-                else throw excProgramaFonte(ERR_CHAR_INVALIDO);
+                else throw char_invalido();
 
                 break;
 
@@ -318,7 +318,7 @@ token_t lexer::proximo_token()
                 else
                 {
                     *stream_lexema << c;
-                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+                    throw lex_nao_identificado(stream_lexema->str());
                 }
                 break;
 
@@ -335,7 +335,7 @@ token_t lexer::proximo_token()
                         *stream_lexema << c;
                     case '\n':
                     case '\r':
-                        throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+                        throw lex_nao_identificado(stream_lexema->str());
 
                     default:
                         break;
@@ -384,7 +384,7 @@ token_t lexer::proximo_token()
                 else
                 {
                     *stream_lexema << c;
-                    throw excProgramaFonte(stream_lexema->str(), ERR_LEX_NAO_IDENTIFICADO);
+                    throw lex_nao_identificado(stream_lexema->str());
                 }
                 break;
 

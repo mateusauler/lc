@@ -2,24 +2,33 @@
 #define EXCESSOES_H
 
 #include <exception>
+#include <cstring>
 #include "main.h"
 
-struct excProgramaFonte : public exception
+struct char_invalido : public exception
 {
-    string lex;
-    tipo_erro_t terro;
+    const char * what() const throw();
+};
 
-    excProgramaFonte(string _l, tipo_erro_t _terro)
-    {
-        lex = _l;
-        terro = _terro;
-    }
+struct lex_nao_identificado : public exception
+{
+    char *msg;
+    lex_nao_identificado(string l);
+    ~lex_nao_identificado();
+    const char * what() const throw();
+};
 
-    excProgramaFonte(tipo_erro_t _terro)
-    {
-        lex = "";
-        terro = _terro;
-    }
+struct token_invalido : public exception
+{
+    char *msg;
+    token_invalido(string l);
+    ~token_invalido();
+    const char * what() const throw();
+};
+
+struct eof_inesperado : public exception
+{
+    const char * what() const throw();
 };
 
 #endif

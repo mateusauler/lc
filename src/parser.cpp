@@ -18,8 +18,8 @@ void parser::consomeToken(token_type_t token)
         if (ultimo_token->tipo != TK_EOF)
             *ultimo_token = lxr->proximo_token();
     }  
-    else if (ultimo_token->tipo == TK_EOF) throw excProgramaFonte(ERR_EOF_INESPERADO);
-    else                                   throw excProgramaFonte(ultimo_token->lex, ERR_TOKEN_NAO_ESPERADO);
+    else if (ultimo_token->tipo == TK_EOF) throw eof_inesperado();
+    else                                   throw token_invalido(ultimo_token->lex);
 }
 
 void parser::prog()

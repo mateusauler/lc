@@ -98,15 +98,6 @@ enum const_type_t
     CONST_BOOL
 };
 
-enum tipo_erro_t
-{
-    ERR_OK,
-    ERR_CHAR_INVALIDO,
-    ERR_LEX_NAO_IDENTIFICADO,
-    ERR_TOKEN_NAO_ESPERADO,
-    ERR_EOF_INESPERADO
-};
-
 struct registro_tabela_simbolos
 {
     token_type_t tipo_token;
