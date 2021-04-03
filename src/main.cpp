@@ -21,7 +21,7 @@ main(int argc, char* argv[])
     try
     {
         p = new parser(f);
-        p->execParser();
+        p->exec_parser();
     }
     catch (const exception& e)
     {

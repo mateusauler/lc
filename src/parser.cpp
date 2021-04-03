@@ -5,13 +5,13 @@ parser::parser(FILE *f)
     lxr = new lexer(f);
 }
 
-void parser::execParser()
+void parser::exec_parser()
 {
     ultimo_token = new token_t(lxr->proximo_token());
     prog();
 }
 
-void parser::consomeToken(token_type_t token)
+void parser::consome_token(token_type_t token)
 {
     if (ultimo_token->tipo == token)
     {
@@ -22,275 +22,312 @@ void parser::consomeToken(token_type_t token)
     else                                   throw token_invalido(ultimo_token->lex);
 }
 
+// {DecVar|DecConst} main BlocoCmd EOF
 void parser::prog()
 {
+    // {DecVar|DecConst}
     while (ultimo_token->tipo != TK_RES_MAIN)
     {
-        if (TK_RES_FINAL == ultimo_token->tipo) decConst();
-        else                                    decVar();
+        if (TK_RES_FINAL == ultimo_token->tipo) dec_const(); // final
+        else                                    dec_var();   // (int | char | boolean)
     }
 
-    consomeToken(TK_RES_MAIN);
-    blocoCmd();
-    consomeToken(TK_EOF);
+    consome_token(TK_RES_MAIN); // main
+    bloco_cmd();
+    consome_token(TK_EOF); // EOF
 }
 
-void parser::decVar()
+// (int | char | boolean) Var {, Var} ;
+void parser::dec_var()
 {
-    if      (ultimo_token->tipo == TK_RES_INT)  consomeToken(TK_RES_INT);
-    else if (ultimo_token->tipo == TK_RES_CHAR) consomeToken(TK_RES_CHAR);
-    else                                        consomeToken(TK_RES_BOOLEAN);
+    // (int | char | boolean)
+    if      (ultimo_token->tipo == TK_RES_INT)  consome_token(TK_RES_INT);     // int
+    else if (ultimo_token->tipo == TK_RES_CHAR) consome_token(TK_RES_CHAR);    // char
+    else                                        consome_token(TK_RES_BOOLEAN); // boolean
 
     var();
 
+    // {, Var}
     while(ultimo_token->tipo == TK_OP_COMMA)
     {
-        consomeToken(TK_OP_COMMA);
+        consome_token(TK_OP_COMMA); // ,
         var();
     }
 
-    consomeToken(TK_END_STATEMENT);
+    consome_token(TK_END_STATEMENT); // ;
 }
 
-void parser::decConst()
+// final ID = [+|-] CONST ;
+void parser::dec_const()
 {
-    consomeToken(TK_RES_FINAL);
-    consomeToken(TK_ID);
-    consomeToken(TK_OP_EQ);
+    consome_token(TK_RES_FINAL); // final
+    consome_token(TK_ID);        // ID
+    consome_token(TK_OP_EQ);     // =
 
-    if      (ultimo_token->tipo == TK_OP_PLUS)  consomeToken(TK_OP_PLUS);
-    else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
+    if      (ultimo_token->tipo == TK_OP_PLUS)  consome_token(TK_OP_PLUS);  // +
+    else if (ultimo_token->tipo == TK_OP_MINUS) consome_token(TK_OP_MINUS); // -
 
-    consomeToken(TK_CONST);
-    consomeToken(TK_END_STATEMENT);
+    consome_token(TK_CONST);         // CONST
+    consome_token(TK_END_STATEMENT); // ;
 }
 
+// ID [:= [+|-] CONST | "[" CONST "]" ]
 void parser::var()
 {
-    consomeToken(TK_ID);
+    consome_token(TK_ID); // ID
 
-    if (ultimo_token->tipo == TK_OP_ATTRIB)
+    if (ultimo_token->tipo == TK_OP_ATTRIB) // := [+|-] CONST
     {
-        consomeToken(TK_OP_ATTRIB);
+        consome_token(TK_OP_ATTRIB); // :=
 
-        if      (ultimo_token->tipo == TK_OP_PLUS)  consomeToken(TK_OP_PLUS);
-        else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
+        if      (ultimo_token->tipo == TK_OP_PLUS)  consome_token(TK_OP_PLUS);  // +
+        else if (ultimo_token->tipo == TK_OP_MINUS) consome_token(TK_OP_MINUS); // -
 
-        consomeToken(TK_CONST);
+        consome_token(TK_CONST); // CONST
     }
-    else if (ultimo_token->tipo == TK_BRA_O_SQR)
+    else if (ultimo_token->tipo == TK_BRA_O_SQR) // "[" CONST "]"
     {
-        consomeToken(TK_BRA_O_SQR);
-        consomeToken(TK_CONST);
-        consomeToken(TK_BRA_C_SQR);
+        consome_token(TK_BRA_O_SQR); // [
+        consome_token(TK_CONST);     // CONST
+        consome_token(TK_BRA_C_SQR); // ]
     }
 }
 
-void parser::blocoCmd()
+// "{" {CmdT} "}"
+void parser::bloco_cmd()
 {
-    consomeToken(TK_BRA_O_CUR);
+    consome_token(TK_BRA_O_CUR); // {
 
-    while (ultimo_token->tipo != TK_BRA_C_CUR) cmdT();
+    // {CmdT}
+    while (ultimo_token->tipo != TK_BRA_C_CUR) cmd_t();
 
-    consomeToken(TK_BRA_C_CUR);
+    consome_token(TK_BRA_C_CUR); // }
 }
 
-void parser::cmdS()
+// ID [ "[" Exp "]" ] := Exp
+// readln "(" ID [ "[" Exp "]" ] ")"
+// (write | writeln) "(" Exp {, Exp} ")"
+void parser::cmd_s()
 {
-    if (ultimo_token->tipo == TK_ID)
+    if (ultimo_token->tipo == TK_ID) // ID [ "[" Exp "]" ] := Exp
     {
-        consomeToken(TK_ID);
+        consome_token(TK_ID); // ID
 
+        // [ "[" Exp "]" ]
         if (ultimo_token->tipo == TK_BRA_O_SQR)
         {
-            consomeToken(TK_BRA_O_SQR);
+            consome_token(TK_BRA_O_SQR); // [
             exp();
-            consomeToken(TK_BRA_C_SQR);
+            consome_token(TK_BRA_C_SQR); // ]
         }
 
-        consomeToken(TK_OP_ATTRIB);
+        consome_token(TK_OP_ATTRIB); // :=
         exp();
     }
-    else if (ultimo_token->tipo == TK_RES_READLN)
+    else if (ultimo_token->tipo == TK_RES_READLN) // readln "(" ID [ "[" Exp "]" ] ")"
     {
-        consomeToken(TK_RES_READLN);
-        consomeToken(TK_BRA_O_PAR);
-        consomeToken(TK_ID);
+        consome_token(TK_RES_READLN); // readln
+        consome_token(TK_BRA_O_PAR);  // (
+        consome_token(TK_ID);         // ID
 
+        // [ "[" Exp "]" ]
         if (ultimo_token->tipo == TK_BRA_O_SQR)
         {
-            consomeToken(TK_BRA_O_SQR);
+            consome_token(TK_BRA_O_SQR); // [
             exp();
-            consomeToken(TK_BRA_C_SQR);
+            consome_token(TK_BRA_C_SQR); // ]
         }
 
-        consomeToken(TK_BRA_C_PAR);
+        consome_token(TK_BRA_C_PAR); // )
 
     }
-    else
+    else // (write | writeln) "(" Exp {, Exp} ")"
     {
-        if (ultimo_token->tipo == TK_RES_WRITE) consomeToken(TK_RES_WRITE);
-        else                                    consomeToken(TK_RES_WRITELN);
+        if (ultimo_token->tipo == TK_RES_WRITE) consome_token(TK_RES_WRITE);   // write
+        else                                    consome_token(TK_RES_WRITELN); // writeln
 
-        consomeToken(TK_BRA_O_PAR);
+        consome_token(TK_BRA_O_PAR); // (
         exp();
 
-        while (ultimo_token->tipo == TK_OP_COMMA)
+        // {, Exp}
+        while (ultimo_token->tipo == TK_OP_COMMA) // ,
         {
-            consomeToken(TK_OP_COMMA);
+            consome_token(TK_OP_COMMA);
             exp();
         }
-        consomeToken(TK_BRA_C_PAR);
+
+        consome_token(TK_BRA_C_PAR); // )
     }
 }
 
-void parser::cmdFor()
+// for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
+void parser::cmd_for()
 {
-    consomeToken(TK_RES_FOR);
-    consomeToken(TK_BRA_O_PAR);
+    consome_token(TK_RES_FOR);   // for
+    consome_token(TK_BRA_O_PAR); // (
 
+    // [CmdS {, CmdS}]
     if (ultimo_token->tipo != TK_END_STATEMENT)
     {
-        cmdS();
+        cmd_s();
+
+        // {, CmdS}
         while (ultimo_token->tipo == TK_OP_COMMA)
         {
-            consomeToken(TK_OP_COMMA);
-            cmdS();
+            consome_token(TK_OP_COMMA); // ,
+            cmd_s();
         }
     }
-    consomeToken(TK_END_STATEMENT);
+    consome_token(TK_END_STATEMENT); // ;
 
     exp();
-    consomeToken(TK_END_STATEMENT);
+    consome_token(TK_END_STATEMENT); // ;
 
+    // [CmdS {, CmdS}]
     if(ultimo_token->tipo != TK_BRA_C_PAR)
     {
-        cmdS();
+        cmd_s();
+
+        // {, CmdS}
         while (ultimo_token->tipo == TK_OP_COMMA)
         {
-            consomeToken(TK_OP_COMMA);
-            cmdS();
+            consome_token(TK_OP_COMMA); // ,
+            cmd_s();
         }
     }
 
-    consomeToken(TK_BRA_C_PAR);
+    consome_token(TK_BRA_C_PAR); // )
 
-    if (ultimo_token->tipo == TK_BRA_O_CUR) blocoCmd();
-    else                                    cmdT();
+    // (CmdT | BlocoCmd)
+    if (ultimo_token->tipo == TK_BRA_O_CUR) bloco_cmd();
+    else                                    cmd_t();
 }
 
-void parser::cmdIf()
+// if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
+void parser::cmd_if()
 {
-    consomeToken(TK_RES_IF);
-    consomeToken(TK_BRA_O_PAR);
+    consome_token(TK_RES_IF);    // if
+    consome_token(TK_BRA_O_PAR); // (
 
     exp();
 
-    consomeToken(TK_BRA_C_PAR);
+    consome_token(TK_BRA_C_PAR); // )
 
-    consomeToken(TK_RES_THEN);
+    consome_token(TK_RES_THEN);  // then
 
-    if (ultimo_token->tipo == TK_BRA_O_CUR) blocoCmd();
-    else                                    cmdT();
+    // (CmdT | BlocoCmd)
+    if (ultimo_token->tipo == TK_BRA_O_CUR) bloco_cmd();
+    else                                    cmd_t();
 
+    // [else (CmdT | BlocoCmd)]
     if (ultimo_token->tipo == TK_RES_ELSE)
     {
-        consomeToken(TK_RES_ELSE);
+        consome_token(TK_RES_ELSE); // else
 
-        if (ultimo_token->tipo == TK_BRA_O_CUR) blocoCmd();
-        else                                    cmdT();
+        // (CmdT | BlocoCmd)
+        if (ultimo_token->tipo == TK_BRA_O_CUR) bloco_cmd();
+        else                                    cmd_t();
     }
 
 }
 
-void parser::cmdT()
+// [CmdS] ; | CmdFor | CmdIf
+void parser::cmd_t()
 {
-    if      (ultimo_token->tipo == TK_END_STATEMENT) consomeToken(TK_END_STATEMENT);
-    else if (ultimo_token->tipo == TK_RES_FOR)       cmdFor();
-    else if (ultimo_token->tipo == TK_RES_IF)        cmdIf();
+    if      (ultimo_token->tipo == TK_END_STATEMENT) consome_token(TK_END_STATEMENT); // ;
+    else if (ultimo_token->tipo == TK_RES_FOR)       cmd_for();                       // for
+    else if (ultimo_token->tipo == TK_RES_IF)        cmd_if();                        // if
     else
     {
-        cmdS();
-        consomeToken(TK_END_STATEMENT);
+        cmd_s();
+        consome_token(TK_END_STATEMENT); // ;
     }
 }
 
+// Soma [(=|<>|>|<|>=|<=) Soma]
 void parser::exp()
 {
     soma();
 
+    // [(=|<>|>|<|>=|<=) Soma]
     if (
-           (ultimo_token->tipo == TK_OP_EQ) ||
-           (ultimo_token->tipo == TK_OP_NE) ||
-           (ultimo_token->tipo == TK_OP_GT) ||
-           (ultimo_token->tipo == TK_OP_LT) ||
-           (ultimo_token->tipo == TK_OP_GE) ||
-           (ultimo_token->tipo == TK_OP_LE)
+           (ultimo_token->tipo == TK_OP_EQ) || // =
+           (ultimo_token->tipo == TK_OP_NE) || // <>
+           (ultimo_token->tipo == TK_OP_GT) || // >
+           (ultimo_token->tipo == TK_OP_LT) || // <
+           (ultimo_token->tipo == TK_OP_GE) || // >=
+           (ultimo_token->tipo == TK_OP_LE)    // <=
        )
     {
-        consomeToken(ultimo_token->tipo);
+        consome_token(ultimo_token->tipo); // (=|<>|>|<|>=|<=)
         soma();
     }
 }
 
+// [+|-] Termo {(+|-|or) Termo}
 void parser::soma()
 {
-
-    if      (ultimo_token->tipo == TK_OP_PLUS)  consomeToken(TK_OP_PLUS);
-    else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
+    // [+|-]
+    if      (ultimo_token->tipo == TK_OP_PLUS)  consome_token(TK_OP_PLUS);  // +
+    else if (ultimo_token->tipo == TK_OP_MINUS) consome_token(TK_OP_MINUS); // -
 
     termo();
 
+    // {(+|-|or) Termo}
     while (
-            (ultimo_token->tipo == TK_OP_PLUS)  ||
-            (ultimo_token->tipo == TK_OP_MINUS) ||
-            (ultimo_token->tipo == TK_RES_OR)
+            (ultimo_token->tipo == TK_OP_PLUS)  || // +
+            (ultimo_token->tipo == TK_OP_MINUS) || // -
+            (ultimo_token->tipo == TK_RES_OR)      // or
           )
     {
-        consomeToken(ultimo_token->tipo);
+        consome_token(ultimo_token->tipo); // (+|-|or)
         termo();
     }
 }
 
+// Fator {(*|/|%|and) Fator}
 void parser::termo()
 {
     fator();
 
+    // {(*|/|%|and) Fator}
     while (
-            (ultimo_token->tipo == TK_OP_MUL)     ||
-            (ultimo_token->tipo == TK_OP_SLASH)   ||
-            (ultimo_token->tipo == TK_OP_PERCENT) ||
-            (ultimo_token->tipo == TK_RES_AND)
+            (ultimo_token->tipo == TK_OP_MUL)     || // *
+            (ultimo_token->tipo == TK_OP_SLASH)   || // /
+            (ultimo_token->tipo == TK_OP_PERCENT) || // %
+            (ultimo_token->tipo == TK_RES_AND)       // and
           )
     {
-        consomeToken(ultimo_token->tipo);
+        consome_token(ultimo_token->tipo); // (*|/|%|and)
         fator();
     }
 }
 
+// not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
 void parser::fator()
 {
-    if (ultimo_token->tipo == TK_RES_NOT)
+    if (ultimo_token->tipo == TK_RES_NOT) // not Fator
     {
-        consomeToken(TK_RES_NOT);
+        consome_token(TK_RES_NOT); // not
         fator();
     }
-    else if (ultimo_token->tipo == TK_BRA_O_PAR)
+    else if (ultimo_token->tipo == TK_BRA_O_PAR) // "(" Exp ")"
     {
-        consomeToken(TK_BRA_O_PAR);
+        consome_token(TK_BRA_O_PAR); // (
         exp();
-        consomeToken(TK_BRA_C_PAR);
+        consome_token(TK_BRA_C_PAR); // )
     }
-    else if (ultimo_token->tipo == TK_ID)
+    else if (ultimo_token->tipo == TK_ID) // ID [ "[" Exp "]" ]
     {
-        consomeToken(TK_ID);
+        consome_token(TK_ID); // ID
 
+        // [ "[" Exp "]" ]
         if(ultimo_token->tipo == TK_BRA_O_SQR)
         {
-            consomeToken(TK_BRA_O_SQR);
+            consome_token(TK_BRA_O_SQR); // [
             exp();
-            consomeToken(TK_BRA_C_SQR);
+            consome_token(TK_BRA_C_SQR); // ]
         }
     }
-    else consomeToken(TK_CONST);
+    else consome_token(TK_CONST); // CONST
 }

@@ -14,22 +14,22 @@ public:
 
     parser(FILE *f);
 
-    void execParser();
+    void exec_parser();
 
 private:
 
     token_t* ultimo_token;
 
-    void consomeToken( token_type_t token );
+    void consome_token( token_type_t token );
     void prog();
-    void decVar();
-    void decConst();
+    void dec_var();
+    void dec_const();
     void var();
-    void blocoCmd();
-    void cmdS();
-    void cmdFor();
-    void cmdIf();
-    void cmdT();
+    void bloco_cmd();
+    void cmd_s();
+    void cmd_for();
+    void cmd_if();
+    void cmd_t();
     void exp();
     void soma();
     void termo();
