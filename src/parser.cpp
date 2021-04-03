@@ -17,7 +17,7 @@ void parser::consomeToken(token_type_t token)
     {
         if (ultimo_token->tipo != TK_EOF)
             *ultimo_token = lxr->proximo_token();
-    }  
+    }
     else if (ultimo_token->tipo == TK_EOF) throw eof_inesperado();
     else                                   throw token_invalido(ultimo_token->lex);
 }
@@ -41,6 +41,32 @@ void parser::decVar()
     else if (ultimo_token->tipo == TK_RES_CHAR) consomeToken(TK_RES_CHAR);
     else                                        consomeToken(TK_RES_BOOLEAN);
 
+    var();
+
+    while(ultimo_token->tipo == TK_OP_COMMA)
+    {
+        consomeToken(TK_OP_COMMA);
+        var();
+    }
+
+    consomeToken(TK_END_STATEMENT);
+}
+
+void parser::decConst()
+{
+    consomeToken(TK_RES_FINAL);
+    consomeToken(TK_ID);
+    consomeToken(TK_OP_EQ);
+
+    if      (ultimo_token->tipo == TK_OP_PLUS)  consomeToken(TK_OP_PLUS);
+    else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
+
+    consomeToken(TK_CONST);
+    consomeToken(TK_END_STATEMENT);
+}
+
+void parser::var()
+{
     consomeToken(TK_ID);
 
     if (ultimo_token->tipo == TK_OP_ATTRIB)
@@ -58,43 +84,6 @@ void parser::decVar()
         consomeToken(TK_CONST);
         consomeToken(TK_BRA_C_SQR);
     }
-
-    while(ultimo_token->tipo == TK_OP_COMMA)
-    {
-        consomeToken(TK_OP_COMMA);
-        consomeToken(TK_ID);
-
-        if (ultimo_token->tipo == TK_OP_ATTRIB)
-        {
-            consomeToken(TK_OP_ATTRIB);
-
-            if      (ultimo_token->tipo == TK_OP_PLUS)  consomeToken(TK_OP_PLUS);
-            else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
-
-            consomeToken(TK_CONST);
-        }
-        else if (ultimo_token->tipo == TK_BRA_O_SQR)
-        {
-            consomeToken(TK_BRA_O_SQR);
-            consomeToken(TK_CONST);
-            consomeToken(TK_BRA_C_SQR);
-        }
-    }
-
-    consomeToken(TK_END_STATEMENT);
-}
-
-void parser::decConst()
-{
-    consomeToken(TK_RES_FINAL);
-    consomeToken(TK_ID);
-    consomeToken(TK_OP_EQ);
-
-    if      (ultimo_token->tipo == TK_OP_PLUS)  consomeToken(TK_OP_PLUS);
-    else if (ultimo_token->tipo == TK_OP_MINUS) consomeToken(TK_OP_MINUS);
-
-    consomeToken(TK_CONST);
-    consomeToken(TK_END_STATEMENT);
 }
 
 void parser::blocoCmd()

@@ -24,6 +24,7 @@ private:
     void prog();
     void decVar();
     void decConst();
+    void var();
     void blocoCmd();
     void cmdS();
     void cmdFor();

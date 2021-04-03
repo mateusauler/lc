@@ -1,14 +1,15 @@
 Prog -> {DecVar|DecConst} main BlocoCmd EOF
 
-DecVar -> (int | char | boolean) ID [:= [+|-] CONST | "[" CONST "]" ] {, ID [:= [+|-] CONST | "[" CONST "]" ]} ;
+DecVar -> (int | char | boolean) Var {, Var} ;
 DecConst -> final ID = [+|-] CONST ;
+
+Var -> ID [:= [+|-] CONST | "[" CONST "]" ]
 
 BlocoCmd -> "{" {CmdT} "}"
 
 CmdS -> ID [ "[" Exp "]" ] := Exp
 CmdS -> readln "(" ID [ "[" Exp "]" ] ")"
 CmdS -> (write | writeln) "(" Exp {, Exp} ")"
-
 
 CmdFor -> for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
 CmdIf -> if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
