@@ -14,7 +14,6 @@ struct lex_nao_identificado : public exception
 {
     char *msg;
     lex_nao_identificado(string l);
-    ~lex_nao_identificado();
     const char * what() const throw();
 };
 
@@ -22,7 +21,6 @@ struct token_invalido : public exception
 {
     char *msg;
     token_invalido(string l);
-    ~token_invalido();
     const char * what() const throw();
 };
 

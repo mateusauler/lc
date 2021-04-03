@@ -16,13 +16,8 @@ lex_nao_identificado::lex_nao_identificado(string l)
     stream << "lexema nao identificado [" << l << "].";
 
     string tmp = stream.str();
-    msg = (char*) malloc(tmp.length() * sizeof(char));
+    msg = new char [tmp.length()];
     strcpy(msg, tmp.c_str());
-}
-
-lex_nao_identificado::~lex_nao_identificado()
-{
-    free(msg);
 }
 
 const char * lex_nao_identificado::what() const throw()
@@ -36,13 +31,8 @@ token_invalido::token_invalido(string l)
     stream << "token nao esperado [" << l << "].";
 
     string tmp = stream.str();
-    msg = (char*) malloc(tmp.length() * sizeof(char));
+    msg = new char [tmp.length()];
     strcpy(msg, tmp.c_str());
-}
-
-token_invalido::~token_invalido()
-{
-    free(msg);
 }
 
 const char * token_invalido::what() const throw()
