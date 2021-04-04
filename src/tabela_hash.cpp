@@ -6,16 +6,10 @@ tabela_hash::tabela_hash(int tamanho)
         tamanho = 128;
 
     tamanho_tbl = tamanho;
-    tabela = (hash_bkt**) malloc(tamanho * sizeof(void*));
+    tabela = new hash_bkt *[tamanho];
 
     for (int i = 0; i < tamanho; i++)
         tabela[i] = nullptr;
-}
-
-tabela_hash::~tabela_hash()
-{
-    free(tabela);
-    tabela = nullptr;
 }
 
 int tabela_hash::hash_function(string chave)

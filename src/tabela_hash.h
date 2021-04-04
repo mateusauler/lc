@@ -34,7 +34,6 @@ protected:
 
 public:
     tabela_hash(int tamanho);
-    ~tabela_hash();
     int hash_function(string chave);
     hash_bkt* inserir(string chave, void* elemento);
     hash_bkt* pesquisar(string chave);
