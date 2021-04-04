@@ -14,7 +14,7 @@ tabela_hash::tabela_hash(int tamanho)
 
 int tabela_hash::hash_function(string chave)
 {
-    return chave[0] % tamanho_tbl;
+    return std::hash<std::string>()(chave) % tamanho_tbl;
 }
 
 hash_bkt* tabela_hash::inserir(string chave, void* elemento)
