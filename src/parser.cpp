@@ -11,9 +11,9 @@ void parser::exec_parser()
     prog();
 }
 
-void parser::consome_token(token_type_t token)
+void parser::consome_token(token_type_t token_esperado)
 {
-    if (ultimo_token->tipo == token)
+    if (ultimo_token->tipo == token_esperado)
     {
         if (ultimo_token->tipo != TK_EOF)
             *ultimo_token = lxr->proximo_token();
@@ -28,7 +28,7 @@ void parser::prog()
     // {DecVar|DecConst}
     while (ultimo_token->tipo != TK_RES_MAIN)
     {
-        if (TK_RES_FINAL == ultimo_token->tipo) dec_const(); // final
+        if (ultimo_token->tipo == TK_RES_FINAL) dec_const(); // final
         else                                    dec_var();   // (int | char | boolean)
     }
 

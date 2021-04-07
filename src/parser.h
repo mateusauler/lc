@@ -20,7 +20,7 @@ private:
 
     token_t* ultimo_token;
 
-    void consome_token( token_type_t token );
+    void consome_token(token_type_t token_esperado);
     void prog();
     void dec_var();
     void dec_const();
