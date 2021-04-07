@@ -13,12 +13,14 @@ code=$(ls $srcdir/*.cpp | grep -v $maincpp)
 includes=$(grep -h -E "#include <.+>" $maincpp $headers $code | sort -u)
 
 cat $headers > $tmpfile
-sed -E -i "/#include \".+\"/d" $tmpfile
-sed -E -i "/#include <.+>/d" $tmpfile
+sed -E -i "/#include (<.+>|\".+\")/d" $tmpfile
 
 cpp -C $tmpfile > $filename
 
-tail -n +57 $filename > $tmpfile
+firstline=$(grep -v -m 1 -E "^(#|\\s*$)" $tmpfile)
+let linecount=$(grep -n "$firstline" $filename | cut -d':' -f1)-1
+
+tail -n +$linecount $filename > $tmpfile
 
 sed -E -i "/^#.*/d" $tmpfile
 
