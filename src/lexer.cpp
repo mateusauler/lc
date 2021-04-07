@@ -27,7 +27,6 @@ lexer::lexer(FILE *_f)
     f = _f;
 
     tbl_simbolos = new tabela_simbolos(128);
-    registro_lexico = new list<token_t>();
 
     tbl_simbolos->inserir(TK_RES_FINAL,   "final");
     tbl_simbolos->inserir(TK_RES_INT,     "int");
@@ -498,8 +497,6 @@ token_t lexer::proximo_token()
                 break;
         }
     }
-
-    registro_lexico->push_back(tok);
 
     return tok;
 }

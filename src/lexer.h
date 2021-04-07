@@ -49,7 +49,6 @@ class lexer
 public:
     int num_linha = 1;
     tabela_simbolos *tbl_simbolos;
-    std::list<token_t> *registro_lexico;
 
     lexer(FILE *_f);
 
