@@ -1,5 +1,7 @@
 #include "tabela_hash.h"
 
+using namespace std;
+
 tabela_hash::tabela_hash(int tamanho)
 {
     if (tamanho <= 0)

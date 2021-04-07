@@ -1,4 +1,8 @@
+#include <cstring>
+#include <sstream>
 #include "excessoes.h"
+
+using namespace std;
 
 const char * char_invalido::what() const throw()
 {

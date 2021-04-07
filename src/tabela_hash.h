@@ -4,21 +4,19 @@
 #include <sstream>
 #include <list>
 
-using namespace std;
-
 struct hash_bkt
 {
     void *elemento;
 
     hash_bkt *prox;
 
-    string chave;
+    std::string chave;
 
     hash_bkt() {
         this->prox = NULL;
     }
 
-    hash_bkt(void* e, string c) {
+    hash_bkt(void* e, std::string c) {
         this->chave = c;
         this->elemento = e;
         this->prox = NULL;
@@ -34,10 +32,10 @@ protected:
 
 public:
     tabela_hash(int tamanho);
-    int hash_function(string chave);
-    hash_bkt* inserir(string chave, void* elemento);
-    hash_bkt* pesquisar(string chave);
-    list<hash_bkt> listar_elementos();
+    int hash_function(std::string chave);
+    hash_bkt* inserir(std::string chave, void* elemento);
+    hash_bkt* pesquisar(std::string chave);
+    std::list<hash_bkt> listar_elementos();
 
 };
 

@@ -1,7 +1,7 @@
-#include "tabela_simbolos.h"
+#include <iostream>
 #include "parser.h"
-#include "excessoes.h"
-#include "main.h"
+
+using namespace std;
 
 int
 main(int argc, char* argv[])

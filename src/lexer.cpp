@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "excessoes.h"
 
                         /*    TAB          LF          CR */
 #define CHAR_VALIDO(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
@@ -18,6 +19,8 @@
 
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
+
+using namespace std;
 
 lexer::lexer(FILE *_f)
 {

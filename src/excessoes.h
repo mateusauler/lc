@@ -1,30 +1,28 @@
 #ifndef EXCESSOES_H
 #define EXCESSOES_H
 
-#include <exception>
-#include <cstring>
-#include "main.h"
+#include <string>
 
-struct char_invalido : public exception
+struct char_invalido : public std::exception
 {
     const char * what() const throw();
 };
 
-struct lex_nao_identificado : public exception
+struct lex_nao_identificado : public std::exception
 {
     char *msg;
-    lex_nao_identificado(string l);
+    lex_nao_identificado(std::string l);
     const char * what() const throw();
 };
 
-struct token_invalido : public exception
+struct token_invalido : public std::exception
 {
     char *msg;
-    token_invalido(string l);
+    token_invalido(std::string l);
     const char * what() const throw();
 };
 
-struct eof_inesperado : public exception
+struct eof_inesperado : public std::exception
 {
     const char * what() const throw();
 };

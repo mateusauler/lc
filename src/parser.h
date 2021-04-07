@@ -1,8 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "excessoes.h"
-#include "main.h"
 #include "lexer.h"
 
 class parser

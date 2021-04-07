@@ -1,5 +1,7 @@
 #include "tabela_simbolos.h"
 
+using namespace std;
+
 registro_tabela_simbolos* tabela_simbolos::inserir(token_type_t tipo_token, string lexema)
 {
     registro_tabela_simbolos* obj = new registro_tabela_simbolos(tipo_token, lexema);
