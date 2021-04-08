@@ -23,7 +23,10 @@ ${TARGET}: ${OBJ}
 ${DESTDIR}:
 	mkdir -p ${DESTDIR}
 
+test: all
+	./test.sh
+
 clean:
 	rm -rf ${DESTDIR}/* ${TARGET}
 
-.PHONY: all clean
+.PHONY: all clean test
