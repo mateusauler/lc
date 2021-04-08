@@ -26,8 +26,8 @@ main(int argc, char* argv[])
     catch (const exception& e)
     {
         fclose(f);
-        cerr << p->lxr->num_linha << endl;
-        cerr << e.what() << endl;
+        cout << p->lxr->num_linha << endl;
+        cout << e.what() << endl;
         return 1;
     }
 
