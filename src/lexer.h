@@ -1,5 +1,4 @@
-#ifndef LEXER_H
-#define LEXER_H
+#pragma once
 
 #include <string>
 #include <list>
@@ -57,5 +56,3 @@ public:
 private:
     FILE *f;
 };
-
-#endif

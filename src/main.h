@@ -1,5 +1,4 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
 
 enum token_type_t
 {
@@ -62,5 +61,3 @@ enum const_type_t
     CONST_STR,
     CONST_BOOL
 };
-
-#endif

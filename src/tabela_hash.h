@@ -1,5 +1,4 @@
-#ifndef HASH_TBL_H
-#define HASH_TBL_H
+#pragma once
 
 #include <sstream>
 #include <list>
@@ -38,5 +37,3 @@ public:
     std::list<hash_bkt> listar_elementos();
 
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TABELA_SIMBOLOS_H
-#define TABELA_SIMBOLOS_H
+#pragma once
 
 #include "tabela_hash.h"
 #include "main.h"
@@ -29,5 +28,3 @@ public:
     std::list<registro_tabela_simbolos> listar_simbolos();
 
 };
-
-#endif

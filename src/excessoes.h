@@ -1,5 +1,4 @@
-#ifndef EXCESSOES_H
-#define EXCESSOES_H
+#pragma once
 
 #include <string>
 
@@ -26,5 +25,3 @@ struct eof_inesperado : public std::exception
 {
     const char * what() const throw();
 };
-
-#endif
