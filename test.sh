@@ -1,6 +1,8 @@
 #!/bin/bash
 
-for d in $(ls exemplos); do
+testes="ok lexico sintatico"
+
+for d in $testes; do
     printf "$d:\n\n"
     for f in $(ls exemplos/$d); do
         s1=$(./lc exemplos/$d/$f)
