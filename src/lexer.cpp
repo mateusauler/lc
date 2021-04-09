@@ -20,8 +20,6 @@
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
-using namespace std;
-
 lexer::lexer(FILE *_f)
 {
     f = _f;
@@ -58,7 +56,7 @@ token_t lexer::proximo_token()
     tok.simbolo = nullptr;
 
     const_type_t tipo_const = CONST_NULL;
-    stringstream *stream_lexema = new stringstream();
+    std::stringstream *stream_lexema = new std::stringstream();
 
     do
     {

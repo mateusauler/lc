@@ -1,8 +1,6 @@
 #include <iostream>
 #include "parser.h"
 
-using namespace std;
-
 int
 main(int argc, char* argv[])
 {
@@ -23,17 +21,17 @@ main(int argc, char* argv[])
         p = new parser(f);
         p->exec_parser();
     }
-    catch (const exception& e)
+    catch (const std::exception& e)
     {
         fclose(f);
-        cout << p->lxr->num_linha << endl;
-        cout << e.what() << endl;
+        std::cout << p->lxr->num_linha << std::endl;
+        std::cout << e.what() << std::endl;
         return 1;
     }
 
     fclose(f);
 
-    cout << p->lxr->num_linha << " linhas compiladas." << endl;
+    std::cout << p->lxr->num_linha << " linhas compiladas." << std::endl;
 
     return 0;
 }

@@ -1,8 +1,6 @@
 #include "tabela_simbolos.h"
 
-using namespace std;
-
-registro_tabela_simbolos* tabela_simbolos::inserir(token_type_t tipo_token, string lexema)
+registro_tabela_simbolos* tabela_simbolos::inserir(token_type_t tipo_token, std::string lexema)
 {
     registro_tabela_simbolos* obj = new registro_tabela_simbolos(tipo_token, lexema);
 
@@ -11,7 +9,7 @@ registro_tabela_simbolos* tabela_simbolos::inserir(token_type_t tipo_token, stri
     return (registro_tabela_simbolos*)retorno->elemento;
 }
 
-registro_tabela_simbolos* tabela_simbolos::pesquisar(string lexema)
+registro_tabela_simbolos* tabela_simbolos::pesquisar(std::string lexema)
 {
     hash_bkt* retorno = tabela_hash::pesquisar(lexema);
 
@@ -20,10 +18,10 @@ registro_tabela_simbolos* tabela_simbolos::pesquisar(string lexema)
     return (registro_tabela_simbolos*)retorno->elemento;
 }
 
-list<registro_tabela_simbolos> tabela_simbolos::listar_simbolos()
+std::list<registro_tabela_simbolos> tabela_simbolos::listar_simbolos()
 {
-    list<hash_bkt> lb = tabela_hash::listar_elementos();
-    list<registro_tabela_simbolos> *l = new list<registro_tabela_simbolos>;
+    std::list<hash_bkt> lb = tabela_hash::listar_elementos();
+    std::list<registro_tabela_simbolos> *l = new std::list<registro_tabela_simbolos>;
 
     for (hash_bkt const &i: lb)
     {

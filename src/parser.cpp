@@ -1,8 +1,6 @@
 #include "parser.h"
 #include "excessoes.h"
 
-using namespace std;
-
 parser::parser(FILE *f)
 {
     lxr = new lexer(f);

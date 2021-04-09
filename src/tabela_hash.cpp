@@ -1,7 +1,5 @@
 #include "tabela_hash.h"
 
-using namespace std;
-
 tabela_hash::tabela_hash(int tamanho)
 {
     if (tamanho <= 0)
@@ -14,12 +12,12 @@ tabela_hash::tabela_hash(int tamanho)
         tabela[i] = nullptr;
 }
 
-int tabela_hash::hash_function(string chave)
+int tabela_hash::hash_function(std::string chave)
 {
     return std::hash<std::string>()(chave) % tamanho_tbl;
 }
 
-hash_bkt* tabela_hash::inserir(string chave, void* elemento)
+hash_bkt* tabela_hash::inserir(std::string chave, void* elemento)
 {
     int hash_chave = hash_function(chave);
 
@@ -40,7 +38,7 @@ hash_bkt* tabela_hash::inserir(string chave, void* elemento)
     return obj;
 }
 
-hash_bkt* tabela_hash::pesquisar(string chave)
+hash_bkt* tabela_hash::pesquisar(std::string chave)
 {
     int hash_chave = hash_function(chave);
 
@@ -61,9 +59,9 @@ hash_bkt* tabela_hash::pesquisar(string chave)
     }
 }
 
-list<hash_bkt> tabela_hash::listar_elementos()
+std::list<hash_bkt> tabela_hash::listar_elementos()
 {
-    list<hash_bkt> *l = new list<hash_bkt>();
+    std::list<hash_bkt> *l = new std::list<hash_bkt>();
 
     for (int i = 0; i < tamanho_tbl; i++)
     {
