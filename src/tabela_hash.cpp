@@ -58,21 +58,3 @@ hash_bkt* tabela_hash::pesquisar(std::string chave)
             return nullptr;
     }
 }
-
-std::list<hash_bkt> tabela_hash::listar_elementos()
-{
-    std::list<hash_bkt> *l = new std::list<hash_bkt>();
-
-    for (int i = 0; i < tamanho_tbl; i++)
-    {
-        hash_bkt *tmp = tabela[i];
-
-        while (tmp != nullptr)
-        {
-            l->push_back(*tmp);
-            tmp = tmp->prox;
-        }
-    }
-
-    return *l;
-}

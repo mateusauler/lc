@@ -17,17 +17,3 @@ registro_tabela_simbolos* tabela_simbolos::pesquisar(std::string lexema)
 
     return (registro_tabela_simbolos*)retorno->elemento;
 }
-
-std::list<registro_tabela_simbolos> tabela_simbolos::listar_simbolos()
-{
-    std::list<hash_bkt> lb = tabela_hash::listar_elementos();
-    std::list<registro_tabela_simbolos> *l = new std::list<registro_tabela_simbolos>;
-
-    for (hash_bkt const &i: lb)
-    {
-        registro_tabela_simbolos r = *(registro_tabela_simbolos*)i.elemento;
-        l->push_back(r);
-    }
-
-    return *l;
-}

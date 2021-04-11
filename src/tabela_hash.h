@@ -34,6 +34,5 @@ public:
     int hash_function(std::string chave);
     hash_bkt* inserir(std::string chave, void* elemento);
     hash_bkt* pesquisar(std::string chave);
-    std::list<hash_bkt> listar_elementos();
 
 };

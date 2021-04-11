@@ -25,6 +25,5 @@ public:
     using tabela_hash::tabela_hash;
     registro_tabela_simbolos* inserir(token_type_t tipo_token, std::string lexema);
     registro_tabela_simbolos* pesquisar(std::string lexema);
-    std::list<registro_tabela_simbolos> listar_simbolos();
 
 };
