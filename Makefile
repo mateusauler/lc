@@ -4,7 +4,7 @@ TARGET = lc
 
 WARNINGS = -Wall
 
-CFLAGS   = -g -O0 ${WARNINGS}
+CFLAGS   = -g -Og ${WARNINGS}
 LDFLAGS  =
 
 CC = c++
