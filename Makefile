@@ -1,9 +1,8 @@
-SRCDIR = src
+SRCDIR  = src
 DESTDIR = out
-TARGET = lc
+TARGET  = lc
 
 WARNINGS = -Wall
-
 CFLAGS   = -g -Og ${WARNINGS}
 LDFLAGS  =
 
@@ -24,9 +23,12 @@ ${DESTDIR}:
 	mkdir -p ${DESTDIR}
 
 test: all
-	./test.sh
+	scripts/test.sh
 
 clean:
-	rm -rf ${DESTDIR}/* ${TARGET}
+	rm -rf ${DESTDIR}/* ${TARGET} lc.cpp
 
-.PHONY: all clean test
+combine: all
+	scripts/combineFiles.sh
+
+.PHONY: all clean test combine
