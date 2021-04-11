@@ -59,9 +59,8 @@ token_t lexer::proximo_token()
 
     token_t tok;
     tok.simbolo = nullptr;
-
-    const_type_t tipo_const = CONST_NULL;
-    std::stringstream *stream_lexema = new std::stringstream();
+    tok.tipo_constante = CONST_NULL;
+    std::stringstream stream_lexema;
 
     do
     {
@@ -76,7 +75,7 @@ token_t lexer::proximo_token()
         switch (estado)
         {
             case ST_START:
-                stream_lexema->str("");
+                stream_lexema.str("");
 
                 if (IS_CHAR(c))
                     estado = ST_ID_NAME;
@@ -195,8 +194,8 @@ token_t lexer::proximo_token()
                             break;
 
                         default:
-                            *stream_lexema << c;
-                            throw lex_nao_identificado(stream_lexema->str());
+                            stream_lexema << c;
+                            throw lex_nao_identificado(stream_lexema.str());
                     }
                 }
                 break;
@@ -206,7 +205,7 @@ token_t lexer::proximo_token()
                  || IS_DIGIT(c))
                     estado = ST_ID_NAME;
                 else if (c != '_')
-                    throw lex_nao_identificado(stream_lexema->str());
+                    throw lex_nao_identificado(stream_lexema.str());
 
                 break;
 
@@ -231,7 +230,7 @@ token_t lexer::proximo_token()
                 else
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_INT;
+                    tok.tipo_constante = CONST_INT;
 
                     estado = ST_END;
                     backtrack = true;
@@ -243,7 +242,7 @@ token_t lexer::proximo_token()
                 || (c >= 'A' && c <= 'F'))
                     estado = ST_CONST_HEX_ALPHA2;
                 else
-                    throw lex_nao_identificado(stream_lexema->str());
+                    throw lex_nao_identificado(stream_lexema.str());
 
                 break;
 
@@ -255,7 +254,7 @@ token_t lexer::proximo_token()
                 else
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_INT;
+                    tok.tipo_constante = CONST_INT;
 
                     estado = ST_END;
                     backtrack = true;
@@ -266,12 +265,12 @@ token_t lexer::proximo_token()
                 if (c == 'h')
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_HEX;
+                    tok.tipo_constante = CONST_HEX;
 
                     estado = ST_END;
                 }
                 else
-                    throw lex_nao_identificado(stream_lexema->str());
+                    throw lex_nao_identificado(stream_lexema.str());
 
                 break;
 
@@ -281,14 +280,14 @@ token_t lexer::proximo_token()
                 else if (c == 'h')
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_HEX;
+                    tok.tipo_constante = CONST_HEX;
 
                     estado = ST_END;
                 }
                 else
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_INT;
+                    tok.tipo_constante = CONST_INT;
 
                     estado = ST_END;
                     backtrack = true;
@@ -299,7 +298,7 @@ token_t lexer::proximo_token()
                 if (!IS_DIGIT(c))
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_INT;
+                    tok.tipo_constante = CONST_INT;
 
                     estado = ST_END;
                     backtrack = true;
@@ -317,11 +316,11 @@ token_t lexer::proximo_token()
                 if (c == '\'')
                 {
                     tok.tipo = TK_CONST;
-                    tipo_const = CONST_CHAR;
+                    tok.tipo_constante = CONST_CHAR;
 
                     estado = ST_END;
                 }
-                else throw lex_nao_identificado(stream_lexema->str());
+                else throw lex_nao_identificado(stream_lexema.str());
                 break;
 
             case ST_CONST_STR_INTERNAL:
@@ -329,14 +328,14 @@ token_t lexer::proximo_token()
                 {
                     case '"':
                         tok.tipo = TK_CONST;
-                        tipo_const = CONST_STR;
+                        tok.tipo_constante = CONST_STR;
                         estado = ST_END;
                         break;
 
                     case '$':
                     case '\n':
                     case '\r':
-                        throw lex_nao_identificado(stream_lexema->str());
+                        throw lex_nao_identificado(stream_lexema.str());
 
                     default:
                         break;
@@ -382,7 +381,7 @@ token_t lexer::proximo_token()
                     tok.tipo = TK_OP_ATTRIB;
                     estado = ST_END;
                 }
-                else throw lex_nao_identificado(stream_lexema->str());
+                else throw lex_nao_identificado(stream_lexema.str());
                 break;
 
             case ST_OP_LT:
@@ -432,7 +431,7 @@ token_t lexer::proximo_token()
             if (c == '\n')
                 num_linha++;
 
-            *stream_lexema << c;
+            stream_lexema << c;
         }
 
     } while (estado != ST_END && c != EOF);
@@ -440,10 +439,10 @@ token_t lexer::proximo_token()
     if (backtrack)
         fseek(f, -1, SEEK_CUR);
 
-    tok.lex = stream_lexema->str();
+    tok.lex = stream_lexema.str();
     int lex_len = tok.lex.length();
 
-    tok.tipo_constante = tipo_const;
+    tok.tipo_constante = tok.tipo_constante;
     tok.tam_constante = 0;
 
     if (tok.tipo == TK_ID)
@@ -459,13 +458,13 @@ token_t lexer::proximo_token()
         {
             tok.tipo = tok.simbolo->tipo_token;
             if (tok.tipo == TK_CONST) // boleano
-                tipo_const = CONST_BOOL;
+                tok.tipo_constante = CONST_BOOL;
         }
     }
 
     if (tok.tipo == TK_CONST)
     {
-        switch (tipo_const)
+        switch (tok.tipo_constante)
         {
             case CONST_NULL:
                 tok.tam_constante = 0;
