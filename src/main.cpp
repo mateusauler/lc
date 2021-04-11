@@ -14,7 +14,7 @@ main(int argc, char* argv[])
     if (!f)
         return 1;
 
-    parser *p;
+    parser *p = nullptr;
 
     try
     {
@@ -31,7 +31,8 @@ main(int argc, char* argv[])
 
     fclose(f);
 
-    std::cout << p->lxr->num_linha << " linhas compiladas." << std::endl;
+	if (p)
+	    std::cout << p->lxr->num_linha << " linhas compiladas." << std::endl;
 
     return 0;
 }
