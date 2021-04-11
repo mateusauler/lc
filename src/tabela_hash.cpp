@@ -1,3 +1,4 @@
+#include <cstring>
 #include "tabela_hash.h"
 
 tabela_hash::tabela_hash(int tamanho)
@@ -8,8 +9,7 @@ tabela_hash::tabela_hash(int tamanho)
     tamanho_tbl = tamanho;
     tabela = new hash_bkt *[tamanho];
 
-    for (int i = 0; i < tamanho; i++)
-        tabela[i] = nullptr;
+    memset(tabela, 0, tamanho * sizeof(void*));
 }
 
 tabela_hash::~tabela_hash()
