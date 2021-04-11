@@ -15,7 +15,7 @@ public:
 
 private:
 
-    token_t* ultimo_token;
+    token_t ultimo_token;
 
     void consome_token(token_type_t token_esperado);
     void prog();
