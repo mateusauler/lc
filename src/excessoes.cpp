@@ -18,7 +18,7 @@ lex_nao_identificado::lex_nao_identificado(std::string l)
     stream << "lexema nao identificado [" << l << "].";
 
     std::string tmp = stream.str();
-    msg = new char [tmp.length()];
+    msg = new char [tmp.length() + sizeof(char)];
     strcpy(msg, tmp.c_str());
 }
 
@@ -33,7 +33,7 @@ token_invalido::token_invalido(std::string l)
     stream << "token nao esperado [" << l << "].";
 
     std::string tmp = stream.str();
-    msg = new char [tmp.length()];
+    msg = new char [tmp.length() + sizeof(char)];
     strcpy(msg, tmp.c_str());
 }
 
