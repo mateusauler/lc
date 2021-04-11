@@ -183,8 +183,15 @@ token_t lexer::proximo_token()
                             estado = ST_END;
                             break;
 
-                        default:
+                        case ' ':
+                        case '\r':
+                        case '\n':
+                        case '\t':
                             break;
+
+                        default:
+                            *stream_lexema << c;
+                            throw lex_nao_identificado(stream_lexema->str());
                     }
                 }
                 break;
@@ -231,10 +238,7 @@ token_t lexer::proximo_token()
                 || (c >= 'A' && c <= 'F'))
                     estado = ST_CONST_HEX_ALPHA2;
                 else
-                {
-                    *stream_lexema << c;
                     throw lex_nao_identificado(stream_lexema->str());
-                }
 
                 break;
 
@@ -262,10 +266,7 @@ token_t lexer::proximo_token()
                     estado = ST_END;
                 }
                 else
-                {
-                    *stream_lexema << c;
                     throw lex_nao_identificado(stream_lexema->str());
-                }
 
                 break;
 
@@ -315,11 +316,7 @@ token_t lexer::proximo_token()
 
                     estado = ST_END;
                 }
-                else
-                {
-                    *stream_lexema << c;
-                    throw lex_nao_identificado(stream_lexema->str());
-                }
+                else throw lex_nao_identificado(stream_lexema->str());
                 break;
 
             case ST_CONST_STR_INTERNAL:
@@ -332,7 +329,6 @@ token_t lexer::proximo_token()
                         break;
 
                     case '$':
-                        *stream_lexema << c;
                     case '\n':
                     case '\r':
                         throw lex_nao_identificado(stream_lexema->str());
@@ -381,11 +377,7 @@ token_t lexer::proximo_token()
                     tok.tipo = TK_OP_ATTRIB;
                     estado = ST_END;
                 }
-                else
-                {
-                    *stream_lexema << c;
-                    throw lex_nao_identificado(stream_lexema->str());
-                }
+                else throw lex_nao_identificado(stream_lexema->str());
                 break;
 
             case ST_OP_LT:
