@@ -22,6 +22,11 @@ lex_nao_identificado::lex_nao_identificado(std::string l)
     strcpy(msg, tmp.c_str());
 }
 
+lex_nao_identificado::~lex_nao_identificado()
+{
+    delete[] msg;
+}
+
 const char * lex_nao_identificado::what() const throw()
 {
     return msg;
@@ -35,6 +40,11 @@ token_invalido::token_invalido(std::string l)
     std::string tmp = stream.str();
     msg = new char [tmp.length() + sizeof(char)];
     strcpy(msg, tmp.c_str());
+}
+
+token_invalido::~token_invalido()
+{
+    delete[] msg;
 }
 
 const char * token_invalido::what() const throw()

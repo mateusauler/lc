@@ -50,6 +50,7 @@ public:
     tabela_simbolos *tbl_simbolos;
 
     lexer(FILE *_f);
+    ~lexer();
 
     token_t proximo_token();
 

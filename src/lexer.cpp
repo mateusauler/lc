@@ -45,6 +45,11 @@ lexer::lexer(FILE *_f)
     tbl_simbolos->inserir(TK_RES_MAIN,    "main");
 }
 
+lexer::~lexer()
+{
+    delete tbl_simbolos;
+}
+
 token_t lexer::proximo_token()
 {
     state_t estado = ST_START;

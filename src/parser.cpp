@@ -6,6 +6,11 @@ parser::parser(FILE *f)
     lxr = new lexer(f);
 }
 
+parser::~parser()
+{
+    delete lxr;
+}
+
 void parser::exec_parser()
 {
     ultimo_token = lxr->proximo_token();

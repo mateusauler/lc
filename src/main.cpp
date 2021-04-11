@@ -23,9 +23,12 @@ main(int argc, char* argv[])
     }
     catch (const std::exception& e)
     {
-        fclose(f);
         std::cout << p->lxr->num_linha << std::endl;
         std::cout << e.what() << std::endl;
+
+        fclose(f);
+        delete p;
+        
         return 1;
     }
 
@@ -33,6 +36,8 @@ main(int argc, char* argv[])
 
 	if (p)
 	    std::cout << p->lxr->num_linha << " linhas compiladas." << std::endl;
+
+    delete p;
 
     return 0;
 }

@@ -10,6 +10,7 @@ public:
     lexer *lxr;
 
     parser(FILE *f);
+    ~parser();
 
     void exec_parser();
 
