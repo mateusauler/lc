@@ -15,7 +15,21 @@ tabela_hash::tabela_hash(int tamanho)
 tabela_hash::~tabela_hash()
 {
     for (int i = 0; i < tamanho_tbl; ++i)
-        delete tabela[i];
+    {
+        if (tabela[i])
+        {
+
+            hash_bkt *tmp = tabela[i];
+            hash_bkt *next;
+
+            while (tmp)
+            {
+                next = tmp->prox;
+                delete tmp;
+                tmp = next;
+            }
+        }
+    }
 
     delete[] tabela;
 }
