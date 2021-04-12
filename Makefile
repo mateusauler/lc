@@ -8,8 +8,8 @@ LDFLAGS  =
 
 CC = c++
 
-SRC = main.cpp tabela_hash.cpp tabela_simbolos.cpp excessoes.cpp lexer.cpp parser.cpp
-OBJ = ${SRC:%.cpp=${DESTDIR}/%.o}
+SRC != cd ${SRCDIR} ; ls *.cpp
+OBJ  = ${SRC:%.cpp=${DESTDIR}/%.o}
 
 all: ${DESTDIR} ${TARGET}
 
