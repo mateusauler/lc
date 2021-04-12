@@ -37,7 +37,7 @@ tabela_hash::~tabela_hash()
 }
 
 // Calcula a hash de uma string
-int tabela_hash::hash_function(std::string chave)
+int tabela_hash::calcula_hash(std::string chave)
 {
     return std::hash<std::string>()(chave) % tamanho_tbl;
 }
@@ -47,7 +47,7 @@ int tabela_hash::hash_function(std::string chave)
 hash_bkt* tabela_hash::inserir(std::string chave, void* elemento)
 {
     // Calcula a hash da chave
-    int hash_chave = hash_function(chave);
+    int hash_chave = calcula_hash(chave);
 
     // Encapsula o elemento em um "bucket"
     hash_bkt *obj = new hash_bkt(elemento, chave);
@@ -74,7 +74,7 @@ hash_bkt* tabela_hash::inserir(std::string chave, void* elemento)
 hash_bkt* tabela_hash::buscar(std::string chave)
 {
     // Calcula a hash desta chave
-    int hash_chave = hash_function(chave);
+    int hash_chave = calcula_hash(chave);
 
     // Caso a entrada na posicao esprada esteja vazia, o elemento buscado nao existe
     if (tabela[hash_chave] == nullptr)

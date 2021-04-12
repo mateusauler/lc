@@ -33,7 +33,7 @@ protected:
 public:
     tabela_hash(int tamanho);
     ~tabela_hash();
-    int hash_function(std::string chave);
+    int calcula_hash(std::string chave);
     hash_bkt* inserir(std::string chave, void* elemento);
     hash_bkt* buscar(std::string chave);
 
