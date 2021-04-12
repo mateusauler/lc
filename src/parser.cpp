@@ -1,11 +1,6 @@
 #include "parser.h"
 #include "excessoes.h"
 
-parser::parser(FILE *f)
-{
-    lxr = new lexer(f);
-}
-
 parser::~parser()
 {
     delete lxr;

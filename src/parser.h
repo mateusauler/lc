@@ -9,7 +9,7 @@ public:
 
     lexer *lxr;
 
-    parser(FILE *f);
+    parser(FILE *f) : lxr(new lexer(f)) { };
     ~parser();
 
     void exec_parser();

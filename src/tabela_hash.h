@@ -31,7 +31,7 @@ protected:
     int tamanho_tbl;
 
 public:
-    tabela_hash(int tamanho);
+    tabela_hash(int tamanho = 128);
     ~tabela_hash();
     int calcula_hash(std::string chave);
     hash_bkt* inserir(std::string chave, void* elemento);

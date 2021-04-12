@@ -23,10 +23,9 @@
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
 lexer::lexer(FILE *_f)
+    : f(_f)
 {
-    f = _f;
-
-    tbl_simbolos = new tabela_simbolos(128);
+    tbl_simbolos = new tabela_simbolos();
 
     // Inicializa a tabela de simbolos com as palavras reservadas
     tbl_simbolos->inserir(TK_RES_FINAL,   "final");

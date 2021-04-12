@@ -2,11 +2,11 @@
 #include "tabela_hash.h"
 
 tabela_hash::tabela_hash(int tamanho)
+    :tamanho_tbl(tamanho)
 {
-    if (tamanho <= 0)
-        tamanho = 128;
+    if (tamanho_tbl <= 0)
+        tamanho_tbl = 128;
 
-    tamanho_tbl = tamanho;
     tabela = new hash_bkt *[tamanho];
 
     // Todos os itens da tabela sao um ponteiro para void
