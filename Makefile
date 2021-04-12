@@ -26,7 +26,7 @@ test: all
 	scripts/test.sh
 
 clean:
-	rm -rf ${DESTDIR}/* ${TARGET} lc.cpp
+	rm -rf ${DESTDIR}/* ${TARGET} lc.cpp vgcore.*
 
 combine: all
 	scripts/combineFiles.sh
