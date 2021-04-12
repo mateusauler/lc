@@ -1,7 +1,6 @@
 #pragma once
 
 #include <sstream>
-#include <list>
 
 struct hash_bkt
 {
@@ -11,11 +10,13 @@ struct hash_bkt
 
     std::string chave;
 
-    hash_bkt() {
+    hash_bkt()
+    {
         this->prox = NULL;
     }
 
-    hash_bkt(void* e, std::string c) {
+    hash_bkt(void* e, std::string c)
+    {
         this->chave = c;
         this->elemento = e;
         this->prox = NULL;
@@ -34,6 +35,6 @@ public:
     ~tabela_hash();
     int hash_function(std::string chave);
     hash_bkt* inserir(std::string chave, void* elemento);
-    hash_bkt* pesquisar(std::string chave);
+    hash_bkt* buscar(std::string chave);
 
 };

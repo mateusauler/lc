@@ -16,9 +16,10 @@ public:
 
 private:
 
-    token_t ultimo_token;
+    token_t token_lido;
 
     void consome_token(token_type_t token_esperado);
+
     void prog();
     void dec_var();
     void dec_const();

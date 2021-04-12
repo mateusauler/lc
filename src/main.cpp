@@ -6,38 +6,37 @@ main(int argc, char* argv[])
 {
     FILE *f;
 
+    // Se um nome de arquivo nao for passado, ler do stdin
     if (argc == 2)
         f = fopen(argv[1], "r");
     else
         f = stdin;
 
+    // Caso houver algum erro ao abrir o arquivo
     if (!f)
         return 1;
 
-    parser *p = nullptr;
+    parser p(f);
+    bool erro = false; // Flag de erro
 
     try
     {
-        p = new parser(f);
-        p->exec_parser();
+        // Executa o parser
+        p.exec_parser();
     }
     catch (const std::exception& e)
     {
-        std::cout << p->lxr->num_linha << std::endl;
+        // Imprime o numero da linha, seguido da mensagem de erro
+        std::cout << p.lxr->num_linha << std::endl;
         std::cout << e.what() << std::endl;
 
-        fclose(f);
-        delete p;
-        
-        return 1;
+        erro = true;
     }
 
     fclose(f);
 
-	if (p)
-	    std::cout << p->lxr->num_linha << " linhas compiladas." << std::endl;
-
-    delete p;
+	if (!erro && p.lxr)
+	    std::cout << p.lxr->num_linha << " linhas compiladas." << std::endl;
 
     return 0;
 }

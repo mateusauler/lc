@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include "excessoes.h"
 
+// Caractere valido
                         /*    TAB          LF          CR */
 #define CHAR_VALIDO(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
                        (c >= ' '  && c <= '"') || \
@@ -10,6 +11,7 @@
                        (c == ']'  || c == '_') || \
                        (c == '}'))
 
+// Caractere valido dentro de constante do tipo char
                                  /* TAB */
 #define CHAR_VALIDO_CONST(c) ((c == 0x9) || \
                              (c >= ' ' && c <= '"') || \
@@ -26,6 +28,7 @@ lexer::lexer(FILE *_f)
 
     tbl_simbolos = new tabela_simbolos(128);
 
+    // Inicializa a tabela de simbolos com as palavras reservadas
     tbl_simbolos->inserir(TK_RES_FINAL,   "final");
     tbl_simbolos->inserir(TK_RES_INT,     "int");
     tbl_simbolos->inserir(TK_RES_CHAR,    "char");
@@ -50,6 +53,7 @@ lexer::~lexer()
     delete tbl_simbolos;
 }
 
+// Le o proximo token do arquivo fonte
 token_t lexer::proximo_token()
 {
     state_t estado = ST_START;
@@ -60,21 +64,28 @@ token_t lexer::proximo_token()
     token_t tok;
     tok.simbolo = nullptr;
     tok.tipo_constante = CONST_NULL;
+
     std::stringstream stream_lexema;
 
     do
     {
         c = fgetc(f);
 
+        // O unico estado que aceita EOF e o estado inicial
         if (c == EOF && estado != ST_START)
             throw eof_inesperado();
 
+        // Caractere invalido
         if (!CHAR_VALIDO(c))
             throw char_invalido();
 
         switch (estado)
         {
+            // Simbolo inicial
+            // Ignora espacos e novas linhas (a contabilizacao de linhas e feita depois)
+            // Qualquer caractere que nao e especificado explicitamente, e considerado erro
             case ST_START:
+                // Limpa o lexema
                 stream_lexema.str("");
 
                 if (IS_CHAR(c))
@@ -200,15 +211,17 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // {_}+
             case ST_ID_UNDERSCORE:
                 if (IS_CHAR(c)
                  || IS_DIGIT(c))
                     estado = ST_ID_NAME;
-                else if (c != '_')
+                else if (c != '_') // Somente {_}+ e invalido
                     throw lex_nao_identificado(stream_lexema.str());
 
                 break;
 
+            // {_}(LETRA | DIGITO){LETRA | DIGITO | _}
             case ST_ID_NAME:
                 if (IS_CHAR(c)
                  || IS_DIGIT(c)
@@ -222,12 +235,13 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // 0
             case ST_CONST_HEX_START:
-                if (IS_DIGIT(c))
+                if (IS_DIGIT(c)) // 0(0-9)
                     estado = ST_CONST_HEX_NUM1;
-                else if (c >= 'A' && c <= 'F')
+                else if (c >= 'A' && c <= 'F') // 0(A-F)
                     estado = ST_CONST_HEX_ALPHA1;
-                else
+                else // 0
                 {
                     tok.tipo = TK_CONST;
                     tok.tipo_constante = CONST_INT;
@@ -237,19 +251,21 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // 0(A-F)
             case ST_CONST_HEX_ALPHA1:
                 if (IS_DIGIT(c)
-                || (c >= 'A' && c <= 'F'))
+                || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
                     estado = ST_CONST_HEX_ALPHA2;
                 else
                     throw lex_nao_identificado(stream_lexema.str());
 
                 break;
 
+            // 0(0-9)
             case ST_CONST_HEX_NUM1:
-                if (IS_DIGIT(c))
+                if (IS_DIGIT(c)) // 0(0-9)(0-9)
                     estado = ST_CONST_HEX_NUM2;
-                else if (c >= 'A' && c <= 'F')
+                else if (c >= 'A' && c <= 'F') // 0(0-9)(A-F)
                     estado = ST_CONST_HEX_ALPHA2;
                 else
                 {
@@ -261,8 +277,9 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // 0(A-F)(A-F | 0-9)
             case ST_CONST_HEX_ALPHA2:
-                if (c == 'h')
+                if (c == 'h') // 0(A-F)(A-F | 0-9)h
                 {
                     tok.tipo = TK_CONST;
                     tok.tipo_constante = CONST_HEX;
@@ -274,17 +291,18 @@ token_t lexer::proximo_token()
 
                 break;
 
+            // 0(0-9)(0-9)
             case ST_CONST_HEX_NUM2:
-                if (IS_DIGIT(c))
+                if (IS_DIGIT(c)) // 0(0-9)(0-9)(0-9)
                     estado = ST_CONST_NUM;
-                else if (c == 'h')
+                else if (c == 'h') // 0(0-9)(0-9)h
                 {
                     tok.tipo = TK_CONST;
                     tok.tipo_constante = CONST_HEX;
 
                     estado = ST_END;
                 }
-                else
+                else // 0(0-9)(0-9)
                 {
                     tok.tipo = TK_CONST;
                     tok.tipo_constante = CONST_INT;
@@ -294,6 +312,7 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // {0-9}+
             case ST_CONST_NUM:
                 if (!IS_DIGIT(c))
                 {
@@ -305,15 +324,16 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // '
             case ST_CONST_CHAR_START:
                 if (CHAR_VALIDO_CONST(c))
                     estado = ST_CONST_CHAR_INTERNAL;
                 else throw char_invalido();
-
                 break;
 
+            // '(caractere)
             case ST_CONST_CHAR_INTERNAL:
-                if (c == '\'')
+                if (c == '\'') // '(caractere)'
                 {
                     tok.tipo = TK_CONST;
                     tok.tipo_constante = CONST_CHAR;
@@ -323,10 +343,11 @@ token_t lexer::proximo_token()
                 else throw lex_nao_identificado(stream_lexema.str());
                 break;
 
+            // "{caractere}
             case ST_CONST_STR_INTERNAL:
                 switch (c)
                 {
-                    case '"':
+                    case '"': // "{caractere}"
                         tok.tipo = TK_CONST;
                         tok.tipo_constante = CONST_STR;
                         estado = ST_END;
@@ -342,10 +363,11 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // /
             case ST_OP_SLASH:
-                if (c == '*')
+                if (c == '*') // /*
                     estado = ST_COMMENT;
-                else
+                else // /
                 {
                     tok.tipo = TK_OP_SLASH;
 
@@ -354,29 +376,32 @@ token_t lexer::proximo_token()
                 }
                 break;
 
+            // /*{qualquer caractere}
             case ST_COMMENT:
 				if (c == '*')
 					estado = ST_COMMENT_END;
                 break;
 
+            // /*{qualquer caractere}{*}+
             case ST_COMMENT_END:
                 switch (c)
                 {
-                    case '/':
+                    case '/': // Fim do comentario
                         estado = ST_START;
                         break;
 
-                    case '*':
+                    case '*': // Ainda pode finalizar o comentario
                         break;
 
-                    default:
+                    default: // Comentario continua
                         estado = ST_COMMENT;
                         break;
                 }
                 break;
 
+            // :
             case ST_OP_ATTRIB_START:
-                if(c == '=')
+                if(c == '=') // :=
                 {
                     tok.tipo = TK_OP_ATTRIB;
                     estado = ST_END;
@@ -384,18 +409,19 @@ token_t lexer::proximo_token()
                 else throw lex_nao_identificado(stream_lexema.str());
                 break;
 
+            // <
             case ST_OP_LT:
                 switch (c)
                 {
-                    case '=':
+                    case '=': // <=
                         tok.tipo = TK_OP_LE;
                         break;
 
-                    case '>':
+                    case '>': // <>
                         tok.tipo = TK_OP_NE;
                         break;
 
-                    default:
+                    default: // <
                         tok.tipo = TK_OP_LT;
                         backtrack = true;
                         break;
@@ -405,14 +431,15 @@ token_t lexer::proximo_token()
 
                 break;
 
+            // >
             case ST_OP_GT:
                 switch (c)
                 {
-                    case '=':
+                    case '=': // >=
                         tok.tipo = TK_OP_GE;
                         break;
 
-                    default:
+                    default: // >
                         tok.tipo = TK_OP_GT;
                         backtrack = true;
                         break;
@@ -422,10 +449,11 @@ token_t lexer::proximo_token()
 
                 break;
 
-            default: // switch (estado)
+            default:
                 break;
         } // switch (estado)
 
+        // Caso nao tenha lido um caractere que nao pertence ao lexema atual
         if (!backtrack)
         {
             if (c == '\n')
@@ -439,25 +467,29 @@ token_t lexer::proximo_token()
     if (backtrack)
         fseek(f, -1, SEEK_CUR);
 
-    tok.lex = stream_lexema.str();
-    int lex_len = tok.lex.length();
-
+    tok.lex            = stream_lexema.str();
     tok.tipo_constante = tok.tipo_constante;
-    tok.tam_constante = 0;
+    tok.tam_constante  = 0;
+
+    int lex_len = tok.lex.length();
 
     if (tok.tipo == TK_ID)
     {
+        // Se o lexema tiver mais de 32 caracteres, ignora a partir do 33
         if (lex_len > 32)
             tok.lex.erase(32, tok.lex.length() - 32);
 
-        tok.simbolo = tbl_simbolos->pesquisar(tok.lex);
+        tok.simbolo = tbl_simbolos->buscar(tok.lex);
 
-        if (tok.simbolo == nullptr)
+        if (tok.simbolo == nullptr) // Caso seja um ID novo
             tok.simbolo = tbl_simbolos->inserir(tok.tipo, tok.lex);
         else
         {
+            // Pode ser uma palavra reservada
             tok.tipo = tok.simbolo->tipo_token;
-            if (tok.tipo == TK_CONST) // boleano
+
+            // Se estiver na tabela de simbolos e seja constante, e boleano
+            if (tok.tipo == TK_CONST)
                 tok.tipo_constante = CONST_BOOL;
         }
     }

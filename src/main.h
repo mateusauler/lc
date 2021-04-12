@@ -2,8 +2,8 @@
 
 enum token_type_t
 {
-    TK_ID,           // Identificador
-    TK_CONST,        // Constante
+    TK_ID,            // Identificador
+    TK_CONST,         // Constante
 
     TK_OP_ATTRIB,     // :=
 

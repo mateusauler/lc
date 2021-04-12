@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <list>
-
 #include "tabela_simbolos.h"
 
 enum state_t
