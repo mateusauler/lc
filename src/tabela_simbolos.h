@@ -12,18 +12,14 @@ struct registro_tabela_simbolos
     registro_tabela_simbolos() { }
 
     registro_tabela_simbolos(token_type_t t, std::string l)
-    {
-        this->tipo_token = t;
-        this->lexema = l;
-    }
+        : tipo_token(t), lexema(l) { }
 };
 
-class tabela_simbolos : tabela_hash
+class tabela_simbolos : public tabela_hash<registro_tabela_simbolos>
 {
 
 public:
-    using tabela_hash::tabela_hash;
-    ~tabela_simbolos();
+    using tabela_hash<registro_tabela_simbolos>::tabela_hash;
     registro_tabela_simbolos* inserir(token_type_t tipo_token, std::string lexema);
     registro_tabela_simbolos* buscar(std::string lexema);
 

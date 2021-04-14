@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "lexer.h"
 #include "excessoes.h"
 
@@ -22,8 +24,7 @@
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
-lexer::lexer(FILE *_f)
-    : f(_f)
+lexer::lexer(FILE *_f) : f(_f)
 {
     // Inicializa a tabela de simbolos com as palavras reservadas
     tbl_simbolos.inserir(TK_RES_FINAL,   "final");
