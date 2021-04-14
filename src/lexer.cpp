@@ -4,18 +4,16 @@
 #include "excessoes.h"
 
 // Caractere valido
-                        /*    TAB          LF          CR */
-#define CHAR_VALIDO(c) ((c == 0x9  || c == 0xA || c == 0xD || c == EOF) || \
-                       (c >= ' '  && c <= '"') || \
-                       (c >= '\'' && c <= '[') || \
-                       (c >= 'a'  && c <= '{') || \
-                       (c == '$'  || c == '%') || \
-                       (c == ']'  || c == '_') || \
+#define CHAR_VALIDO(c) ((c == '\t' || c == '\n' || c == '\r' || c == EOF) || \
+                       (c >= ' '   && c <= '"') || \
+                       (c >= '\''  && c <= '[') || \
+                       (c >= 'a'   && c <= '{') || \
+                       (c == '$'   || c == '%') || \
+                       (c == ']'   || c == '_') || \
                        (c == '}'))
 
 // Caractere valido dentro de constante do tipo char
-                                 /* TAB */
-#define CHAR_VALIDO_CONST(c) ((c == 0x9) || \
+#define CHAR_VALIDO_CONST(c) ((c == '\t') || \
                              (c >= ' ' && c <= '"') || \
                              (c >= '(' && c <= '[') || \
                              (c >= 'a' && c <= '{') || \
