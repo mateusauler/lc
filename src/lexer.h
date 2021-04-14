@@ -44,10 +44,9 @@ class lexer
 {
 public:
     int num_linha = 1;
-    tabela_simbolos *tbl_simbolos;
+    tabela_simbolos tbl_simbolos;
 
     lexer(FILE *_f);
-    ~lexer();
 
     token_t proximo_token();
 

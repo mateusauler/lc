@@ -25,31 +25,24 @@
 lexer::lexer(FILE *_f)
     : f(_f)
 {
-    tbl_simbolos = new tabela_simbolos();
-
     // Inicializa a tabela de simbolos com as palavras reservadas
-    tbl_simbolos->inserir(TK_RES_FINAL,   "final");
-    tbl_simbolos->inserir(TK_RES_INT,     "int");
-    tbl_simbolos->inserir(TK_RES_CHAR,    "char");
-    tbl_simbolos->inserir(TK_RES_BOOLEAN, "boolean");
-    tbl_simbolos->inserir(TK_RES_IF,      "if");
-    tbl_simbolos->inserir(TK_RES_ELSE,    "else");
-    tbl_simbolos->inserir(TK_RES_THEN,    "then");
-    tbl_simbolos->inserir(TK_RES_FOR,     "for");
-    tbl_simbolos->inserir(TK_RES_AND,     "and");
-    tbl_simbolos->inserir(TK_RES_OR,      "or");
-    tbl_simbolos->inserir(TK_RES_NOT,     "not");
-    tbl_simbolos->inserir(TK_CONST,       "FALSE");
-    tbl_simbolos->inserir(TK_CONST,       "TRUE");
-    tbl_simbolos->inserir(TK_RES_WRITE,   "write");
-    tbl_simbolos->inserir(TK_RES_WRITELN, "writeln");
-    tbl_simbolos->inserir(TK_RES_READLN,  "readln");
-    tbl_simbolos->inserir(TK_RES_MAIN,    "main");
-}
-
-lexer::~lexer()
-{
-    delete tbl_simbolos;
+    tbl_simbolos.inserir(TK_RES_FINAL,   "final");
+    tbl_simbolos.inserir(TK_RES_INT,     "int");
+    tbl_simbolos.inserir(TK_RES_CHAR,    "char");
+    tbl_simbolos.inserir(TK_RES_BOOLEAN, "boolean");
+    tbl_simbolos.inserir(TK_RES_IF,      "if");
+    tbl_simbolos.inserir(TK_RES_ELSE,    "else");
+    tbl_simbolos.inserir(TK_RES_THEN,    "then");
+    tbl_simbolos.inserir(TK_RES_FOR,     "for");
+    tbl_simbolos.inserir(TK_RES_AND,     "and");
+    tbl_simbolos.inserir(TK_RES_OR,      "or");
+    tbl_simbolos.inserir(TK_RES_NOT,     "not");
+    tbl_simbolos.inserir(TK_CONST,       "FALSE");
+    tbl_simbolos.inserir(TK_CONST,       "TRUE");
+    tbl_simbolos.inserir(TK_RES_WRITE,   "write");
+    tbl_simbolos.inserir(TK_RES_WRITELN, "writeln");
+    tbl_simbolos.inserir(TK_RES_READLN,  "readln");
+    tbl_simbolos.inserir(TK_RES_MAIN,    "main");
 }
 
 // Le o proximo token do arquivo fonte
@@ -478,10 +471,10 @@ token_t lexer::proximo_token()
         if (lex_len > 32)
             tok.lex.erase(32, tok.lex.length() - 32);
 
-        tok.simbolo = tbl_simbolos->buscar(tok.lex);
+        tok.simbolo = tbl_simbolos.buscar(tok.lex);
 
         if (tok.simbolo == nullptr) // Caso seja um ID novo
-            tok.simbolo = tbl_simbolos->inserir(tok.tipo, tok.lex);
+            tok.simbolo = tbl_simbolos.inserir(tok.tipo, tok.lex);
         else
         {
             // Pode ser uma palavra reservada
