@@ -1,15 +1,10 @@
 #include "parser.h"
 #include "excessoes.h"
 
-parser::~parser()
-{
-    delete lxr;
-}
-
 // Executa o parsing no arquivo passado para o construtor
 void parser::exec_parser()
 {
-    token_lido = lxr->proximo_token();
+    token_lido = proximo_token();
     prog();
 }
 
@@ -19,7 +14,7 @@ void parser::consome_token(token_type_t token_esperado)
     if (token_lido.tipo == token_esperado)
     {
         if (token_lido.tipo != TK_EOF)
-            token_lido = lxr->proximo_token();
+            token_lido = proximo_token();
     }
     else if (token_lido.tipo == TK_EOF) throw eof_inesperado();
     else                                throw token_invalido(token_lido.lex);

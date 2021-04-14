@@ -2,15 +2,12 @@
 
 #include "lexer.h"
 
-class parser
+class parser : public lexer
 {
 
 public:
 
-    lexer *lxr;
-
-    parser(FILE *f) : lxr(new lexer(f)) { };
-    ~parser();
+    using lexer::lexer;
 
     void exec_parser();
 
