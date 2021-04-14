@@ -27,7 +27,7 @@ main(int argc, char* argv[])
     catch (const std::exception& e)
     {
         // Imprime o numero da linha, seguido da mensagem de erro
-        std::cout << p.num_linha << std::endl;
+        std::cout << p.get_linha() << std::endl;
         std::cout << e.what() << std::endl;
 
         erro = true;
@@ -36,7 +36,7 @@ main(int argc, char* argv[])
     fclose(f);
 
 	if (!erro)
-	    std::cout << p.num_linha << " linhas compiladas." << std::endl;
+	    std::cout << p.get_linha() << " linhas compiladas." << std::endl;
 
     return 0;
 }

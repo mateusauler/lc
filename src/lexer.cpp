@@ -44,6 +44,11 @@ lexer::lexer(FILE *_f) : f(_f)
     tbl_simbolos.inserir(TK_RES_MAIN,    "main");
 }
 
+int lexer::get_linha() const
+{
+    return num_linha;
+}
+
 // Le o proximo token do arquivo fonte
 token_t lexer::proximo_token()
 {

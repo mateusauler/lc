@@ -43,13 +43,14 @@ struct token_t
 class lexer
 {
 public:
-    int num_linha = 1;
     tabela_simbolos tbl_simbolos;
 
     lexer(FILE *_f);
 
+    int get_linha() const;
     token_t proximo_token();
 
 private:
+    int num_linha = 1;
     FILE *f;
 };
