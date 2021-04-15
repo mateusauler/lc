@@ -22,7 +22,7 @@ ${TARGET}: ${OBJ}
 ${DESTDIR}:
 	mkdir -p ${DESTDIR}
 
-test: all
+test: all combine
 	scripts/test.sh
 
 clean:
