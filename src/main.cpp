@@ -1,5 +1,6 @@
 #include <iostream>
 #include "parser.h"
+#include "excessoes.h"
 
 int
 main(int argc, char* argv[])
@@ -24,7 +25,7 @@ main(int argc, char* argv[])
         // Executa o parser
         p.exec_parser();
     }
-    catch (const std::exception& e)
+    catch (const erro_fonte& e)
     {
         // Imprime o numero da linha, seguido da mensagem de erro
         std::cout << p.get_linha() << std::endl;
