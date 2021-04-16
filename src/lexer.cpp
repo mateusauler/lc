@@ -458,7 +458,7 @@ token_t lexer::proximo_token()
             stream_lexema << c;
         }
 
-    } while (estado != ST_END && c != EOF);
+    } while (estado != ST_END);
 
     if (backtrack)
         fseek(f, -1, SEEK_CUR);
