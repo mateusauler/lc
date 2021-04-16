@@ -463,9 +463,8 @@ token_t lexer::proximo_token()
     if (backtrack)
         fseek(f, -1, SEEK_CUR);
 
-    tok.lex            = stream_lexema.str();
-    tok.tipo_constante = tok.tipo_constante;
-    tok.tam_constante  = 0;
+    tok.lex           = stream_lexema.str();
+    tok.tam_constante = 0;
 
     int lex_len = tok.lex.length();
 
