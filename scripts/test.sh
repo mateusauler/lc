@@ -1,6 +1,6 @@
 #!/bin/bash
 
-testes="ok lexico sintatico"
+testes="ok lexico sintatico semantico"
 dirfonte=testes/fonte
 diresperado=testes/esperado/compilador
 
