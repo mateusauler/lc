@@ -87,9 +87,6 @@ token_t lexer::proximo_token()
     bool backtrack = false;
 
     token_t tok;
-    tok.simbolo = nullptr;
-    tok.tipo_constante = CONST_NULL;
-    tok.tam_constante = 0;
 
     do
     {

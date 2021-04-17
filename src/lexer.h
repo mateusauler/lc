@@ -34,10 +34,12 @@ enum state_t
 struct token_t
 {
     token_type_t tipo;
-    std::string lex;
-    registro_tabela_simbolos* simbolo;
-    const_type_t tipo_constante;
-    int tam_constante;
+    std::string lex = "";
+
+    registro_tabela_simbolos* simbolo = nullptr;
+
+    const_type_t tipo_constante = CONST_NULL;
+    int tam_constante = 0;
     void *valor_const = nullptr;
 
     ~token_t()
