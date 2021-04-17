@@ -60,8 +60,7 @@ token_t lexer::proximo_token()
     token_t tok;
     tok.simbolo = nullptr;
     tok.tipo_constante = CONST_NULL;
-
-    std::stringstream stream_lexema;
+    tok.tam_constante = 0;
 
     do
     {
@@ -82,7 +81,7 @@ token_t lexer::proximo_token()
             // Qualquer caractere que nao e especificado explicitamente, e considerado erro
             case ST_START:
                 // Limpa o lexema
-                stream_lexema.str("");
+                tok.lex = "";
 
                 if (IS_CHAR(c))
                     estado = ST_ID_NAME;
@@ -201,8 +200,8 @@ token_t lexer::proximo_token()
                             break;
 
                         default:
-                            stream_lexema << c;
-                            throw lex_nao_identificado(stream_lexema.str());
+                            tok.lex += c;
+                            throw lex_nao_identificado(tok.lex);
                     }
                 }
                 break;
@@ -213,7 +212,7 @@ token_t lexer::proximo_token()
                  || IS_DIGIT(c))
                     estado = ST_ID_NAME;
                 else if (c != '_') // Somente {_}+ e invalido
-                    throw lex_nao_identificado(stream_lexema.str());
+                    throw lex_nao_identificado(tok.lex);
 
                 break;
 
@@ -253,7 +252,7 @@ token_t lexer::proximo_token()
                 || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
                     estado = ST_CONST_HEX_ALPHA2;
                 else
-                    throw lex_nao_identificado(stream_lexema.str());
+                    throw lex_nao_identificado(tok.lex);
 
                 break;
 
@@ -283,7 +282,7 @@ token_t lexer::proximo_token()
                     estado = ST_END;
                 }
                 else
-                    throw lex_nao_identificado(stream_lexema.str());
+                    throw lex_nao_identificado(tok.lex);
 
                 break;
 
@@ -336,7 +335,7 @@ token_t lexer::proximo_token()
 
                     estado = ST_END;
                 }
-                else throw lex_nao_identificado(stream_lexema.str());
+                else throw lex_nao_identificado(tok.lex);
                 break;
 
             // "{caractere}
@@ -352,7 +351,7 @@ token_t lexer::proximo_token()
                     case '$':
                     case '\n':
                     case '\r':
-                        throw lex_nao_identificado(stream_lexema.str());
+                        throw lex_nao_identificado(tok.lex);
 
                     default:
                         break;
@@ -402,7 +401,7 @@ token_t lexer::proximo_token()
                     tok.tipo = TK_OP_ATTRIB;
                     estado = ST_END;
                 }
-                else throw lex_nao_identificado(stream_lexema.str());
+                else throw lex_nao_identificado(tok.lex);
                 break;
 
             // <
@@ -455,16 +454,13 @@ token_t lexer::proximo_token()
             if (c == '\n')
                 num_linha++;
 
-            stream_lexema << c;
+            tok.lex += c;
         }
 
     } while (estado != ST_END);
 
     if (backtrack)
         fseek(f, -1, SEEK_CUR);
-
-    tok.lex           = stream_lexema.str();
-    tok.tam_constante = 0;
 
     int lex_len = tok.lex.length();
 
