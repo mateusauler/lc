@@ -3,11 +3,32 @@
 #include "tabela_hash.h"
 #include "main.h"
 
+enum classe_t
+{
+    C_VAR,
+    C_CONST,
+    C_NULL,
+};
+
+enum tipo_t
+{
+    T_INT,
+    T_CHAR,
+    T_BOOL,
+    T_NULL,
+};
+
 struct registro_tabela_simbolos
 {
     token_type_t tipo_token;
 
     std::string lexema;
+
+    classe_t classe = C_NULL;
+
+    tipo_t tipo = T_NULL;
+
+    int tam = 0;
 
     registro_tabela_simbolos() { }
 
