@@ -22,6 +22,35 @@
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
+static void parse_valor(token_t& t)
+{
+    switch (t.tipo_constante)
+    {
+        case CONST_BOOL:
+            t.valor_const = new bool(t.lex == "TRUE");
+            break;
+
+        case CONST_HEX:
+            t.valor_const = new char(std::stoi(t.lex.substr(1, 2), 0, 16));
+            break;
+
+        case CONST_CHAR:
+            t.valor_const = new char(t.lex[1]);
+            break;
+
+        case CONST_INT:
+            t.valor_const = new int(std::atoi(t.lex.c_str()));
+            break;
+
+        case CONST_STR:
+            t.valor_const = new std::string(t.lex.substr(1, t.tam_constante - 1) + '$');
+            break;
+
+        default:
+            break;
+    }
+}
+
 lexer::lexer(FILE *_f) : f(_f)
 {
     // Inicializa a tabela de simbolos com as palavras reservadas
@@ -514,6 +543,8 @@ token_t lexer::proximo_token()
                 break;
         }
     }
+
+    parse_valor(tok);
 
     return tok;
 }

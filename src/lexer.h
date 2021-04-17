@@ -38,6 +38,33 @@ struct token_t
     registro_tabela_simbolos* simbolo;
     const_type_t tipo_constante;
     int tam_constante;
+    void *valor_const = nullptr;
+
+    ~token_t()
+    {
+        switch (tipo_constante)
+        {
+            case CONST_BOOL:
+                delete (bool*)valor_const;
+                break;
+
+            case CONST_HEX:
+            case CONST_CHAR:
+                delete (char*)valor_const;
+                break;
+
+            case CONST_INT:
+                delete (int*)valor_const;
+                break;
+
+            case CONST_STR:
+                delete (std::string*)valor_const;
+                break;
+
+            default:
+                break;
+        }
+    }
 };
 
 class lexer
