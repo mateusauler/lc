@@ -43,19 +43,19 @@ void parser::dec_var()
     switch (token_lido.tipo)
     {
         case TK_RES_INT:
-            tipo = T_INT;
+            tipo = TP_INT;
             break;
 
         case TK_RES_CHAR:
-            tipo = T_CHAR;
+            tipo = TP_CHAR;
             break;
 
         case TK_RES_BOOLEAN:
-            tipo = T_BOOL;
+            tipo = TP_BOOL;
             break;
 
         default:
-            tipo = T_NULL;
+            tipo = TP_NULL;
             break;
     }
     // (int | char | boolean)
@@ -85,8 +85,8 @@ void parser::dec_const()
 
     consome_token(TK_ID);        // ID
 
-    if (rt->classe != C_NULL) throw id_ja_declarado(lex);
-    rt->classe = C_CONST;
+    if (rt->classe != CL_NULL) throw id_ja_declarado(lex);
+    rt->classe = CL_CONST;
 
     consome_token(TK_OP_EQ);     // =
 
@@ -100,16 +100,16 @@ void parser::dec_const()
     switch (tipo_constante)
     {
         case CONST_INT:
-            rt->tipo = T_INT;
+            rt->tipo = TP_INT;
             break;
     
         case CONST_CHAR:
         case CONST_HEX:
-            rt->tipo = T_CHAR;
+            rt->tipo = TP_CHAR;
             break;
     
         case CONST_BOOL:
-            rt->tipo = T_BOOL;
+            rt->tipo = TP_BOOL;
             break;
     
         default:
@@ -127,8 +127,8 @@ void parser::var(tipo_t tipo)
 
     consome_token(TK_ID); // ID
 
-    if(rt->classe != C_NULL) throw id_ja_declarado(lex);
-    rt->classe = C_VAR;
+    if(rt->classe != CL_NULL) throw id_ja_declarado(lex);
+    rt->classe = CL_VAR;
     rt->tipo = tipo;
 
     if (token_lido.tipo == TK_OP_ATTRIB) // := [+|-] CONST
@@ -142,21 +142,21 @@ void parser::var(tipo_t tipo)
 
         consome_token(TK_CONST); // CONST
 
-        tipo_t tipo_convertido = T_NULL;
+        tipo_t tipo_convertido = TP_NULL;
 
         switch (tipo_constante)
         {
             case CONST_INT:
-                tipo_convertido = T_INT;
+                tipo_convertido = TP_INT;
                 break;
         
             case CONST_CHAR:
             case CONST_HEX:
-                tipo_convertido = T_CHAR;
+                tipo_convertido = TP_CHAR;
                 break;
         
             case CONST_BOOL:
-                tipo_convertido = T_BOOL;
+                tipo_convertido = TP_BOOL;
                 break;
         
             default:
@@ -197,7 +197,7 @@ void parser::cmd_s()
 
         consome_token(TK_ID); // ID
 
-        if (rt->classe == C_NULL) throw id_nao_declarado(lex);
+        if (rt->classe == CL_NULL) throw id_nao_declarado(lex);
 
         // [ "[" Exp "]" ]
         if (token_lido.tipo == TK_BRA_O_SQR)

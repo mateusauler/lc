@@ -5,29 +5,25 @@
 
 enum classe_t
 {
-    C_VAR,
-    C_CONST,
-    C_NULL,
+    CL_VAR,
+    CL_CONST,
+    CL_NULL,
 };
 
 enum tipo_t
 {
-    T_INT,
-    T_CHAR,
-    T_BOOL,
-    T_NULL,
+    TP_INT,
+    TP_CHAR,
+    TP_BOOL,
+    TP_NULL,
 };
 
 struct registro_tabela_simbolos
 {
     token_type_t tipo_token;
-
     std::string lexema;
-
-    classe_t classe = C_NULL;
-
-    tipo_t tipo = T_NULL;
-
+    classe_t classe = CL_NULL;
+    tipo_t tipo = TP_NULL;
     int tam = 0;
 
     registro_tabela_simbolos() { }
