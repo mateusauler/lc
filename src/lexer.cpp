@@ -301,9 +301,9 @@ token_t lexer::proximo_token()
                 }
                 break;
 
-            // 0(A-F)(A-F | 0-9)
+            // 0 ((A-F)(A-F | 0-9) | (A-F | 0-9)(A-F))
             case ST_CONST_HEX_ALPHA2:
-                if (c == 'h') // 0(A-F)(A-F | 0-9)h
+                if (c == 'h') // 0 ((A-F)(A-F | 0-9) | (A-F | 0-9)(A-F)) h
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_HEX;

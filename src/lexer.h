@@ -12,7 +12,7 @@ enum state_t
 
     ST_CONST_HEX_START,     // Leu `0`
     ST_CONST_HEX_ALPHA1,    // Leu `0(A-F)`
-    ST_CONST_HEX_ALPHA2,    // Leu `0(A-F | 0-9)(A-F)`
+    ST_CONST_HEX_ALPHA2,    // Leu `0` seguido de dois digitos hexa (sendo, pelo menos um `A-F`)
     ST_CONST_HEX_NUM1,      // Leu `0` seguido de um digito
     ST_CONST_HEX_NUM2,      // Leu `0` seguido de dois digitos
     ST_CONST_NUM,           // Esta lendo constante numerica (nao hexa)
