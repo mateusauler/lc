@@ -50,7 +50,7 @@ class lexer
 public:
     tabela_simbolos tbl_simbolos;
 
-    lexer(FILE *_f);
+    lexer(FILE *_f) : f(_f) {}
 
     int get_linha() const;
     token_t proximo_token();

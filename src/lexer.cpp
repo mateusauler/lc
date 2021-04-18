@@ -77,28 +77,6 @@ token_t::~token_t()
     }
 }
 
-lexer::lexer(FILE *_f) : f(_f)
-{
-    // Inicializa a tabela de simbolos com as palavras reservadas
-    tbl_simbolos.inserir(TK_RES_FINAL,   "final");
-    tbl_simbolos.inserir(TK_RES_INT,     "int");
-    tbl_simbolos.inserir(TK_RES_CHAR,    "char");
-    tbl_simbolos.inserir(TK_RES_BOOLEAN, "boolean");
-    tbl_simbolos.inserir(TK_RES_IF,      "if");
-    tbl_simbolos.inserir(TK_RES_ELSE,    "else");
-    tbl_simbolos.inserir(TK_RES_THEN,    "then");
-    tbl_simbolos.inserir(TK_RES_FOR,     "for");
-    tbl_simbolos.inserir(TK_RES_AND,     "and");
-    tbl_simbolos.inserir(TK_RES_OR,      "or");
-    tbl_simbolos.inserir(TK_RES_NOT,     "not");
-    tbl_simbolos.inserir(TK_CONST,       "FALSE");
-    tbl_simbolos.inserir(TK_CONST,       "TRUE");
-    tbl_simbolos.inserir(TK_RES_WRITE,   "write");
-    tbl_simbolos.inserir(TK_RES_WRITELN, "writeln");
-    tbl_simbolos.inserir(TK_RES_READLN,  "readln");
-    tbl_simbolos.inserir(TK_RES_MAIN,    "main");
-}
-
 int lexer::get_linha() const
 {
     return num_linha;
