@@ -10,7 +10,7 @@ enum classe_t
     CL_NULL,
 };
 
-enum tipo_t
+enum tipo_dados_t
 {
     TP_INT,
     TP_CHAR,
@@ -20,15 +20,15 @@ enum tipo_t
 
 struct registro_tabela_simbolos
 {
-    token_type_t tipo_token;
+    tipo_token_t tipo_token;
     std::string lexema;
     classe_t classe = CL_NULL;
-    tipo_t tipo = TP_NULL;
+    tipo_dados_t tipo = TP_NULL;
     int tam = 0;
 
     registro_tabela_simbolos() { }
 
-    registro_tabela_simbolos(token_type_t t, std::string l)
+    registro_tabela_simbolos(tipo_token_t t, std::string l)
         : tipo_token(t), lexema(l) { }
 };
 
@@ -37,7 +37,7 @@ class tabela_simbolos : public tabela_hash<registro_tabela_simbolos>
 
 public:
     tabela_simbolos();
-    registro_tabela_simbolos* inserir(token_type_t tipo_token, std::string lexema);
+    registro_tabela_simbolos* inserir(tipo_token_t tipo_token, std::string lexema);
     registro_tabela_simbolos* buscar(std::string lexema);
 
 };

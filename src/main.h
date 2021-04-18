@@ -1,6 +1,6 @@
 #pragma once
 
-enum token_type_t
+enum tipo_token_t
 {
     TK_ID,            // Identificador
     TK_CONST,         // Constante
@@ -52,7 +52,7 @@ enum token_type_t
     TK_EOF            // EOF
 };
 
-enum const_type_t
+enum tipo_constante_t
 {
     CONST_NULL,
     CONST_INT,

@@ -24,7 +24,7 @@ tabela_simbolos::tabela_simbolos()
 
 // Insere um registro na tabela
 // Retorna um ponteiro para o registro inserido
-registro_tabela_simbolos* tabela_simbolos::inserir(token_type_t tipo_token, std::string lexema)
+registro_tabela_simbolos* tabela_simbolos::inserir(tipo_token_t tipo_token, std::string lexema)
 {
     registro_tabela_simbolos* obj = new registro_tabela_simbolos(tipo_token, lexema);
 
