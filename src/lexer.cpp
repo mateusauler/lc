@@ -527,9 +527,6 @@ token_t lexer::proximo_token()
                 break;
 
             case CONST_CHAR:
-                tok.tam_constante = 1;
-                break;
-
             case CONST_HEX:
                 tok.tam_constante = 1;
                 break;
