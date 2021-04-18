@@ -61,3 +61,18 @@ enum tipo_constante_t
     CONST_STR,
     CONST_BOOL
 };
+
+enum classe_t
+{
+    CL_NULL,
+    CL_VAR,
+    CL_CONST
+};
+
+enum tipo_dados_t
+{
+    TP_NULL,
+    TP_INT,
+    TP_CHAR,
+    TP_BOOL
+};

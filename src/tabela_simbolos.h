@@ -3,21 +3,6 @@
 #include "tabela_hash.h"
 #include "enums.h"
 
-enum classe_t
-{
-    CL_VAR,
-    CL_CONST,
-    CL_NULL,
-};
-
-enum tipo_dados_t
-{
-    TP_INT,
-    TP_CHAR,
-    TP_BOOL,
-    TP_NULL,
-};
-
 struct registro_tabela_simbolos
 {
     tipo_token_t tipo_token;
