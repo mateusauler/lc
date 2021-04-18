@@ -68,7 +68,7 @@ public:
         return std::hash<std::string>()(chave) % tamanho_tbl;
     }
 
-    // Insere um item com conteudo "elemento" e chava "chave"
+    // Insere um item com conteudo "elemento" e chave "chave"
     // E retorna um ponteiro para o objeto encapsulado
     hash_bkt<T>* inserir(std::string chave, T* elemento)
     {
