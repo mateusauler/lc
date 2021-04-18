@@ -1,6 +1,34 @@
 #include "parser.h"
 #include "excessoes.h"
 
+/* Converte um `const_type_t` para um `tipo_t`.
+ * `t_const` Tipo de constante a ser convertido.
+ * `aceita_null` Se deve aceitar constante nula ou jogar um erro.
+ */
+static tipo_t converte_tipo_constante(const_type_t t_const, bool aceita_null = true)
+{
+    switch (t_const)
+    {
+        case CONST_INT:
+            return TP_INT;
+            break;
+
+        case CONST_CHAR:
+        case CONST_HEX:
+            return TP_CHAR;
+            break;
+
+        case CONST_BOOL:
+            return TP_BOOL;
+            break;
+
+        default:
+            if (aceita_null)
+                return TP_NULL;
+            throw tipo_incompativel();
+    }
+}
+
 // Executa o parsing no arquivo passado para o construtor
 void parser::exec_parser()
 {
@@ -58,6 +86,7 @@ void parser::dec_var()
             tipo = TP_NULL;
             break;
     }
+
     // (int | char | boolean)
     if      (token_lido.tipo == TK_RES_INT)  consome_token(TK_RES_INT);     // int
     else if (token_lido.tipo == TK_RES_CHAR) consome_token(TK_RES_CHAR);    // char
@@ -97,24 +126,7 @@ void parser::dec_const()
 
     consome_token(TK_CONST);         // CONST
 
-    switch (tipo_constante)
-    {
-        case CONST_INT:
-            rt->tipo = TP_INT;
-            break;
-    
-        case CONST_CHAR:
-        case CONST_HEX:
-            rt->tipo = TP_CHAR;
-            break;
-    
-        case CONST_BOOL:
-            rt->tipo = TP_BOOL;
-            break;
-    
-        default:
-            throw tipo_incompativel();
-    }
+    rt->tipo = converte_tipo_constante(tipo_constante, false);
 
     consome_token(TK_END_STATEMENT); // ;
 }
@@ -138,31 +150,11 @@ void parser::var(tipo_t tipo)
         if      (token_lido.tipo == TK_OP_PLUS)  consome_token(TK_OP_PLUS);  // +
         else if (token_lido.tipo == TK_OP_MINUS) consome_token(TK_OP_MINUS); // -
 
-        const_type_t tipo_constante = token_lido.tipo_constante; 
+        const_type_t tipo_constante = token_lido.tipo_constante;
 
         consome_token(TK_CONST); // CONST
 
-        tipo_t tipo_convertido = TP_NULL;
-
-        switch (tipo_constante)
-        {
-            case CONST_INT:
-                tipo_convertido = TP_INT;
-                break;
-        
-            case CONST_CHAR:
-            case CONST_HEX:
-                tipo_convertido = TP_CHAR;
-                break;
-        
-            case CONST_BOOL:
-                tipo_convertido = TP_BOOL;
-                break;
-        
-            default:
-                throw tipo_incompativel();
-        }
-        
+        tipo_t tipo_convertido = converte_tipo_constante(tipo_constante, false);
         if (tipo_convertido != tipo) throw tipo_incompativel();
 
     }
