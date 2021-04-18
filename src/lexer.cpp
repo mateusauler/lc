@@ -51,6 +51,32 @@ static void parse_valor(token_t& t)
     }
 }
 
+token_t::~token_t()
+{
+    switch (tipo_constante)
+    {
+        case CONST_BOOL:
+            delete (bool*)valor_const;
+            break;
+
+        case CONST_HEX:
+        case CONST_CHAR:
+            delete (char*)valor_const;
+            break;
+
+        case CONST_INT:
+            delete (int*)valor_const;
+            break;
+
+        case CONST_STR:
+            delete (std::string*)valor_const;
+            break;
+
+        default:
+            break;
+    }
+}
+
 lexer::lexer(FILE *_f) : f(_f)
 {
     // Inicializa a tabela de simbolos com as palavras reservadas
