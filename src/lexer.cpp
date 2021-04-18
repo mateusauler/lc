@@ -226,8 +226,7 @@ token_t lexer::proximo_token()
                             break;
 
                         default:
-                            tok.lex += c;
-                            throw lex_nao_identificado(tok.lex);
+                            throw lex_nao_identificado(tok.lex + c);
                     }
                 }
                 break;
