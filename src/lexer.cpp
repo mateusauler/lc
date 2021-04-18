@@ -22,6 +22,7 @@
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
+// Calcula e preenche o valor de um token do tipo constante
 static void parse_valor(token_t& t)
 {
     switch (t.tipo_constante)
@@ -82,7 +83,6 @@ int lexer::get_linha() const
     return num_linha;
 }
 
-// Le o proximo token do arquivo fonte
 token_t lexer::proximo_token()
 {
     state_t estado = ST_START;
@@ -94,7 +94,7 @@ token_t lexer::proximo_token()
 
     do
     {
-        c = fgetc(f);
+        c = fgetc(arq_fonte);
 
         // O unico estado que aceita EOF e o estado inicial
         if (c == EOF && estado != ST_START)
@@ -489,7 +489,7 @@ token_t lexer::proximo_token()
     } while (estado != ST_END);
 
     if (backtrack)
-        fseek(f, -1, SEEK_CUR);
+        fseek(arq_fonte, -1, SEEK_CUR);
 
     int lex_len = tok.lex.length();
 

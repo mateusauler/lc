@@ -6,16 +6,14 @@
 template <typename T>
 struct hash_bkt
 {
-    T *elemento;
-
+    T *elemento; // Conteudo armazenado
     hash_bkt *prox = nullptr;
+    std::string chave; // Chave do elemento
 
-    std::string chave;
-
-    hash_bkt() { }
+    hash_bkt() {}
 
     hash_bkt(T* e, std::string c)
-        : elemento(e), chave(c) { }
+        : elemento(e), chave(c) {}
 };
 
 template<typename T>
@@ -24,7 +22,7 @@ class tabela_hash
 
 protected:
     hash_bkt<T> **tabela;
-    int tamanho_tbl;
+    int tamanho_tbl; // Numero de buckets da tabela
 
 public:
     tabela_hash(int tamanho = 128) : tamanho_tbl(tamanho)
@@ -68,8 +66,10 @@ public:
         return std::hash<std::string>()(chave) % tamanho_tbl;
     }
 
-    // Insere um item com conteudo "elemento" e chave "chave"
-    // E retorna um ponteiro para o objeto encapsulado
+    /*
+     * Insere um item com conteudo "elemento" e chave "chave".
+     * Retorna um ponteiro para o objeto encapsulado.
+     */
     hash_bkt<T>* inserir(std::string chave, T* elemento)
     {
         // Calcula a hash da chave
@@ -95,8 +95,10 @@ public:
         return obj;
     }
 
-    // Busca um elemento com a chave "chave" na tabela
-    // Retorna um ponteiro para o registro na tabela
+    /*
+     * Busca um elemento com a chave "chave" na tabela.
+     * Retorna um ponteiro para o registro na tabela.
+     */
     hash_bkt<T>* buscar(std::string chave)
     {
         // Calcula a hash desta chave

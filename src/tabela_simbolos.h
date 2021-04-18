@@ -22,7 +22,17 @@ class tabela_simbolos : public tabela_hash<registro_tabela_simbolos>
 
 public:
     tabela_simbolos();
+
+    /*
+     * Insere um registro na tabela.
+     * Retorna um ponteiro para o registro inserido.
+     */
     registro_tabela_simbolos* inserir(tipo_token_t tipo_token, std::string lexema);
+
+    /*
+     * Busca um elemento com a chave "lexema" na tabela.
+     * Retorna um ponteiro para o registro encontrado ou NULL, caso nao tenha sido encontrado.
+     */
     registro_tabela_simbolos* buscar(std::string lexema);
 
 };

@@ -29,14 +29,12 @@ static tipo_dados_t converte_tipo_constante(tipo_constante_t t_const, bool aceit
     }
 }
 
-// Executa o parsing no arquivo passado para o construtor
 void parser::exec_parser()
 {
     token_lido = proximo_token();
     prog();
 }
 
-// Verifica se o token lido tem o tipo esperado e le o proximo
 void parser::consome_token(tipo_token_t token_esperado)
 {
     if (token_lido.tipo_token == token_esperado)
@@ -48,9 +46,10 @@ void parser::consome_token(tipo_token_t token_esperado)
     else                                      throw token_invalido(token_lido.lex);
 }
 
-// {DecVar|DecConst} main BlocoCmd EOF
 void parser::prog()
 {
+    // {DecVar|DecConst} main BlocoCmd EOF
+
     // {DecVar|DecConst}
     while (token_lido.tipo_token != TK_RES_MAIN)
     {
@@ -63,9 +62,9 @@ void parser::prog()
     consome_token(TK_EOF); // EOF
 }
 
-// (int | char | boolean) Var {, Var} ;
 void parser::dec_var()
 {
+    // (int | char | boolean) Var {, Var} ;
     tipo_dados_t tipo;
 
     switch (token_lido.tipo_token)
@@ -104,9 +103,10 @@ void parser::dec_var()
     consome_token(TK_END_STATEMENT); // ;
 }
 
-// final ID = [+|-] CONST ;
 void parser::dec_const()
 {
+    // final ID = [+|-] CONST ;
+
     consome_token(TK_RES_FINAL); // final
 
     registro_tabela_simbolos *rt = token_lido.simbolo;
@@ -131,9 +131,10 @@ void parser::dec_const()
     consome_token(TK_END_STATEMENT); // ;
 }
 
-// ID [:= [+|-] CONST | "[" CONST "]" ]
 void parser::var(tipo_dados_t tipo)
 {
+    // ID [:= [+|-] CONST | "[" CONST "]" ]
+
     registro_tabela_simbolos *rt = token_lido.simbolo;
     std::string lex = token_lido.lex;
 
@@ -166,9 +167,10 @@ void parser::var(tipo_dados_t tipo)
     }
 }
 
-// "{" {CmdT} "}"
 void parser::bloco_cmd()
 {
+    // "{" {CmdT} "}"
+
     consome_token(TK_BRA_O_CUR); // {
 
     // {CmdT}
@@ -177,11 +179,12 @@ void parser::bloco_cmd()
     consome_token(TK_BRA_C_CUR); // }
 }
 
-// ID [ "[" Exp "]" ] := Exp
-// readln "(" ID [ "[" Exp "]" ] ")"
-// (write | writeln) "(" Exp {, Exp} ")"
 void parser::cmd_s()
 {
+    // ID [ "[" Exp "]" ] := Exp
+    // readln "(" ID [ "[" Exp "]" ] ")"
+    // (write | writeln) "(" Exp {, Exp} ")"
+
     if (token_lido.tipo_token == TK_ID) // ID [ "[" Exp "]" ] := Exp
     {
         registro_tabela_simbolos *rt = token_lido.simbolo;
@@ -238,9 +241,10 @@ void parser::cmd_s()
     }
 }
 
-// for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
 void parser::cmd_for()
 {
+    // for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
+
     consome_token(TK_RES_FOR);   // for
     consome_token(TK_BRA_O_PAR); // (
 
@@ -281,9 +285,10 @@ void parser::cmd_for()
     else                                       cmd_t();
 }
 
-// if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
 void parser::cmd_if()
 {
+    // if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
+
     consome_token(TK_RES_IF);    // if
     consome_token(TK_BRA_O_PAR); // (
 
@@ -309,9 +314,10 @@ void parser::cmd_if()
 
 }
 
-// [CmdS] ; | CmdFor | CmdIf
 void parser::cmd_t()
 {
+    // [CmdS] ; | CmdFor | CmdIf
+
     if      (token_lido.tipo_token == TK_END_STATEMENT) consome_token(TK_END_STATEMENT); // ;
     else if (token_lido.tipo_token == TK_RES_FOR)       cmd_for();                       // for
     else if (token_lido.tipo_token == TK_RES_IF)        cmd_if();                        // if
@@ -322,9 +328,10 @@ void parser::cmd_t()
     }
 }
 
-// Soma [(=|<>|>|<|>=|<=) Soma]
 void parser::exp()
 {
+    // Soma [(=|<>|>|<|>=|<=) Soma]
+
     soma();
 
     // [(=|<>|>|<|>=|<=) Soma]
@@ -342,9 +349,10 @@ void parser::exp()
     }
 }
 
-// [+|-] Termo {(+|-|or) Termo}
 void parser::soma()
 {
+    // [+|-] Termo {(+|-|or) Termo}
+
     // [+|-]
     if      (token_lido.tipo_token == TK_OP_PLUS)  consome_token(TK_OP_PLUS);  // +
     else if (token_lido.tipo_token == TK_OP_MINUS) consome_token(TK_OP_MINUS); // -
@@ -363,9 +371,10 @@ void parser::soma()
     }
 }
 
-// Fator {(*|/|%|and) Fator}
 void parser::termo()
 {
+    // Fator {(*|/|%|and) Fator}
+
     fator();
 
     // {(*|/|%|and) Fator}
@@ -381,9 +390,10 @@ void parser::termo()
     }
 }
 
-// not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
 void parser::fator()
 {
+    // not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
+
     if (token_lido.tipo_token == TK_RES_NOT) // not Fator
     {
         consome_token(TK_RES_NOT); // not
