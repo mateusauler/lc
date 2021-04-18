@@ -1,7 +1,7 @@
 #pragma once
 
 #include "tabela_hash.h"
-#include "main.h"
+#include "enums.h"
 
 enum classe_t
 {

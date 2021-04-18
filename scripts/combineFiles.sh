@@ -5,7 +5,7 @@ tmpfile=$filename.tmp
 srcdir=src
 maincpp=$srcdir/main.cpp
 
-headers="main.h excessoes.h tabela_hash.h tabela_simbolos.h lexer.h parser.h"
+headers="enums.h excessoes.h tabela_hash.h tabela_simbolos.h lexer.h parser.h"
 headers=$(printf "$headers" | sed -E "s/(\s+|^)/\1$srcdir\//g")
 code=$(ls $srcdir/*.cpp | grep -v $maincpp)
 
