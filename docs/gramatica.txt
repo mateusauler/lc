@@ -11,9 +11,10 @@ CmdS -> ID [ "[" Exp "]" ] := Exp
 CmdS -> readln "(" ID [ "[" Exp "]" ] ")"
 CmdS -> (write | writeln) "(" Exp {, Exp} ")"
 
-CmdFor -> for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
+CmdFor -> for "(" [Cmd {, Cmd}] ; Exp ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
 CmdIf -> if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
 
+Cmd -> CmdS | CmdFor | CmdIf
 CmdT -> [CmdS] ; | CmdFor | CmdIf
 
 Exp -> Soma [(=|<>|>|<|>=|<=) Soma]

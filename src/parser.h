@@ -43,6 +43,9 @@ private:
     // Comando `if`
     void cmd_if();
 
+    // Comando sem terminacao
+    void cmd();
+
     // Comando terminado
     void cmd_t();
 

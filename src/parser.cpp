@@ -243,21 +243,21 @@ void parser::cmd_s()
 
 void parser::cmd_for()
 {
-    // for "(" [CmdS {, CmdS}] ; Exp ; [CmdS {, CmdS}] ")" (CmdT | BlocoCmd)
+    // for "(" [Cmd {, Cmd}] ; Exp ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
 
     consome_token(TK_RES_FOR);   // for
     consome_token(TK_BRA_O_PAR); // (
 
-    // [CmdS {, CmdS}]
+    // [Cmd {, Cmd}]
     if (token_lido.tipo_token != TK_END_STATEMENT)
     {
-        cmd_s();
+        cmd();
 
-        // {, CmdS}
+        // {, Cmd}
         while (token_lido.tipo_token == TK_OP_COMMA)
         {
             consome_token(TK_OP_COMMA); // ,
-            cmd_s();
+            cmd();
         }
     }
     consome_token(TK_END_STATEMENT); // ;
@@ -265,16 +265,16 @@ void parser::cmd_for()
     exp();
     consome_token(TK_END_STATEMENT); // ;
 
-    // [CmdS {, CmdS}]
+    // [Cmd {, Cmd}]
     if(token_lido.tipo_token != TK_BRA_C_PAR)
     {
-        cmd_s();
+        cmd();
 
-        // {, CmdS}
+        // {, Cmd}
         while (token_lido.tipo_token == TK_OP_COMMA)
         {
             consome_token(TK_OP_COMMA); // ,
-            cmd_s();
+            cmd();
         }
     }
 
@@ -326,6 +326,15 @@ void parser::cmd_t()
         cmd_s();
         consome_token(TK_END_STATEMENT); // ;
     }
+}
+
+void parser::cmd()
+{
+    // CmdS | CmdFor | CmdIf
+
+    if      (token_lido.tipo_token == TK_RES_FOR) cmd_for(); // for
+    else if (token_lido.tipo_token == TK_RES_IF)  cmd_if();  // if
+    else                                          cmd_s();
 }
 
 void parser::exp()
