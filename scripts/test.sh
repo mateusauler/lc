@@ -49,7 +49,7 @@ if [ ! -z "$erros" ] ; then
     exit 1
 fi
 
-c++ lc.cpp -o lc
+SRCDIR=. make -e --no-print-directory
 
 run_tests
 
