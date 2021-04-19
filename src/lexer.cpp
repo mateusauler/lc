@@ -22,36 +22,6 @@
 #define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define IS_DIGIT(c) (c >= '0' && c <= '9')
 
-// Calcula e preenche o valor de um token do tipo constante
-static void parse_valor(token_t& t)
-{
-    switch (t.tipo_constante)
-    {
-        case CONST_BOOL:
-            t.valor_const = new bool(t.lex == "TRUE");
-            break;
-
-        case CONST_HEX:
-            t.valor_const = new char(std::stoi(t.lex.substr(1, 2), 0, 16));
-            break;
-
-        case CONST_CHAR:
-            t.valor_const = new char(t.lex[1]);
-            break;
-
-        case CONST_INT:
-            t.valor_const = new int(std::atoi(t.lex.c_str()));
-            break;
-
-        case CONST_STR:
-            t.valor_const = new std::string(t.lex.substr(1, t.tam_constante - 1) + '$');
-            break;
-
-        default:
-            break;
-    }
-}
-
 token_t::~token_t()
 {
     switch (tipo_constante)
@@ -541,7 +511,32 @@ token_t lexer::proximo_token()
         }
     }
 
-    parse_valor(tok);
+    // Calcula e preenche o valor de um token do tipo constante
+    switch (tok.tipo_constante)
+    {
+        case CONST_BOOL:
+            tok.valor_const = new bool(tok.lex == "TRUE");
+            break;
+
+        case CONST_HEX:
+            tok.valor_const = new char(std::stoi(tok.lex.substr(1, 2), 0, 16));
+            break;
+
+        case CONST_CHAR:
+            tok.valor_const = new char(tok.lex[1]);
+            break;
+
+        case CONST_INT:
+            tok.valor_const = new int(std::atoi(tok.lex.c_str()));
+            break;
+
+        case CONST_STR:
+            tok.valor_const = new std::string(tok.lex.substr(1, tok.tam_constante - 1) + '$');
+            break;
+
+        default:
+            break;
+    }
 
     return tok;
 }
