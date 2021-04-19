@@ -21,14 +21,16 @@ function run_tests()
 
             if [ "$s1" = "$s2" ] ; then
                 fileresultado=$(echo "$diresperado/$d/$f" | sed "s/\.l/.se/")
-                esperado=$(cat $fileresultado)
-                if [ "$s1" != "$esperado" ] ; then
-                    cat_erro "\n$filename:"
-                    cat_erro "Saida inesperada."
-                    cat_erro "Esperado:"
-                    cat_erro "$esperado"
-                    cat_erro "Gerado:"
-                    cat_erro "$s1\n"
+                if [ -f $fileresultado ] ; then
+                    esperado=$(cat $fileresultado)
+                    if [ "$s1" != "$esperado" ] ; then
+                        cat_erro "\n$filename:"
+                        cat_erro "Saida inesperada."
+                        cat_erro "Esperado:"
+                        cat_erro "$esperado"
+                        cat_erro "Gerado:"
+                        cat_erro "$s1\n"
+                    fi
                 fi
             else
                 cat_erro "$filename:"
