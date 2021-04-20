@@ -1,0 +1,149 @@
+Prog -> {DecVar|DecConst} main BlocoCmd EOF
+
+DecVar -> (int (1) | char (2) | boolean (3)) (4) Var1 {, Var2} ;
+DecConst -> final ID (5) = [+|-] CONST (6) ;
+
+Var -> ID (7) [:= [+|-] CONST (8) | "[" CONST (9) "]" ]
+
+BlocoCmd -> "{" {CmdT} "}"
+
+CmdS -> ID (10) [ "[" Exp1 (11) "]" ] := Exp2 (12)
+CmdS -> readln "(" ID (13) [ "[" Exp (14) "]" ] ")"
+CmdS -> (write | writeln) "(" Exp {, Exp} ")"
+
+CmdFor -> for "(" [Cmd {, Cmd}] ; Exp (15) ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
+CmdIf -> if "(" Exp (16) ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
+
+Cmd -> CmdS | CmdFor | CmdIf
+CmdT -> [CmdS] ; | CmdFor | CmdIf
+
+Exp -> Soma1 (17) [(=|<>|>|<|>=|<=) Soma2 (18)]
+Soma -> [+|-] Termo1 (19) {(+|-|or) Termo2 (20)}
+Termo -> Fator1 (21) {(*|/|%|and) Fator2 (22)}
+Fator -> not (23) Fator1 (24) | "(" Exp (25) ")" | ID (26) [ "[" Exp (27) "]" ] | CONST (28)
+
+
+1- DecVar.tipo = int
+2- DecVar.tipo = char
+3- DecVar.tipo = boolean
+4- {
+   Var1.tipo = DecVar.tipo
+   Var2.tipo = DecVar.tipo
+}
+5- {
+    se ID em T.S.
+        Erro
+    senao
+        ID.simbolo->classe = constante
+}
+6- {
+    se CONST.tipo = string
+        Erro
+    senao
+        ID.simbolo->tipo = CONST.tipo
+}
+7- {
+    se ID em T.S.
+        Erro
+    senao
+        ID.simbolo->classe = variavel
+}
+8- {
+    se CONST.tipo != Var.tipo
+        Erro
+}
+9- {
+    se CONST.tipo != int
+        Erro
+    senao se CONST.valr * ID.tipo.tamanho > 8Kb
+        Erro
+    senao
+        ID.tamanho = CONST.valor
+}
+10- {
+    se ID nao em T.S.
+        Erro
+    senao se ID.classe = constante
+        Erro
+    senao
+        CmdS.tamanho = ID.tamanho
+}
+11- {
+    se Exp1.tipo != int
+        Erro
+    senao se CmdS.tamanho == 0
+        Erro
+    senao
+        CmdS.tamanho = 0
+}
+12- {
+    se Exp2.tipo != ID.tipo && ID.tipo != char && Exp2.tipo != string
+        Erro
+    senao se ID.tipo != Exp2.tipo && CmdS.tamanho < Exp2.tamanho
+        Erro
+}
+13- {
+    se ID nao em T.S.
+        Erro
+    senao se ID.classe = constante
+        Erro
+}
+14- {
+    se Exp.tipo != ID.tipo
+        Erro
+}
+15- {
+    se Exp.tipo != boolean
+        Erro
+}
+16- {
+    se Exp.tipo != boolean
+        Erro
+}
+17- Exp.tipo = Soma1.tipo
+18- {
+    se Soma1.tipo != Soma2.tipo &&
+         (Soma1.tamanho == 0 || Soma2.tamanho == 0)   ||
+        ((Soma1.tipo != char && Soma2.tipo != string) ||
+         (Soma2.tipo != char && Soma1.tipo != string))
+        Erro
+    senao se operador != (=|<>) && (Soma1.tipo == string || Soma2.tipo == string || Soma1.tamanho > 0 || Soma2.tamanho > 0)
+        Erro
+    senao
+        Exp.tipo = boolean
+}
+19- Soma.tipo = Termo1.tipo
+20- {
+    se Soma.tipo != Termo2.tipo
+        Erro
+    senao se operador == or && Soma.tipo != boolean
+        Erro
+    senao se (operador == + || operador == -) && Soma.tipo != int
+        Erro
+}
+21- Termo.tipo = Fator1.tipo
+22- {
+    se Termo.tipo != Fator2.tipo
+        Erro
+    senao se operador == and && Termo.tipo != boolean
+        Erro
+    senao se (operador == * || operador == / || operador == %) && Termo.tipo != int
+        Erro
+}
+23- Fator.tipo = boolean
+24- {
+    se Fator1.tipo != boolean
+        Erro
+}
+25- Fator.tipo = Exp.tipo
+26- {
+    Fator.tipo = ID.tipo
+    Fator.tamanho = ID.tamanho
+}
+27- {
+    se ID.tamanho == 0
+        Erro
+    senao
+        Fator.tamanho = 0
+}
+28- Fator.tipo = CONST.tipo
