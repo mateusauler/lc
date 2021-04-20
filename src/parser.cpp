@@ -67,29 +67,24 @@ void parser::dec_var()
     // (int | char | boolean) Var {, Var} ;
     tipo_dados_t tipo;
 
+    // (int | char | boolean)
     switch (token_lido.tipo_token)
     {
-        case TK_RES_INT:
+        case TK_RES_INT: // int
+            consome_token(TK_RES_INT);
             tipo = TP_INT;
             break;
 
-        case TK_RES_CHAR:
+        case TK_RES_CHAR: // char
+            consome_token(TK_RES_CHAR);
             tipo = TP_CHAR;
             break;
 
-        case TK_RES_BOOLEAN:
+        default: // boolean
+            consome_token(TK_RES_BOOLEAN);
             tipo = TP_BOOL;
             break;
-
-        default:
-            tipo = TP_NULL;
-            break;
     }
-
-    // (int | char | boolean)
-    if      (token_lido.tipo_token == TK_RES_INT)  consome_token(TK_RES_INT);     // int
-    else if (token_lido.tipo_token == TK_RES_CHAR) consome_token(TK_RES_CHAR);    // char
-    else                                           consome_token(TK_RES_BOOLEAN); // boolean
 
     var(tipo);
 
@@ -112,19 +107,19 @@ void parser::dec_const()
     registro_tabela_simbolos *rt = token_lido.simbolo;
     std::string lex = token_lido.lex;
 
-    consome_token(TK_ID);        // ID
+    consome_token(TK_ID); // ID
 
     if (rt->classe != CL_NULL) throw id_ja_declarado(lex);
     rt->classe = CL_CONST;
 
-    consome_token(TK_OP_EQ);     // =
+    consome_token(TK_OP_EQ); // =
 
     if      (token_lido.tipo_token == TK_OP_PLUS)  consome_token(TK_OP_PLUS);  // +
     else if (token_lido.tipo_token == TK_OP_MINUS) consome_token(TK_OP_MINUS); // -
 
     tipo_constante_t tipo_constante = token_lido.tipo_constante;
 
-    consome_token(TK_CONST);         // CONST
+    consome_token(TK_CONST); // CONST
 
     rt->tipo = converte_tipo_constante(tipo_constante, false);
 
