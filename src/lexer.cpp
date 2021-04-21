@@ -12,13 +12,6 @@
                        (c == ']'   || c == '_') || \
                        (c == '}'))
 
-// Caractere valido dentro de constante do tipo char
-#define CHAR_VALIDO_CONST(c) ((c == '\t') || \
-                             (c >= ' ' && c <= '"') || \
-                             (c >= '(' && c <= '[') || \
-                             (c >= 'a' && c <= '{') || \
-                             (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
-
 #define E_CHAR(c)  ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define E_DIGITO(c) (c >= '0' && c <= '9')
 
@@ -320,9 +313,17 @@ token_t lexer::proximo_token()
 
             // '
             case ES_CONST_CHAR_INICIO:
-                if (CHAR_VALIDO_CONST(c))
-                    estado = ES_CONST_CHAR_INTERNO;
-                else throw char_invalido();
+                switch (c)
+                {
+                    case '\n':
+                    case '\r':
+                    case '\'':
+                        throw char_invalido();
+
+                    default:
+                        estado = ES_CONST_CHAR_INTERNO;
+                        break;
+                }
                 break;
 
             // '(caractere)
