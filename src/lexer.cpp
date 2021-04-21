@@ -19,8 +19,8 @@
                              (c >= 'a' && c <= '{') || \
                              (c == '$' || c == '%' || c == ']' || c == '_' || c == '}'))
 
-#define IS_CHAR(c) ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-#define IS_DIGIT(c) (c >= '0' && c <= '9')
+#define E_CHAR(c)  ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+#define E_DIGITO(c) (c >= '0' && c <= '9')
 
 token_t::~token_t()
 {
@@ -55,7 +55,7 @@ int lexer::get_linha() const
 
 token_t lexer::proximo_token()
 {
-    state_t estado = ST_START;
+    estado_t estado = ES_INICIO;
 
     char c;
     bool backtrack = false;
@@ -67,7 +67,7 @@ token_t lexer::proximo_token()
         c = fgetc(arq_fonte);
 
         // O unico estado que aceita EOF e o estado inicial
-        if (c == EOF && estado != ST_START)
+        if (c == EOF && estado != ES_INICIO)
             throw eof_inesperado();
 
         // Caractere invalido
@@ -79,118 +79,118 @@ token_t lexer::proximo_token()
             // Simbolo inicial
             // Ignora espacos e novas linhas (a contabilizacao de linhas e feita depois)
             // Qualquer caractere que nao e especificado explicitamente, e considerado erro
-            case ST_START:
+            case ES_INICIO:
                 // Limpa o lexema
                 tok.lex = "";
 
-                if (IS_CHAR(c))
-                    estado = ST_ID_NAME;
-                else if (c > '0' && IS_DIGIT(c))
-                    estado = ST_CONST_NUM;
+                if (E_CHAR(c))
+                    estado = ES_ID_NOME;
+                else if (c > '0' && E_DIGITO(c))
+                    estado = ES_CONST_NUM;
                 else
                 {
                     switch(c)
                     {
                         case '_':
-                            estado = ST_ID_UNDERSCORE;
+                            estado = ES_ID_UNDERLINE;
                             break;
 
                         case '0':
-                            estado = ST_CONST_HEX_START;
+                            estado = ES_CONST_HEX_INICIO;
                             break;
 
                         case '\'':
-                            estado = ST_CONST_CHAR_START;
+                            estado = ES_CONST_CHAR_INICIO;
                             break;
 
                         case '"':
-                            estado = ST_CONST_STR_INTERNAL;
+                            estado = ES_CONST_STR_INTERNO;
                             break;
 
                         case '/':
-                            estado = ST_OP_SLASH;
+                            estado = ES_OP_BARRA;
                             break;
 
                         case ':':
-                            estado = ST_OP_ATTRIB_START;
+                            estado = ES_OP_ATRIB_INICIO;
                             break;
 
                         case '<':
-                            estado = ST_OP_LT;
+                            estado = ES_OP_LT;
                             break;
 
                         case '>':
-                            estado = ST_OP_GT;
+                            estado = ES_OP_GT;
                             break;
 
                         case '{':
-                            tok.tipo_token = TK_BRA_O_CUR;
-                            estado = ST_END;
+                            tok.tipo_token = TK_GRU_A_CHA;
+                            estado = ES_FIM;
                             break;
 
                         case '}':
-                            tok.tipo_token = TK_BRA_C_CUR;
-                            estado = ST_END;
+                            tok.tipo_token = TK_GRU_F_CHA;
+                            estado = ES_FIM;
                             break;
 
                         case '[':
-                            tok.tipo_token = TK_BRA_O_SQR;
-                            estado = ST_END;
+                            tok.tipo_token = TK_GRU_O_COL;
+                            estado = ES_FIM;
                             break;
 
                         case ']':
-                            tok.tipo_token = TK_BRA_C_SQR;
-                            estado = ST_END;
+                            tok.tipo_token = TK_GRU_F_COL;
+                            estado = ES_FIM;
                             break;
 
                         case '(':
-                            tok.tipo_token = TK_BRA_O_PAR;
-                            estado = ST_END;
+                            tok.tipo_token = TK_GRU_A_PAR;
+                            estado = ES_FIM;
                             break;
 
                         case ')':
-                            tok.tipo_token = TK_BRA_C_PAR;
-                            estado = ST_END;
+                            tok.tipo_token = TK_GRU_F_PAR;
+                            estado = ES_FIM;
                             break;
 
                         case '%':
-                            tok.tipo_token = TK_OP_PERCENT;
-                            estado = ST_END;
+                            tok.tipo_token = TK_OP_PORCENTO;
+                            estado = ES_FIM;
                             break;
 
                         case '*':
                             tok.tipo_token = TK_OP_MUL;
-                            estado = ST_END;
+                            estado = ES_FIM;
                             break;
 
                         case '+':
-                            tok.tipo_token = TK_OP_PLUS;
-                            estado = ST_END;
+                            tok.tipo_token = TK_OP_MAIS;
+                            estado = ES_FIM;
                             break;
 
                         case '-':
-                            tok.tipo_token = TK_OP_MINUS;
-                            estado = ST_END;
+                            tok.tipo_token = TK_OP_MENOS;
+                            estado = ES_FIM;
                             break;
 
                         case ',':
-                            tok.tipo_token = TK_OP_COMMA;
-                            estado = ST_END;
+                            tok.tipo_token = TK_OP_VIRGULA;
+                            estado = ES_FIM;
                             break;
 
                         case ';':
-                            tok.tipo_token = TK_END_STATEMENT;
-                            estado = ST_END;
+                            tok.tipo_token = TK_FIM_DECL;
+                            estado = ES_FIM;
                             break;
 
                         case '=':
                             tok.tipo_token = TK_OP_EQ;
-                            estado = ST_END;
+                            estado = ES_FIM;
                             break;
 
                         case EOF:
                             tok.tipo_token = TK_EOF;
-                            estado = ST_END;
+                            estado = ES_FIM;
                             break;
 
                         case ' ':
@@ -206,79 +206,79 @@ token_t lexer::proximo_token()
                 break;
 
             // {_}+
-            case ST_ID_UNDERSCORE:
-                if (IS_CHAR(c)
-                 || IS_DIGIT(c))
-                    estado = ST_ID_NAME;
+            case ES_ID_UNDERLINE:
+                if (E_CHAR(c)
+                 || E_DIGITO(c))
+                    estado = ES_ID_NOME;
                 else if (c != '_') // Somente {_}+ e invalido
                     throw lex_nao_identificado(tok.lex);
 
                 break;
 
             // {_}(LETRA | DIGITO){LETRA | DIGITO | _}
-            case ST_ID_NAME:
-                if (IS_CHAR(c)
-                 || IS_DIGIT(c)
+            case ES_ID_NOME:
+                if (E_CHAR(c)
+                 || E_DIGITO(c)
                  || (c == '_'))
-                    estado = ST_ID_NAME;
+                    estado = ES_ID_NOME;
                 else
                 {
                     tok.tipo_token = TK_ID;
-                    estado = ST_END;
+                    estado = ES_FIM;
                     backtrack = true;
                 }
                 break;
 
             // 0
-            case ST_CONST_HEX_START:
-                if (IS_DIGIT(c)) // 0(0-9)
-                    estado = ST_CONST_HEX_NUM1;
+            case ES_CONST_HEX_INICIO:
+                if (E_DIGITO(c)) // 0(0-9)
+                    estado = ES_CONST_HEX_NUM1;
                 else if (c >= 'A' && c <= 'F') // 0(A-F)
-                    estado = ST_CONST_HEX_ALPHA1;
+                    estado = ES_CONST_HEX_ALPHA1;
                 else // 0
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_INT;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                     backtrack = true;
                 }
                 break;
 
             // 0(A-F)
-            case ST_CONST_HEX_ALPHA1:
-                if (IS_DIGIT(c)
+            case ES_CONST_HEX_ALPHA1:
+                if (E_DIGITO(c)
                 || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
-                    estado = ST_CONST_HEX_ALPHA2;
+                    estado = ES_CONST_HEX_ALPHA2;
                 else
                     throw lex_nao_identificado(tok.lex);
 
                 break;
 
             // 0(0-9)
-            case ST_CONST_HEX_NUM1:
-                if (IS_DIGIT(c)) // 0(0-9)(0-9)
-                    estado = ST_CONST_HEX_NUM2;
+            case ES_CONST_HEX_NUM1:
+                if (E_DIGITO(c)) // 0(0-9)(0-9)
+                    estado = ES_CONST_HEX_NUM2;
                 else if (c >= 'A' && c <= 'F') // 0(0-9)(A-F)
-                    estado = ST_CONST_HEX_ALPHA2;
+                    estado = ES_CONST_HEX_ALPHA2;
                 else
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_INT;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                     backtrack = true;
                 }
                 break;
 
             // 0 ((A-F)(A-F | 0-9) | (A-F | 0-9)(A-F))
-            case ST_CONST_HEX_ALPHA2:
+            case ES_CONST_HEX_ALPHA2:
                 if (c == 'h') // 0 ((A-F)(A-F | 0-9) | (A-F | 0-9)(A-F)) h
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_HEX;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                 }
                 else
                     throw lex_nao_identificado(tok.lex);
@@ -286,65 +286,65 @@ token_t lexer::proximo_token()
                 break;
 
             // 0(0-9)(0-9)
-            case ST_CONST_HEX_NUM2:
-                if (IS_DIGIT(c)) // 0(0-9)(0-9)(0-9)
-                    estado = ST_CONST_NUM;
+            case ES_CONST_HEX_NUM2:
+                if (E_DIGITO(c)) // 0(0-9)(0-9)(0-9)
+                    estado = ES_CONST_NUM;
                 else if (c == 'h') // 0(0-9)(0-9)h
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_HEX;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                 }
                 else // 0(0-9)(0-9)
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_INT;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                     backtrack = true;
                 }
                 break;
 
             // {0-9}+
-            case ST_CONST_NUM:
-                if (!IS_DIGIT(c))
+            case ES_CONST_NUM:
+                if (!E_DIGITO(c))
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_INT;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                     backtrack = true;
                 }
                 break;
 
             // '
-            case ST_CONST_CHAR_START:
+            case ES_CONST_CHAR_INICIO:
                 if (CHAR_VALIDO_CONST(c))
-                    estado = ST_CONST_CHAR_INTERNAL;
+                    estado = ES_CONST_CHAR_INTERNO;
                 else throw char_invalido();
                 break;
 
             // '(caractere)
-            case ST_CONST_CHAR_INTERNAL:
+            case ES_CONST_CHAR_INTERNO:
                 if (c == '\'') // '(caractere)'
                 {
                     tok.tipo_token = TK_CONST;
                     tok.tipo_constante = CONST_CHAR;
 
-                    estado = ST_END;
+                    estado = ES_FIM;
                 }
                 else throw lex_nao_identificado(tok.lex);
                 break;
 
             // "{caractere}
-            case ST_CONST_STR_INTERNAL:
+            case ES_CONST_STR_INTERNO:
                 switch (c)
                 {
                     case '"': // "{caractere}"
                         tok.tipo_token = TK_CONST;
                         tok.tipo_constante = CONST_STR;
-                        estado = ST_END;
+                        estado = ES_FIM;
                         break;
 
                     case '$':
@@ -358,53 +358,53 @@ token_t lexer::proximo_token()
                 break;
 
             // /
-            case ST_OP_SLASH:
+            case ES_OP_BARRA:
                 if (c == '*') // /*
-                    estado = ST_COMMENT;
+                    estado = ES_COMENTARIO;
                 else // /
                 {
-                    tok.tipo_token = TK_OP_SLASH;
+                    tok.tipo_token = TK_OP_BARRA;
 
                     backtrack = true;
-                    estado = ST_END;
+                    estado = ES_FIM;
                 }
                 break;
 
             // /*{qualquer caractere}
-            case ST_COMMENT:
+            case ES_COMENTARIO:
 				if (c == '*')
-					estado = ST_COMMENT_END;
+					estado = ES_COMENTARIO_FIM;
                 break;
 
             // /*{qualquer caractere}{*}+
-            case ST_COMMENT_END:
+            case ES_COMENTARIO_FIM:
                 switch (c)
                 {
                     case '/': // Fim do comentario
-                        estado = ST_START;
+                        estado = ES_INICIO;
                         break;
 
                     case '*': // Ainda pode finalizar o comentario
                         break;
 
                     default: // Comentario continua
-                        estado = ST_COMMENT;
+                        estado = ES_COMENTARIO;
                         break;
                 }
                 break;
 
             // :
-            case ST_OP_ATTRIB_START:
+            case ES_OP_ATRIB_INICIO:
                 if(c == '=') // :=
                 {
-                    tok.tipo_token = TK_OP_ATTRIB;
-                    estado = ST_END;
+                    tok.tipo_token = TK_OP_ATRIB;
+                    estado = ES_FIM;
                 }
                 else throw lex_nao_identificado(tok.lex);
                 break;
 
             // <
-            case ST_OP_LT:
+            case ES_OP_LT:
                 switch (c)
                 {
                     case '=': // <=
@@ -421,12 +421,12 @@ token_t lexer::proximo_token()
                         break;
                 }
 
-                estado = ST_END;
+                estado = ES_FIM;
 
                 break;
 
             // >
-            case ST_OP_GT:
+            case ES_OP_GT:
                 switch (c)
                 {
                     case '=': // >=
@@ -439,7 +439,7 @@ token_t lexer::proximo_token()
                         break;
                 }
 
-                estado = ST_END;
+                estado = ES_FIM;
 
                 break;
 
@@ -456,7 +456,7 @@ token_t lexer::proximo_token()
             tok.lex += c;
         }
 
-    } while (estado != ST_END);
+    } while (estado != ES_FIM);
 
     if (backtrack)
         fseek(arq_fonte, -1, SEEK_CUR);
@@ -478,7 +478,7 @@ token_t lexer::proximo_token()
             // Pode ser uma palavra reservada
             tok.tipo_token = tok.simbolo->tipo_token;
 
-            // Se estiver na tabela de simbolos e seja constante, e boleano
+            // Se estiver na tabela de simbolos e for constante, e boleano
             if (tok.tipo_token == TK_CONST)
                 tok.tipo_constante = CONST_BOOL;
         }
