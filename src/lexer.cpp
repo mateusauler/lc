@@ -120,7 +120,7 @@ token_t lexer::proximo_token()
                         break;
 
                     case '[':
-                        tok.tipo_token = TK_GRU_O_COL;
+                        tok.tipo_token = TK_GRU_A_COL;
                         estado = ES_FIM;
                         break;
 

@@ -23,7 +23,7 @@ enum tipo_token_t
 
     TK_GRU_A_PAR,   // (
     TK_GRU_F_PAR,   // )
-    TK_GRU_O_COL,   // [
+    TK_GRU_A_COL,   // [
     TK_GRU_F_COL,   // ]
     TK_GRU_A_CHA,   // {
     TK_GRU_F_CHA,   // }
@@ -48,7 +48,7 @@ enum tipo_token_t
     TK_RES_READLN,  // readln
     TK_RES_MAIN,    // main
 
-    TK_FIM_DECL,     // ;
+    TK_FIM_DECL,    // ;
     TK_EOF          // EOF
 };
 

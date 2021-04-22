@@ -159,8 +159,8 @@ void parser::var(tipo_dados_t tipo)
 
             break;
 
-        case TK_GRU_O_COL: // "[" CONST "]"
-            consome_token(TK_GRU_O_COL); // [
+        case TK_GRU_A_COL: // "[" CONST "]"
+            consome_token(TK_GRU_A_COL); // [
             consome_token(TK_CONST);     // CONST
             consome_token(TK_GRU_F_COL); // ]
             break;
@@ -202,9 +202,9 @@ void parser::cmd_s()
             if (rt->classe == CL_NULL) throw id_nao_declarado(lex);
 
             // [ "[" Exp "]" ]
-            if (token_lido.tipo_token == TK_GRU_O_COL)
+            if (token_lido.tipo_token == TK_GRU_A_COL)
             {
-                consome_token(TK_GRU_O_COL); // [
+                consome_token(TK_GRU_A_COL); // [
                 exp();
                 consome_token(TK_GRU_F_COL); // ]
             }
@@ -219,9 +219,9 @@ void parser::cmd_s()
             consome_token(TK_ID);         // ID
 
             // [ "[" Exp "]" ]
-            if (token_lido.tipo_token == TK_GRU_O_COL)
+            if (token_lido.tipo_token == TK_GRU_A_COL)
             {
-                consome_token(TK_GRU_O_COL); // [
+                consome_token(TK_GRU_A_COL); // [
                 exp();
                 consome_token(TK_GRU_F_COL); // ]
             }
@@ -459,9 +459,9 @@ void parser::fator()
             consome_token(TK_ID); // ID
 
             // [ "[" Exp "]" ]
-            if(token_lido.tipo_token == TK_GRU_O_COL)
+            if(token_lido.tipo_token == TK_GRU_A_COL)
             {
-                consome_token(TK_GRU_O_COL); // [
+                consome_token(TK_GRU_A_COL); // [
                 exp();
                 consome_token(TK_GRU_F_COL); // ]
             }
