@@ -55,7 +55,7 @@ token_t lexer::proximo_token()
 
     token_t tok;
 
-    do
+    while (estado != ES_FIM)
     {
         c = fgetc(arq_fonte);
 
@@ -75,133 +75,126 @@ token_t lexer::proximo_token()
             case ES_INICIO:
                 // Limpa o lexema
                 tok.lex = "";
-
-                if (E_CHAR(c))
-                    estado = ES_ID_NOME;
-                else if (c > '0' && E_DIGITO(c))
-                    estado = ES_CONST_NUM;
-                else
+                switch(c)
                 {
-                    switch(c)
-                    {
-                        case '_':
-                            estado = ES_ID_UNDERLINE;
-                            break;
+                    case '_':
+                        estado = ES_ID_UNDERLINE;
+                        break;
 
-                        case '0':
-                            estado = ES_CONST_HEX_INICIO;
-                            break;
+                    case '0':
+                        estado = ES_CONST_HEX_INICIO;
+                        break;
 
-                        case '\'':
-                            estado = ES_CONST_CHAR_INICIO;
-                            break;
+                    case '\'':
+                        estado = ES_CONST_CHAR_INICIO;
+                        break;
 
-                        case '"':
-                            estado = ES_CONST_STR_INTERNO;
-                            break;
+                    case '"':
+                        estado = ES_CONST_STR_INTERNO;
+                        break;
 
-                        case '/':
-                            estado = ES_OP_BARRA;
-                            break;
+                    case '/':
+                        estado = ES_OP_BARRA;
+                        break;
 
-                        case ':':
-                            estado = ES_OP_ATRIB_INICIO;
-                            break;
+                    case ':':
+                        estado = ES_OP_ATRIB_INICIO;
+                        break;
 
-                        case '<':
-                            estado = ES_OP_LT;
-                            break;
+                    case '<':
+                        estado = ES_OP_LT;
+                        break;
 
-                        case '>':
-                            estado = ES_OP_GT;
-                            break;
+                    case '>':
+                        estado = ES_OP_GT;
+                        break;
 
-                        case '{':
-                            tok.tipo_token = TK_GRU_A_CHA;
-                            estado = ES_FIM;
-                            break;
+                    case '{':
+                        tok.tipo_token = TK_GRU_A_CHA;
+                        estado = ES_FIM;
+                        break;
 
-                        case '}':
-                            tok.tipo_token = TK_GRU_F_CHA;
-                            estado = ES_FIM;
-                            break;
+                    case '}':
+                        tok.tipo_token = TK_GRU_F_CHA;
+                        estado = ES_FIM;
+                        break;
 
-                        case '[':
-                            tok.tipo_token = TK_GRU_O_COL;
-                            estado = ES_FIM;
-                            break;
+                    case '[':
+                        tok.tipo_token = TK_GRU_O_COL;
+                        estado = ES_FIM;
+                        break;
 
-                        case ']':
-                            tok.tipo_token = TK_GRU_F_COL;
-                            estado = ES_FIM;
-                            break;
+                    case ']':
+                        tok.tipo_token = TK_GRU_F_COL;
+                        estado = ES_FIM;
+                        break;
 
-                        case '(':
-                            tok.tipo_token = TK_GRU_A_PAR;
-                            estado = ES_FIM;
-                            break;
+                    case '(':
+                        tok.tipo_token = TK_GRU_A_PAR;
+                        estado = ES_FIM;
+                        break;
 
-                        case ')':
-                            tok.tipo_token = TK_GRU_F_PAR;
-                            estado = ES_FIM;
-                            break;
+                    case ')':
+                        tok.tipo_token = TK_GRU_F_PAR;
+                        estado = ES_FIM;
+                        break;
 
-                        case '%':
-                            tok.tipo_token = TK_OP_PORCENTO;
-                            estado = ES_FIM;
-                            break;
+                    case '%':
+                        tok.tipo_token = TK_OP_PORCENTO;
+                        estado = ES_FIM;
+                        break;
 
-                        case '*':
-                            tok.tipo_token = TK_OP_MUL;
-                            estado = ES_FIM;
-                            break;
+                    case '*':
+                        tok.tipo_token = TK_OP_MUL;
+                        estado = ES_FIM;
+                        break;
 
-                        case '+':
-                            tok.tipo_token = TK_OP_MAIS;
-                            estado = ES_FIM;
-                            break;
+                    case '+':
+                        tok.tipo_token = TK_OP_MAIS;
+                        estado = ES_FIM;
+                        break;
 
-                        case '-':
-                            tok.tipo_token = TK_OP_MENOS;
-                            estado = ES_FIM;
-                            break;
+                    case '-':
+                        tok.tipo_token = TK_OP_MENOS;
+                        estado = ES_FIM;
+                        break;
 
-                        case ',':
-                            tok.tipo_token = TK_OP_VIRGULA;
-                            estado = ES_FIM;
-                            break;
+                    case ',':
+                        tok.tipo_token = TK_OP_VIRGULA;
+                        estado = ES_FIM;
+                        break;
 
-                        case ';':
-                            tok.tipo_token = TK_FIM_DECL;
-                            estado = ES_FIM;
-                            break;
+                    case ';':
+                        tok.tipo_token = TK_FIM_DECL;
+                        estado = ES_FIM;
+                        break;
 
-                        case '=':
-                            tok.tipo_token = TK_OP_EQ;
-                            estado = ES_FIM;
-                            break;
+                    case '=':
+                        tok.tipo_token = TK_OP_EQ;
+                        estado = ES_FIM;
+                        break;
 
-                        case EOF:
-                            tok.tipo_token = TK_EOF;
-                            estado = ES_FIM;
-                            break;
+                    case EOF:
+                        tok.tipo_token = TK_EOF;
+                        estado = ES_FIM;
+                        break;
 
-                        case ' ':
-                        case '\r':
-                        case '\n':
-                        case '\t':
-                            break;
+                    case ' ':
+                    case '\r':
+                    case '\n':
+                    case '\t':
+                        break;
 
-                        default:
-                            throw lex_nao_identificado(tok.lex + c);
-                    }
+                    default:
+                        if      (E_CHAR(c))   estado = ES_ID_NOME;
+                        else if (E_DIGITO(c)) estado = ES_CONST_NUM;
+                        else throw lex_nao_identificado(tok.lex + c);
                 }
                 break;
 
             // {_}+
             case ES_ID_UNDERLINE:
-                if (E_CHAR(c)
-                 || E_DIGITO(c))
+                if (E_CHAR(c) || E_DIGITO(c))
                     estado = ES_ID_NOME;
                 else if (c != '_') // Somente {_}+ e invalido
                     throw lex_nao_identificado(tok.lex);
@@ -210,9 +203,7 @@ token_t lexer::proximo_token()
 
             // {_}(LETRA | DIGITO){LETRA | DIGITO | _}
             case ES_ID_NOME:
-                if (E_CHAR(c)
-                 || E_DIGITO(c)
-                 || (c == '_'))
+                if (E_CHAR(c) || E_DIGITO(c) || (c == '_'))
                     estado = ES_ID_NOME;
                 else
                 {
@@ -240,8 +231,7 @@ token_t lexer::proximo_token()
 
             // 0(A-F)
             case ES_CONST_HEX_ALPHA1:
-                if (E_DIGITO(c)
-                || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
+                if (E_DIGITO(c) || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
                     estado = ES_CONST_HEX_ALPHA2;
                 else
                     throw lex_nao_identificado(tok.lex);
@@ -456,8 +446,7 @@ token_t lexer::proximo_token()
 
             tok.lex += c;
         }
-
-    } while (estado != ES_FIM);
+    }
 
     if (backtrack)
         fseek(arq_fonte, -1, SEEK_CUR);
