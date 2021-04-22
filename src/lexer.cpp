@@ -189,6 +189,7 @@ token_t lexer::proximo_token()
                         if      (E_CHAR(c))   estado = ES_ID_NOME;
                         else if (E_DIGITO(c)) estado = ES_CONST_NUM;
                         else throw lex_nao_identificado(tok.lex + c);
+                        break;
                 }
                 break;
 
