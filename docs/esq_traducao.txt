@@ -137,8 +137,11 @@ Fator -> not (23) Fator1 (24) | "(" Exp (25) ")" | ID (26) [ "[" Exp (27) "]" ] 
 }
 25- Fator.tipo = Exp.tipo
 26- {
-    Fator.tipo = ID.tipo
-    Fator.tamanho = ID.tamanho
+    se ID em T.S.
+        Fator.tipo = ID.tipo
+        Fator.tamanho = ID.tamanho
+    senao
+        Erro
 }
 27- {
     se ID.tamanho == 0
