@@ -20,7 +20,7 @@ CmdT -> [CmdS] ; | CmdFor | CmdIf
 Exp -> Soma1 (17) [(=|<>|>|<|>=|<=) Soma2 (18)]
 Soma -> [+|-] Termo1 (19) {(+|-|or) Termo2 (20)}
 Termo -> Fator1 (21) {(*|/|%|and) Fator2 (22)}
-Fator -> not (23) Fator1 (24) | "(" Exp (25) ")" | ID (26) [ "[" Exp (27) "]" ] | CONST (28)
+Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" ] | CONST (28)
 
 
 1- DecVar.tipo = int
@@ -77,9 +77,12 @@ Fator -> not (23) Fator1 (24) | "(" Exp (25) ")" | ID (26) [ "[" Exp (27) "]" ] 
         CmdS.tamanho = 0
 }
 12- {
-    se Exp2.tipo != ID.tipo && ID.tipo != char && Exp2.tipo != string
-        Erro
-    senao se ID.tipo != Exp2.tipo && CmdS.tamanho < Exp2.tamanho
+    se ID.tipo != Exp2.tipo
+        se ID.tipo != char && Exp2.tipo != string
+            Erro
+        senao se CmdS.tamanho < Exp2.tamanho
+            Erro
+    senao se CmdS.tamanho > 0
         Erro
 }
 13- {
@@ -100,42 +103,68 @@ Fator -> not (23) Fator1 (24) | "(" Exp (25) ")" | ID (26) [ "[" Exp (27) "]" ] 
     se Exp.tipo != boolean
         Erro
 }
-17- Exp.tipo = Soma1.tipo
-18- {
-    se Soma1.tipo != Soma2.tipo &&
-         (Soma1.tamanho == 0 || Soma2.tamanho == 0)   ||
-        ((Soma1.tipo != char && Soma2.tipo != string) ||
-         (Soma2.tipo != char && Soma1.tipo != string))
-        Erro
-    senao se operador != (=|<>) && (Soma1.tipo == string || Soma2.tipo == string || Soma1.tamanho > 0 || Soma2.tamanho > 0)
-        Erro
-    senao
-        Exp.tipo = boolean
+17- {
+    Exp.tipo = Soma1.tipo
+    Exp.tamanho = Soma1.tamanho
 }
-19- Soma.tipo = Termo1.tipo
+18- {
+    se (Soma1.tipo != Soma2.tipo)
+        se (Soma1.tipo == char   && Soma2.tipo == string) ||
+           (Soma1.tipo == string && Soma2.tipo == char))
+            se Soma1.tamanho == 0 || Soma2.tamanho == 0
+                Erro
+            senao se operador != (=|<>)
+                Erro
+        senao
+            Erro
+    senao se operador == (=|<>)
+        se Soma1.tamanho != Soma2.tamanho && (Soma1.tamanho == 0 || Soma2.tamanho == 0)
+            Erro
+    senao se (Soma1.tamanho > 0 || Soma2.tamanho > 0)
+        Erro
+
+    Exp.tipo = boolean
+}
+19- {
+    Soma.tipo = Termo1.tipo
+    Soma.tamanho = Termo1.tamanho
+}
 20- {
     se Soma.tipo != Termo2.tipo
+        Erro
+    senao se Termo1.tamanho != 0 || Termo2.tamanho != 0
         Erro
     senao se operador == or && Soma.tipo != boolean
         Erro
     senao se (operador == + || operador == -) && Soma.tipo != int
         Erro
 }
-21- Termo.tipo = Fator1.tipo
+21- {
+    Termo.tipo = Fator1.tipo
+    Termo.tamanho = Fator1.tamanho
+}
 22- {
     se Termo.tipo != Fator2.tipo
+        Erro
+    senao se Fator1.tamanho != 0 || Fator2.tamanho != 0
         Erro
     senao se operador == and && Termo.tipo != boolean
         Erro
     senao se (operador == * || operador == / || operador == %) && Termo.tipo != int
         Erro
 }
-23- Fator.tipo = boolean
+23- {
+    Fator.tipo = boolean
+    Fator.tamanho = 0
+}
 24- {
     se Fator1.tipo != boolean
         Erro
 }
-25- Fator.tipo = Exp.tipo
+25- {
+    Fator.tipo = Exp1.tipo
+    Fator.tamanho = Exp1.tamanho
+}
 26- {
     se ID em T.S.
         Fator.tipo = ID.tipo
@@ -149,4 +178,7 @@ Fator -> not (23) Fator1 (24) | "(" Exp (25) ")" | ID (26) [ "[" Exp (27) "]" ] 
     senao
         Fator.tamanho = 0
 }
-28- Fator.tipo = CONST.tipo
+28- {
+    Fator.tipo = CONST.tipo
+    Fator.tamanho = CONST.tamanho
+}
