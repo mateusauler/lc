@@ -34,7 +34,7 @@ main
     /* este programa nao faz sentido */
 
     i_a := -5;
-    i_b := -2*a-1;
+    i_b := -2*i_a-1;
     i_e[4-2] := i_b%3;
 
     readln(i_c);
