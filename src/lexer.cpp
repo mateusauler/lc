@@ -46,14 +46,15 @@ int lexer::get_linha() const
     return num_linha;
 }
 
-token_t lexer::proximo_token()
+void lexer::proximo_token()
 {
     estado_t estado = ES_INICIO;
 
     char c;
     bool backtrack = false;
 
-    token_t tok;
+    if (token_lido) delete token_lido;
+    token_lido = new token_t();
 
     while (estado != ES_FIM)
     {
@@ -74,7 +75,7 @@ token_t lexer::proximo_token()
             // Qualquer caractere que nao e especificado explicitamente, e considerado erro
             case ES_INICIO:
                 // Limpa o lexema
-                tok.lex = "";
+                token_lido->lex = "";
                 switch(c)
                 {
                     case '_':
@@ -110,72 +111,72 @@ token_t lexer::proximo_token()
                         break;
 
                     case '{':
-                        tok.tipo_token = TK_GRU_A_CHA;
+                        token_lido->tipo_token = TK_GRU_A_CHA;
                         estado = ES_FIM;
                         break;
 
                     case '}':
-                        tok.tipo_token = TK_GRU_F_CHA;
+                        token_lido->tipo_token = TK_GRU_F_CHA;
                         estado = ES_FIM;
                         break;
 
                     case '[':
-                        tok.tipo_token = TK_GRU_A_COL;
+                        token_lido->tipo_token = TK_GRU_A_COL;
                         estado = ES_FIM;
                         break;
 
                     case ']':
-                        tok.tipo_token = TK_GRU_F_COL;
+                        token_lido->tipo_token = TK_GRU_F_COL;
                         estado = ES_FIM;
                         break;
 
                     case '(':
-                        tok.tipo_token = TK_GRU_A_PAR;
+                        token_lido->tipo_token = TK_GRU_A_PAR;
                         estado = ES_FIM;
                         break;
 
                     case ')':
-                        tok.tipo_token = TK_GRU_F_PAR;
+                        token_lido->tipo_token = TK_GRU_F_PAR;
                         estado = ES_FIM;
                         break;
 
                     case '%':
-                        tok.tipo_token = TK_OP_PORCENTO;
+                        token_lido->tipo_token = TK_OP_PORCENTO;
                         estado = ES_FIM;
                         break;
 
                     case '*':
-                        tok.tipo_token = TK_OP_MUL;
+                        token_lido->tipo_token = TK_OP_MUL;
                         estado = ES_FIM;
                         break;
 
                     case '+':
-                        tok.tipo_token = TK_OP_MAIS;
+                        token_lido->tipo_token = TK_OP_MAIS;
                         estado = ES_FIM;
                         break;
 
                     case '-':
-                        tok.tipo_token = TK_OP_MENOS;
+                        token_lido->tipo_token = TK_OP_MENOS;
                         estado = ES_FIM;
                         break;
 
                     case ',':
-                        tok.tipo_token = TK_OP_VIRGULA;
+                        token_lido->tipo_token = TK_OP_VIRGULA;
                         estado = ES_FIM;
                         break;
 
                     case ';':
-                        tok.tipo_token = TK_FIM_DECL;
+                        token_lido->tipo_token = TK_FIM_DECL;
                         estado = ES_FIM;
                         break;
 
                     case '=':
-                        tok.tipo_token = TK_OP_EQ;
+                        token_lido->tipo_token = TK_OP_EQ;
                         estado = ES_FIM;
                         break;
 
                     case EOF:
-                        tok.tipo_token = TK_EOF;
+                        token_lido->tipo_token = TK_EOF;
                         estado = ES_FIM;
                         break;
 
@@ -188,7 +189,7 @@ token_t lexer::proximo_token()
                     default:
                         if      (E_CHAR(c))   estado = ES_ID_NOME;
                         else if (E_DIGITO(c)) estado = ES_CONST_NUM;
-                        else throw lex_nao_identificado(tok.lex + c);
+                        else throw lex_nao_identificado(token_lido->lex + c);
                         break;
                 }
                 break;
@@ -198,7 +199,7 @@ token_t lexer::proximo_token()
                 if (E_CHAR(c) || E_DIGITO(c))
                     estado = ES_ID_NOME;
                 else if (c != '_') // Somente {_}+ e invalido
-                    throw lex_nao_identificado(tok.lex);
+                    throw lex_nao_identificado(token_lido->lex);
 
                 break;
 
@@ -208,7 +209,7 @@ token_t lexer::proximo_token()
                     estado = ES_ID_NOME;
                 else
                 {
-                    tok.tipo_token = TK_ID;
+                    token_lido->tipo_token = TK_ID;
                     estado = ES_FIM;
                     backtrack = true;
                 }
@@ -222,8 +223,8 @@ token_t lexer::proximo_token()
                     estado = ES_CONST_HEX_ALPHA1;
                 else // 0
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_INT;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_INT;
 
                     estado = ES_FIM;
                     backtrack = true;
@@ -235,7 +236,7 @@ token_t lexer::proximo_token()
                 if (E_DIGITO(c) || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
                     estado = ES_CONST_HEX_ALPHA2;
                 else
-                    throw lex_nao_identificado(tok.lex);
+                    throw lex_nao_identificado(token_lido->lex);
 
                 break;
 
@@ -247,8 +248,8 @@ token_t lexer::proximo_token()
                     estado = ES_CONST_HEX_ALPHA2;
                 else
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_INT;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_INT;
 
                     estado = ES_FIM;
                     backtrack = true;
@@ -259,13 +260,13 @@ token_t lexer::proximo_token()
             case ES_CONST_HEX_ALPHA2:
                 if (c == 'h') // 0 ((A-F)(A-F | 0-9) | (A-F | 0-9)(A-F)) h
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_HEX;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_HEX;
 
                     estado = ES_FIM;
                 }
                 else
-                    throw lex_nao_identificado(tok.lex);
+                    throw lex_nao_identificado(token_lido->lex);
 
                 break;
 
@@ -275,15 +276,15 @@ token_t lexer::proximo_token()
                     estado = ES_CONST_NUM;
                 else if (c == 'h') // 0(0-9)(0-9)h
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_HEX;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_HEX;
 
                     estado = ES_FIM;
                 }
                 else // 0(0-9)(0-9)
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_INT;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_INT;
 
                     estado = ES_FIM;
                     backtrack = true;
@@ -294,8 +295,8 @@ token_t lexer::proximo_token()
             case ES_CONST_NUM:
                 if (!E_DIGITO(c))
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_INT;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_INT;
 
                     estado = ES_FIM;
                     backtrack = true;
@@ -321,12 +322,12 @@ token_t lexer::proximo_token()
             case ES_CONST_CHAR_INTERNO:
                 if (c == '\'') // '(caractere)'
                 {
-                    tok.tipo_token = TK_CONST;
-                    tok.tipo_constante = CONST_CHAR;
+                    token_lido->tipo_token = TK_CONST;
+                    token_lido->tipo_constante = CONST_CHAR;
 
                     estado = ES_FIM;
                 }
-                else throw lex_nao_identificado(tok.lex);
+                else throw lex_nao_identificado(token_lido->lex);
                 break;
 
             // "{caractere}
@@ -334,15 +335,15 @@ token_t lexer::proximo_token()
                 switch (c)
                 {
                     case '"': // "{caractere}"
-                        tok.tipo_token = TK_CONST;
-                        tok.tipo_constante = CONST_STR;
+                        token_lido->tipo_token = TK_CONST;
+                        token_lido->tipo_constante = CONST_STR;
                         estado = ES_FIM;
                         break;
 
                     case '$':
                     case '\n':
                     case '\r':
-                        throw lex_nao_identificado(tok.lex);
+                        throw lex_nao_identificado(token_lido->lex);
 
                     default:
                         break;
@@ -355,7 +356,7 @@ token_t lexer::proximo_token()
                     estado = ES_COMENTARIO;
                 else // /
                 {
-                    tok.tipo_token = TK_OP_BARRA;
+                    token_lido->tipo_token = TK_OP_BARRA;
 
                     backtrack = true;
                     estado = ES_FIM;
@@ -389,10 +390,10 @@ token_t lexer::proximo_token()
             case ES_OP_ATRIB_INICIO:
                 if(c == '=') // :=
                 {
-                    tok.tipo_token = TK_OP_ATRIB;
+                    token_lido->tipo_token = TK_OP_ATRIB;
                     estado = ES_FIM;
                 }
-                else throw lex_nao_identificado(tok.lex);
+                else throw lex_nao_identificado(token_lido->lex);
                 break;
 
             // <
@@ -400,15 +401,15 @@ token_t lexer::proximo_token()
                 switch (c)
                 {
                     case '=': // <=
-                        tok.tipo_token = TK_OP_LE;
+                        token_lido->tipo_token = TK_OP_LE;
                         break;
 
                     case '>': // <>
-                        tok.tipo_token = TK_OP_NE;
+                        token_lido->tipo_token = TK_OP_NE;
                         break;
 
                     default: // <
-                        tok.tipo_token = TK_OP_LT;
+                        token_lido->tipo_token = TK_OP_LT;
                         backtrack = true;
                         break;
                 }
@@ -422,11 +423,11 @@ token_t lexer::proximo_token()
                 switch (c)
                 {
                     case '=': // >=
-                        tok.tipo_token = TK_OP_GE;
+                        token_lido->tipo_token = TK_OP_GE;
                         break;
 
                     default: // >
-                        tok.tipo_token = TK_OP_GT;
+                        token_lido->tipo_token = TK_OP_GT;
                         backtrack = true;
                         break;
                 }
@@ -445,89 +446,87 @@ token_t lexer::proximo_token()
             if (c == '\n')
                 num_linha++;
 
-            tok.lex += c;
+            token_lido->lex += c;
         }
     }
 
     if (backtrack)
         fseek(arq_fonte, -1, SEEK_CUR);
 
-    int lex_len = tok.lex.length();
+    int lex_len = token_lido->lex.length();
 
-    if (tok.tipo_token == TK_ID)
+    if (token_lido->tipo_token == TK_ID)
     {
         // Se o lexema tiver mais de 32 caracteres, ignora a partir do 33
         if (lex_len > 32)
-            tok.lex.erase(32, tok.lex.length() - 32);
+            token_lido->lex.erase(32, token_lido->lex.length() - 32);
 
-        tok.simbolo = tbl_simbolos.buscar(tok.lex);
+        token_lido->simbolo = tbl_simbolos.buscar(token_lido->lex);
 
-        if (tok.simbolo == nullptr) // Caso seja um ID novo
-            tok.simbolo = tbl_simbolos.inserir(tok.tipo_token, tok.lex);
+        if (token_lido->simbolo == nullptr) // Caso seja um ID novo
+            token_lido->simbolo = tbl_simbolos.inserir(token_lido->tipo_token, token_lido->lex);
         else
         {
             // Pode ser uma palavra reservada
-            tok.tipo_token = tok.simbolo->tipo_token;
+            token_lido->tipo_token = token_lido->simbolo->tipo_token;
 
             // Se estiver na tabela de simbolos e for constante, e boleano
-            if (tok.tipo_token == TK_CONST)
-                tok.tipo_constante = CONST_BOOL;
+            if (token_lido->tipo_token == TK_CONST)
+                token_lido->tipo_constante = CONST_BOOL;
         }
     }
 
-    if (tok.tipo_token == TK_CONST)
+    if (token_lido->tipo_token == TK_CONST)
     {
-        switch (tok.tipo_constante)
+        switch (token_lido->tipo_constante)
         {
             case CONST_NULL:
-                tok.tam_constante = 0;
+                token_lido->tam_constante = 0;
                 break;
 
             case CONST_INT:
-                tok.tam_constante = 2;
+                token_lido->tam_constante = 2;
                 break;
 
             case CONST_CHAR:
             case CONST_HEX:
-                tok.tam_constante = 1;
+                token_lido->tam_constante = 1;
                 break;
 
             case CONST_STR:
-                tok.tam_constante = lex_len - 1;
+                token_lido->tam_constante = lex_len - 1;
                 break;
 
             case CONST_BOOL:
-                tok.tam_constante = 1;
+                token_lido->tam_constante = 1;
                 break;
         }
     }
 
     // Calcula e preenche o valor de um token do tipo constante
-    switch (tok.tipo_constante)
+    switch (token_lido->tipo_constante)
     {
         case CONST_BOOL:
-            tok.valor_const = new bool(tok.lex == "TRUE");
+            token_lido->valor_const = new bool(token_lido->lex == "TRUE");
             break;
 
         case CONST_HEX:
-            tok.valor_const = new char(std::stoi(tok.lex.substr(1, 2), 0, 16));
+            token_lido->valor_const = new char(std::stoi(token_lido->lex.substr(1, 2), 0, 16));
             break;
 
         case CONST_CHAR:
-            tok.valor_const = new char(tok.lex[1]);
+            token_lido->valor_const = new char(token_lido->lex[1]);
             break;
 
         case CONST_INT:
-            tok.valor_const = new int(std::atoi(tok.lex.c_str()));
+            token_lido->valor_const = new int(std::atoi(token_lido->lex.c_str()));
             break;
 
         case CONST_STR:
-            tok.valor_const = new std::string(tok.lex.substr(1, tok.tam_constante - 1) + '$');
+            token_lido->valor_const = new std::string(token_lido->lex.substr(1, token_lido->tam_constante - 1) + '$');
             break;
 
         default:
             break;
     }
-
-    return tok;
 }

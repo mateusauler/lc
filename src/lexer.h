@@ -27,7 +27,10 @@ public:
     int get_linha() const;
 
     // Le o proximo token do arquivo fonte
-    token_t proximo_token();
+    void proximo_token();
+
+    // Ultimo token gerado pelo analisador lexico
+    token_t *token_lido = nullptr;
 
 private:
     int num_linha = 1; // Numero da linha atual do arquivo fonte

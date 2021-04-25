@@ -14,8 +14,6 @@ public:
 
 private:
 
-    token_t token_lido; // Ultimo token gerado pelo analisador lexico
-
     // Verifica se o token lido tem o tipo esperado e le o proximo
     void consome_token(tipo_token_t token_esperado);
 
