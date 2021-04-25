@@ -29,60 +29,6 @@ static tipo_dados_t converte_tipo_constante(tipo_constante_t t_const, bool aceit
     }
 }
 
-static operador_t converte_operacao(tipo_token_t token, bool aceita_null = true)
-{
-    switch(token)
-    {
-        case TK_OP_LT:       // <
-            return OP_LT;
-
-        case TK_OP_GT:       // >
-            return OP_GT;
-
-        case TK_OP_LE:       // <=
-            return OP_LE;
-
-        case TK_OP_GE:       // >=
-            return OP_GE;
-
-        case TK_OP_EQ:       // =
-            return OP_EQ;
-
-        case TK_OP_NE:       // <>
-            return OP_NE;
-
-        case TK_OP_MAIS:     // +
-            return OP_ADD;
-
-        case TK_OP_MENOS:    // -
-            return OP_SUB;
-
-        case TK_OP_MUL:      // *
-            return OP_MUL;
-
-        case TK_OP_BARRA:    // /
-            return OP_DIV;
-
-        case TK_OP_PORCENTO: // %
-            return OP_MOD;
-
-        case TK_RES_AND:     // and
-            return OP_AND;
-
-        case TK_RES_OR:      // or
-            return OP_OR;
-
-        case TK_RES_NOT:     // not
-            return OP_NOT;
-
-        default:
-            if (aceita_null)
-                return OP_NULL;
-            throw tipo_incompativel();
-
-    }
-}
-
 static int byte_tipo( tipo_dados_t tipo )
 {
     switch(tipo)
@@ -244,7 +190,7 @@ void parser::var(tipo_dados_t tipo)
             tipo_convertido = converte_tipo_constante(token_lido->tipo_constante);
             valor_array = *(int*)token_lido->valor_const;
 
-            consome_token(TK_CONST);     // CONST
+            consome_token(TK_CONST); // CONST
 
             // Ação 9
             if (tipo_convertido != TP_INT) throw tipo_incompativel();
@@ -252,7 +198,6 @@ void parser::var(tipo_dados_t tipo)
             rt->tam = valor_array;
 
             consome_token(TK_GRU_F_COL); // ]
-
 
             break;
 
@@ -515,8 +460,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
     tipo_dados_t tipo_soma;
     int tamanho_soma;
 
-    tipo_token_t token_operador;
-    operador_t operador;
+    tipo_token_t operador;
 
     // Ação 17
     soma(tipo, tamanho);
@@ -531,12 +475,10 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
         case TK_OP_GE: // >=
         case TK_OP_LE: // <=
 
-            token_operador = token_lido->tipo_token;
+            operador = token_lido->tipo_token;
 
             consome_token(token_lido->tipo_token); // (=|<>|>|<|>=|<=)
             soma(tipo_soma, tamanho_soma);
-
-            operador = converte_operacao(token_operador, false);
 
             // Ação 18
             if (tipo != tipo_soma)
@@ -544,12 +486,12 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
                 if ((tipo == TP_CHAR   && tipo_soma == TP_STRING) ||
                     (tipo == TP_STRING && tipo_soma == TP_CHAR))
                 {
-                    if ((tamanho == 0 || tamanho_soma == 0) || (operador != OP_EQ && operador != OP_NE))
+                    if ((tamanho == 0 || tamanho_soma == 0) || (operador != TK_OP_EQ && operador != TK_OP_NE))
                         throw tipo_incompativel();
                 }
                 else throw tipo_incompativel();
             }
-            if (operador == OP_EQ || operador == OP_NE)
+            if (operador == TK_OP_EQ || operador == TK_OP_NE)
             {
                 if (tamanho != tamanho_soma && (tamanho == 0 || tamanho_soma == 0))
                     throw tipo_incompativel();
@@ -573,8 +515,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
     tipo_dados_t tipo_termo;
     int tamanho_termo;
 
-    tipo_token_t token_operador;
-    operador_t operador;
+    tipo_token_t operador;
 
     // [+|-]
     if      (token_lido->tipo_token == TK_OP_MAIS)  consome_token(TK_OP_MAIS);  // +
@@ -592,7 +533,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
             case TK_OP_MENOS: // -
             case TK_RES_OR:   // or
 
-                token_operador = token_lido->tipo_token;
+                operador = token_lido->tipo_token;
 
                 consome_token(token_lido->tipo_token); // (+|-|or)
                 termo(tipo_termo, tamanho_termo);
@@ -604,16 +545,13 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
                 if (tamanho_termo != 0 || tamanho != 0)
                     throw tipo_incompativel();
 
-                operador = converte_operacao(token_operador, false);
-
-                if (operador == OP_OR)
+                if (operador == TK_RES_OR)
                 {
                     if (tipo != TP_BOOL)
                         throw tipo_incompativel();
                 }
                 else if (tipo != TP_INT)
                     throw tipo_incompativel();
-
 
                 break;
 
@@ -630,8 +568,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
     tipo_dados_t tipo_fator;
     int tamanho_fator;
 
-    tipo_token_t token_operador;
-    operador_t operador;
+    tipo_token_t operador;
 
     // Ação 21
     fator(tipo, tamanho);
@@ -646,7 +583,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
             case TK_OP_PORCENTO: // %
             case TK_RES_AND:     // and
 
-                token_operador = token_lido->tipo_token;
+                operador = token_lido->tipo_token;
 
                 consome_token(token_lido->tipo_token); // (*|/|%|and)
                 fator(tipo_fator, tamanho_fator);
@@ -658,9 +595,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
                 if (tamanho_fator != 0 || tamanho != 0)
                     throw tipo_incompativel();
 
-                operador = converte_operacao(token_operador, false);
-
-                if (operador == OP_AND)
+                if (operador == TK_RES_AND)
                 {
                     if (tipo != TP_BOOL)
                         throw tipo_incompativel();
@@ -747,11 +682,11 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
 
         default: // CONST
 
-            // Ação 28
             tipo_constante = token_lido->tipo_constante;
 
             consome_token(TK_CONST);
 
+            // Ação 28
             tipo = converte_tipo_constante(tipo_constante, false);
             tamanho = 0;
             break;

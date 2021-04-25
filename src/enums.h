@@ -106,25 +106,3 @@ enum tipo_dados_t
     TP_BOOL,
     TP_STRING
 };
-
-enum operador_t
-{
-    OP_NULL,
-
-    OP_NOT,
-    OP_AND,
-    OP_OR,
-
-    OP_MUL,
-    OP_DIV,
-    OP_MOD,
-    OP_ADD,
-    OP_SUB,
-
-    OP_EQ,
-    OP_NE,
-    OP_GT,
-    OP_LT,
-    OP_GE,
-    OP_LE
-};
