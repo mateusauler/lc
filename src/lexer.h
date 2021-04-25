@@ -22,6 +22,7 @@ public:
     tabela_simbolos tbl_simbolos;
 
     lexer(FILE *f) : arq_fonte(f) {}
+    ~lexer();
 
     // Retorna o numero da linha atual do arquivo fonte
     int get_linha() const;

@@ -41,6 +41,11 @@ token_t::~token_t()
     }
 }
 
+lexer::~lexer()
+{
+    delete token_lido;
+}
+
 int lexer::get_linha() const
 {
     return num_linha;
