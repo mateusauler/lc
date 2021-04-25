@@ -733,10 +733,11 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
 
             // Ação 28
             tipo_constante = token_lido->tipo_constante;
-            tipo = converte_tipo_constante(tipo_constante, false);
-            tamanho = token_lido->tam_constante;
 
             consome_token(TK_CONST);
+
+            tipo = converte_tipo_constante(tipo_constante, false);
+            tamanho = 0;
             break;
     }
 }
