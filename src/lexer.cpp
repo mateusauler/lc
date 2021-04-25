@@ -53,7 +53,8 @@ void lexer::proximo_token()
     char c;
     bool backtrack = false;
 
-    if (token_lido) delete token_lido;
+    if (token_lido && token_lido->tipo_token == TK_EOF) return;
+    delete token_lido;
     token_lido = new token_t();
 
     while (estado != ES_FIM)

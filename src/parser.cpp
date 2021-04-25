@@ -108,11 +108,7 @@ void parser::exec_parser()
 
 void parser::consome_token(tipo_token_t token_esperado)
 {
-    if (token_lido->tipo_token == token_esperado)
-    {
-        if (token_lido->tipo_token != TK_EOF)
-            proximo_token();
-    }
+    if      (token_lido->tipo_token == token_esperado) proximo_token();
     else if (token_lido->tipo_token == TK_EOF) throw eof_inesperado();
     else                                       throw token_invalido(token_lido->lex);
 }
