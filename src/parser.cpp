@@ -20,7 +20,7 @@ static tipo_dados_t converte_tipo_constante(tipo_constante_t t_const, bool aceit
             return TP_BOOL;
 
         case CONST_STR:
-            return TP_STRING;
+            return TP_STR;
 
         default:
             if (aceita_null)
@@ -142,7 +142,7 @@ void parser::dec_const()
 
     // Ação 6
     rt->tipo = converte_tipo_constante(tipo_constante, false);
-    if (rt->tipo == TP_STRING) throw tipo_incompativel();
+    if (rt->tipo == TP_STR) throw tipo_incompativel();
 
     consome_token(TK_FIM_DECL); // ;
 }
@@ -267,7 +267,7 @@ void parser::cmd_s()
             // Ação 12
             if (tipo_exp != rt->tipo)
             {
-                if (rt->tipo != TP_CHAR && tipo_exp != TP_STRING)
+                if (rt->tipo != TP_CHAR && tipo_exp != TP_STR)
                     throw tipo_incompativel();
 
                 if (tamanho < tamanho_exp)
@@ -483,8 +483,8 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
             // Ação 18
             if (tipo != tipo_soma)
             {
-                if ((tipo == TP_CHAR   && tipo_soma == TP_STRING) ||
-                    (tipo == TP_STRING && tipo_soma == TP_CHAR))
+                if ((tipo == TP_CHAR && tipo_soma == TP_STR) ||
+                    (tipo == TP_STR  && tipo_soma == TP_CHAR))
                 {
                     if ((tamanho == 0 || tamanho_soma == 0) || (operador != TK_OP_EQ && operador != TK_OP_NE))
                         throw tipo_incompativel();

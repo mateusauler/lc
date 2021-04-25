@@ -104,5 +104,5 @@ enum tipo_dados_t
     TP_INT,
     TP_CHAR,
     TP_BOOL,
-    TP_STRING
+    TP_STR
 };
