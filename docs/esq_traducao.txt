@@ -135,9 +135,10 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         Erro
     senao se Termo1.tamanho != 0 || Termo2.tamanho != 0
         Erro
-    senao se operador == or && Soma.tipo != boolean
-        Erro
-    senao se (operador == + || operador == -) && Soma.tipo != int
+    senao se operador == or
+        se Soma.tipo != boolean
+            Erro
+    senao se Soma.tipo != int
         Erro
 }
 21- {
@@ -149,9 +150,10 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         Erro
     senao se Fator1.tamanho != 0 || Fator2.tamanho != 0
         Erro
-    senao se operador == and && Termo.tipo != boolean
-        Erro
-    senao se (operador == * || operador == / || operador == %) && Termo.tipo != int
+    senao se operador == and
+        se Termo.tipo != boolean
+            Erro
+    senao se Termo.tipo != int
         Erro
 }
 23- {

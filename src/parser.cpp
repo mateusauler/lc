@@ -602,11 +602,21 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
                 termo(tipo_termo, tamanho_termo);
 
                 // Ação 20
-                if (tipo != tipo_termo) throw tipo_incompativel();
-                if (tamanho_termo != 0 || tamanho != 0) throw tipo_incompativel();
+                if (tipo != tipo_termo)
+                    throw tipo_incompativel();
+
+                if (tamanho_termo != 0 || tamanho != 0)
+                    throw tipo_incompativel();
+
                 operador = converte_operacao(token_operador, false);
-                if (operador == OP_OR && tipo != TP_BOOL) throw tipo_incompativel();
-                else if (tipo != TP_INT) throw tipo_incompativel();
+
+                if (operador == OP_OR)
+                {
+                    if (tipo != TP_BOOL)
+                        throw tipo_incompativel();
+                }
+                else if (tipo != TP_INT)
+                    throw tipo_incompativel();
 
 
                 break;
@@ -646,11 +656,21 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
                 fator(tipo_fator, tamanho_fator);
 
                 // Ação 22
-                if (tipo != tipo_fator) throw tipo_incompativel();
-                if (tamanho_fator != 0 || tamanho != 0) throw tipo_incompativel();
+                if (tipo != tipo_fator)
+                    throw tipo_incompativel();
+
+                if (tamanho_fator != 0 || tamanho != 0)
+                    throw tipo_incompativel();
+
                 operador = converte_operacao(token_operador, false);
-                if (operador == OP_AND && tipo != TP_BOOL) throw tipo_incompativel();
-                else if (tipo != TP_INT) throw tipo_incompativel();
+
+                if (operador == OP_AND)
+                {
+                    if (tipo != TP_BOOL)
+                        throw tipo_incompativel();
+                }
+                else if (tipo != TP_INT)
+                    throw tipo_incompativel();
 
                 break;
 
