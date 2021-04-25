@@ -50,15 +50,15 @@ private:
     void cmd_t();
 
     // Expressao
-    void exp();
+    void exp(tipo_dados_t &tipo, int &tamanho);
 
     // Lista de somas
-    void soma();
+    void soma(tipo_dados_t &tipo, int &tamanho);
 
     // Termo de somas (lista de multiplicacoes)
-    void termo();
+    void termo(tipo_dados_t &tipo, int &tamanho);
 
     // Fator de multiplicacoes
-    void fator();
+    void fator(tipo_dados_t &tipo, int &tamanho);
 
 };

@@ -11,21 +11,92 @@ static tipo_dados_t converte_tipo_constante(tipo_constante_t t_const, bool aceit
     {
         case CONST_INT:
             return TP_INT;
-            break;
 
         case CONST_CHAR:
         case CONST_HEX:
             return TP_CHAR;
-            break;
 
         case CONST_BOOL:
             return TP_BOOL;
-            break;
+
+        case CONST_STR:
+            return TP_STRING;
 
         default:
             if (aceita_null)
                 return TP_NULL;
             throw tipo_incompativel();
+    }
+}
+
+static operador_t converte_operacao(tipo_token_t token, bool aceita_null = true)
+{
+    switch(token)
+    {
+        case TK_OP_LT:       // <
+            return OP_LT;
+
+        case TK_OP_GT:       // >
+            return OP_GT;
+
+        case TK_OP_LE:       // <=
+            return OP_LE;
+
+        case TK_OP_GE:       // >=
+            return OP_GE;
+
+        case TK_OP_EQ:       // =
+            return OP_EQ;
+
+        case TK_OP_NE:       // <>
+            return OP_NE;
+
+        case TK_OP_MAIS:     // +
+            return OP_ADD;
+
+        case TK_OP_MENOS:    // -
+            return OP_SUB;
+
+        case TK_OP_MUL:      // *
+            return OP_MUL;
+
+        case TK_OP_BARRA:    // /
+            return OP_DIV;
+
+        case TK_OP_PORCENTO: // %
+            return OP_MOD;
+
+        case TK_RES_AND:     // and
+            return OP_AND;
+
+        case TK_RES_OR:      // or
+            return OP_OR;
+
+        case TK_RES_NOT:     // not
+            return OP_NOT;
+
+        default:
+            if(aceita_null)
+                return OP_NULL;
+            throw tipo_incompativel();
+
+    }
+}
+
+static int byte_tipo( tipo_dados_t tipo )
+{
+    switch(tipo)
+    {
+        case TP_INT:
+            return 2;
+
+        case TP_CHAR:
+        case TP_BOOL:
+            return 1;
+
+        default:
+            return 0;
+
     }
 }
 
@@ -72,26 +143,31 @@ void parser::dec_var()
     {
         case TK_RES_INT: // int
             consome_token(TK_RES_INT);
+            //Ação 1
             tipo = TP_INT;
             break;
 
         case TK_RES_CHAR: // char
             consome_token(TK_RES_CHAR);
+            //Ação 2
             tipo = TP_CHAR;
             break;
 
         default: // boolean
             consome_token(TK_RES_BOOLEAN);
+            //Ação 3
             tipo = TP_BOOL;
             break;
     }
 
+    //Ação 4
     var(tipo);
 
     // {, Var}
     while(token_lido.tipo_token == TK_OP_VIRGULA)
     {
         consome_token(TK_OP_VIRGULA); // ,
+        //Ação 4
         var(tipo);
     }
 
@@ -109,6 +185,7 @@ void parser::dec_const()
 
     consome_token(TK_ID); // ID
 
+    //Ação 5
     if (rt->classe != CL_NULL) throw id_ja_declarado(lex);
     rt->classe = CL_CONST;
 
@@ -121,7 +198,9 @@ void parser::dec_const()
 
     consome_token(TK_CONST); // CONST
 
+    //Ação 6
     rt->tipo = converte_tipo_constante(tipo_constante, false);
+    if(rt->tipo == TP_STRING) throw tipo_incompativel();
 
     consome_token(TK_FIM_DECL); // ;
 }
@@ -136,8 +215,11 @@ void parser::var(tipo_dados_t tipo)
     tipo_constante_t tipo_constante;
     tipo_dados_t tipo_convertido;
 
+    void *valor_array;
+
     consome_token(TK_ID); // ID
 
+    //Ação 7
     if(rt->classe != CL_NULL) throw id_ja_declarado(lex);
     rt->classe = CL_VAR;
     rt->tipo = tipo;
@@ -154,6 +236,7 @@ void parser::var(tipo_dados_t tipo)
 
             consome_token(TK_CONST); // CONST
 
+            //Ação 8
             tipo_convertido = converte_tipo_constante(tipo_constante, false);
             if (tipo_convertido != tipo) throw tipo_incompativel();
 
@@ -161,8 +244,20 @@ void parser::var(tipo_dados_t tipo)
 
         case TK_GRU_A_COL: // "[" CONST "]"
             consome_token(TK_GRU_A_COL); // [
+
+            tipo_convertido = converte_tipo_constante(token_lido.tipo_constante);
+            valor_array = token_lido.valor_const;
+
             consome_token(TK_CONST);     // CONST
+
+            //Ação 9
+            if(tipo_convertido != TP_INT) throw tipo_incompativel();
+            if( *(int*)valor_array * byte_tipo(tipo) > 8192) throw tam_vet_excede_max();
+            rt->tam = *(int*)valor_array;
+
             consome_token(TK_GRU_F_COL); // ]
+
+
             break;
 
         default:
@@ -191,6 +286,11 @@ void parser::cmd_s()
     registro_tabela_simbolos *rt;
     std::string lex;
 
+    tipo_dados_t tipo_exp;
+    int tamanho_exp;
+
+    int tamanho;
+
     switch (token_lido.tipo_token)
     {
         case TK_ID: // ID [ "[" Exp "]" ] := Exp
@@ -199,30 +299,63 @@ void parser::cmd_s()
 
             consome_token(TK_ID); // ID
 
+            // if(!rt) throw std::exception();
+
+            //Ação 10
             if (rt->classe == CL_NULL) throw id_nao_declarado(lex);
+            if (rt->classe == CL_CONST) throw classe_id_incompativel(lex);
+
+            tamanho = rt->tam;
 
             // [ "[" Exp "]" ]
             if (token_lido.tipo_token == TK_GRU_A_COL)
             {
                 consome_token(TK_GRU_A_COL); // [
-                exp();
+                exp(tipo_exp, tamanho_exp);
+
+                //Regra 11
+                if(tipo_exp != TP_INT) throw tipo_incompativel();
+                if(tamanho == 0) throw tipo_incompativel();
+                tamanho = 0;
+
                 consome_token(TK_GRU_F_COL); // ]
             }
 
             consome_token(TK_OP_ATRIB); // :=
-            exp();
+            exp(tipo_exp, tamanho_exp);
+
+            //Regra 12
+            if(tipo_exp != rt->tipo)
+            {
+                if(rt->tipo != TP_CHAR && tipo_exp != TP_STRING) throw tipo_incompativel();
+                if(tamanho < tamanho_exp) throw tipo_incompativel();
+            }
+            if(tamanho > 0 ) throw tipo_incompativel();
+
+
             break;
 
         case TK_RES_READLN: // readln "(" ID [ "[" Exp "]" ] ")"
             consome_token(TK_RES_READLN); // readln
             consome_token(TK_GRU_A_PAR);  // (
+
+            rt = token_lido.simbolo;
+
             consome_token(TK_ID);         // ID
+
+            //Regra 13
+            if (rt->classe == CL_NULL) throw id_nao_declarado(lex);
+            if (rt->classe == CL_CONST) throw classe_id_incompativel(lex);
 
             // [ "[" Exp "]" ]
             if (token_lido.tipo_token == TK_GRU_A_COL)
             {
                 consome_token(TK_GRU_A_COL); // [
-                exp();
+                exp(tipo_exp, tamanho_exp);
+
+                //Regra 14
+                if(tipo_exp != TP_INT) throw tipo_incompativel();
+
                 consome_token(TK_GRU_F_COL); // ]
             }
 
@@ -234,13 +367,13 @@ void parser::cmd_s()
             else                                       consome_token(TK_RES_WRITELN); // writeln
 
             consome_token(TK_GRU_A_PAR); // (
-            exp();
+            exp(tipo_exp, tamanho_exp);
 
             // {, Exp}
             while (token_lido.tipo_token == TK_OP_VIRGULA) // ,
             {
                 consome_token(TK_OP_VIRGULA);
-                exp();
+                exp(tipo_exp, tamanho_exp);
             }
 
             consome_token(TK_GRU_F_PAR); // )
@@ -251,6 +384,9 @@ void parser::cmd_s()
 void parser::cmd_for()
 {
     // for "(" [Cmd {, Cmd}] ; Exp ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
+
+    tipo_dados_t tipo_exp;
+    int tamanho_exp;
 
     consome_token(TK_RES_FOR);   // for
     consome_token(TK_GRU_A_PAR); // (
@@ -269,7 +405,11 @@ void parser::cmd_for()
     }
     consome_token(TK_FIM_DECL); // ;
 
-    exp();
+    exp(tipo_exp, tamanho_exp);
+
+    //Regra 15
+    if(tipo_exp != TP_BOOL) throw tipo_incompativel();
+
     consome_token(TK_FIM_DECL); // ;
 
     // [Cmd {, Cmd}]
@@ -296,10 +436,16 @@ void parser::cmd_if()
 {
     // if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
 
+    tipo_dados_t tipo_exp;
+    int tamanho_exp;
+
     consome_token(TK_RES_IF);    // if
     consome_token(TK_GRU_A_PAR); // (
 
-    exp();
+    exp(tipo_exp, tamanho_exp);
+
+    //Regra 16
+    if(tipo_exp != TP_BOOL) throw tipo_incompativel();
 
     consome_token(TK_GRU_F_PAR); // )
 
@@ -361,11 +507,19 @@ void parser::cmd()
     }
 }
 
-void parser::exp()
+void parser::exp(tipo_dados_t &tipo, int &tamanho)
 {
     // Soma [(=|<>|>|<|>=|<=) Soma]
 
-    soma();
+    tipo_dados_t tipo_soma;
+    int tamanho_soma;
+
+    tipo_token_t token_operador;
+    operador_t operador;
+
+    //Regra 17
+    soma(tipo, tamanho);
+
 
     // [(=|<>|>|<|>=|<=) Soma]
     switch (token_lido.tipo_token)
@@ -376,8 +530,33 @@ void parser::exp()
         case TK_OP_LT: // <
         case TK_OP_GE: // >=
         case TK_OP_LE: // <=
+
+            token_operador = token_lido.tipo_token;
+
             consome_token(token_lido.tipo_token); // (=|<>|>|<|>=|<=)
-            soma();
+            soma(tipo_soma, tamanho_soma);
+
+            operador = converte_operacao(token_operador, false);
+
+            //Regra 18
+            if(tipo != tipo_soma)
+            {
+                if ( (tipo == TP_CHAR && tipo_soma == TP_STRING) ||
+                     (tipo == TP_STRING && tipo_soma == TP_CHAR) )
+                {
+                    if(tamanho == 0 || tamanho_soma == 0) throw tipo_incompativel();
+                    if(operador != OP_EQ && operador != OP_NE) throw tipo_incompativel();
+                }
+                else throw tipo_incompativel();
+            }
+            if(operador == OP_EQ || operador == OP_NE)
+            {
+                if  (tamanho != tamanho_soma && (tamanho == 0 || tamanho_soma == 0) ) throw tipo_incompativel();
+            }
+            else if(tamanho > 0 || tamanho_soma > 0) throw tipo_incompativel();
+
+            tipo = TP_BOOL;
+
         break;
 
         default:
@@ -385,15 +564,22 @@ void parser::exp()
     }
 }
 
-void parser::soma()
+void parser::soma(tipo_dados_t &tipo, int &tamanho)
 {
     // [+|-] Termo {(+|-|or) Termo}
+
+    tipo_dados_t tipo_termo;
+    int tamanho_termo;
+
+    tipo_token_t token_operador;
+    operador_t operador;
 
     // [+|-]
     if      (token_lido.tipo_token == TK_OP_MAIS)  consome_token(TK_OP_MAIS);  // +
     else if (token_lido.tipo_token == TK_OP_MENOS) consome_token(TK_OP_MENOS); // -
 
-    termo();
+    //Regra 19
+    termo(tipo, tamanho);
 
     // {(+|-|or) Termo}
     while (true)
@@ -403,8 +589,20 @@ void parser::soma()
             case TK_OP_MAIS:  // +
             case TK_OP_MENOS: // -
             case TK_RES_OR:   // or
+
+                token_operador = token_lido.tipo_token;
+
                 consome_token(token_lido.tipo_token); // (+|-|or)
-                termo();
+                termo(tipo_termo, tamanho_termo);
+
+                //Regra 20
+                if(tipo != tipo_termo) throw tipo_incompativel();
+                if(tamanho_termo != 0 || tamanho != 0) throw tipo_incompativel();
+                operador = converte_operacao(token_operador, false);
+                if(operador == OP_OR && tipo != TP_BOOL) throw tipo_incompativel();
+                else if(tipo != TP_INT) throw tipo_incompativel();
+
+
                 break;
 
             default:
@@ -413,11 +611,18 @@ void parser::soma()
     }
 }
 
-void parser::termo()
+void parser::termo(tipo_dados_t &tipo, int &tamanho)
 {
     // Fator {(*|/|%|and) Fator}
 
-    fator();
+    tipo_dados_t tipo_fator;
+    int tamanho_fator;
+
+    tipo_token_t token_operador;
+    operador_t operador;
+
+    //Regra 21
+    fator(tipo, tamanho);
 
     // {(*|/|%|and) Fator}
     while (true)
@@ -428,8 +633,19 @@ void parser::termo()
             case TK_OP_BARRA:    // /
             case TK_OP_PORCENTO: // %
             case TK_RES_AND:     // and
+
+                token_operador = token_lido.tipo_token;
+
                 consome_token(token_lido.tipo_token); // (*|/|%|and)
-                fator();
+                fator(tipo_fator, tamanho_fator);
+
+                //Regra 22
+                if(tipo != tipo_fator) throw tipo_incompativel();
+                if(tamanho_fator != 0 || tamanho != 0) throw tipo_incompativel();
+                operador = converte_operacao(token_operador, false);
+                if(operador == OP_AND && tipo != TP_BOOL) throw tipo_incompativel();
+                else if(tipo != TP_INT) throw tipo_incompativel();
+
                 break;
 
             default:
@@ -438,36 +654,87 @@ void parser::termo()
     }
 }
 
-void parser::fator()
+void parser::fator(tipo_dados_t &tipo, int &tamanho)
 {
     // not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
+
+    tipo_dados_t tipo_exp;
+    int tamanho_exp;
+
+    tipo_dados_t tipo_fator;
+    int tamanho_fator;
+
+    tipo_constante_t tipo_constante;
+
+    registro_tabela_simbolos *rt = token_lido.simbolo;
+    std::string lex = token_lido.lex;
+
 
     switch (token_lido.tipo_token)
     {
         case TK_RES_NOT: // not Fator
             consome_token(TK_RES_NOT); // not
-            fator();
+
+            //Regra 23
+            tipo = TP_BOOL;
+            tamanho = 0;
+
+            fator(tipo_fator, tamanho_fator);
+
+            //Regra 24
+            if(tipo_fator != TP_BOOL) throw tipo_incompativel();
+
+
             break;
 
         case TK_GRU_A_PAR: // "(" Exp ")"
             consome_token(TK_GRU_A_PAR); // (
-            exp();
+            exp(tipo_exp, tamanho_exp);
+
+            //Regra 25
+            tipo = tipo_exp;
+            tamanho = tamanho_exp;
+
+
             consome_token(TK_GRU_F_PAR); // )
             break;
 
         case TK_ID: // ID [ "[" Exp "]" ]
+
+
             consome_token(TK_ID); // ID
+
+            //Regra 26
+            if (rt->classe != CL_NULL)
+            {
+                tipo = rt->tipo;
+                tamanho = rt->tam;
+            }
+            else throw id_nao_declarado(lex);
+
+
 
             // [ "[" Exp "]" ]
             if(token_lido.tipo_token == TK_GRU_A_COL)
             {
                 consome_token(TK_GRU_A_COL); // [
-                exp();
+                exp(tipo_exp, tamanho_exp);
+
+                //Regra 27
+                if(rt->tam == 0) throw tipo_incompativel();
+                else tamanho = 0;
+
                 consome_token(TK_GRU_F_COL); // ]
             }
             break;
 
         default: // CONST
+
+            //Regra 28
+            tipo_constante = token_lido.tipo_constante;
+            tipo = converte_tipo_constante(tipo_constante, false);
+            tamanho = token_lido.tam_constante;
+
             consome_token(TK_CONST);
             break;
     }
