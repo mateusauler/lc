@@ -47,6 +47,7 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         Erro
     senao
         ID.simbolo->classe = variavel
+        ID.simbolo->tipo = Var.tipo
 }
 8- {
     se CONST.tipo != Var.tipo
