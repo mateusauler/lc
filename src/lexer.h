@@ -11,9 +11,6 @@ struct token_t
 
     tipo_constante_t tipo_constante = CONST_NULL;
     int tam_constante = 0;
-    void *valor_const = nullptr;
-
-    ~token_t();
 };
 
 class lexer

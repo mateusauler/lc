@@ -15,32 +15,6 @@
 #define E_CHAR(c)  ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 #define E_DIGITO(c) (c >= '0' && c <= '9')
 
-token_t::~token_t()
-{
-    switch (tipo_constante)
-    {
-        case CONST_BOOL:
-            delete (bool*)valor_const;
-            break;
-
-        case CONST_HEX:
-        case CONST_CHAR:
-            delete (char*)valor_const;
-            break;
-
-        case CONST_INT:
-            delete (int*)valor_const;
-            break;
-
-        case CONST_STR:
-            delete (std::string*)valor_const;
-            break;
-
-        default:
-            break;
-    }
-}
-
 lexer::~lexer()
 {
     delete token_lido;
@@ -507,32 +481,5 @@ void lexer::proximo_token()
                 token_lido->tam_constante = 1;
                 break;
         }
-    }
-
-    // Calcula e preenche o valor de um token do tipo constante
-    switch (token_lido->tipo_constante)
-    {
-        case CONST_BOOL:
-            token_lido->valor_const = new bool(token_lido->lex == "TRUE");
-            break;
-
-        case CONST_HEX:
-            token_lido->valor_const = new char(std::stoi(token_lido->lex.substr(1, 2), 0, 16));
-            break;
-
-        case CONST_CHAR:
-            token_lido->valor_const = new char(token_lido->lex[1]);
-            break;
-
-        case CONST_INT:
-            token_lido->valor_const = new int(std::atoi(token_lido->lex.c_str()));
-            break;
-
-        case CONST_STR:
-            token_lido->valor_const = new std::string(token_lido->lex.substr(1, token_lido->tam_constante - 1) + '$');
-            break;
-
-        default:
-            break;
     }
 }

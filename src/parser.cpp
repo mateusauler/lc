@@ -188,12 +188,14 @@ void parser::var(tipo_dados_t tipo)
             consome_token(TK_GRU_A_COL); // [
 
             tipo_convertido = converte_tipo_constante(token_lido->tipo_constante);
-            valor_array = *(int*)token_lido->valor_const;
+            lex = token_lido->lex;
             linha_erro = num_linha;
 
             consome_token(TK_CONST); // CONST
 
             // Ação 9
+            valor_array = std::atoi(lex.c_str());
+
             if (tipo_convertido != TP_INT) throw tipo_incompativel(linha_erro);
             if (valor_array * byte_tipo(tipo) > 8192) throw tam_vet_excede_max(linha_erro);
             rt->tam = valor_array;
