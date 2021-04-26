@@ -68,11 +68,11 @@ void lexer::proximo_token()
 
         // O unico estado que aceita EOF e o estado inicial
         if (c == EOF && estado != ES_INICIO)
-            throw eof_inesperado();
+            throw eof_inesperado(num_linha);
 
         // Caractere invalido
         if (!CHAR_VALIDO(c))
-            throw char_invalido();
+            throw char_invalido(num_linha);
 
         switch (estado)
         {
@@ -195,7 +195,7 @@ void lexer::proximo_token()
                     default:
                         if      (E_CHAR(c))   estado = ES_ID_NOME;
                         else if (E_DIGITO(c)) estado = ES_CONST_NUM;
-                        else throw lex_nao_identificado(token_lido->lex + c);
+                        else throw lex_nao_identificado(token_lido->lex + c, num_linha);
                         break;
                 }
                 break;
@@ -205,7 +205,7 @@ void lexer::proximo_token()
                 if (E_CHAR(c) || E_DIGITO(c))
                     estado = ES_ID_NOME;
                 else if (c != '_') // Somente {_}+ e invalido
-                    throw lex_nao_identificado(token_lido->lex);
+                    throw lex_nao_identificado(token_lido->lex, num_linha);
 
                 break;
 
@@ -242,7 +242,7 @@ void lexer::proximo_token()
                 if (E_DIGITO(c) || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
                     estado = ES_CONST_HEX_ALPHA2;
                 else
-                    throw lex_nao_identificado(token_lido->lex);
+                    throw lex_nao_identificado(token_lido->lex, num_linha);
 
                 break;
 
@@ -272,7 +272,7 @@ void lexer::proximo_token()
                     estado = ES_FIM;
                 }
                 else
-                    throw lex_nao_identificado(token_lido->lex);
+                    throw lex_nao_identificado(token_lido->lex, num_linha);
 
                 break;
 
@@ -316,7 +316,7 @@ void lexer::proximo_token()
                     case '\n':
                     case '\r':
                     case '\'':
-                        throw char_invalido();
+                        throw char_invalido(num_linha);
 
                     default:
                         estado = ES_CONST_CHAR_INTERNO;
@@ -333,7 +333,7 @@ void lexer::proximo_token()
 
                     estado = ES_FIM;
                 }
-                else throw lex_nao_identificado(token_lido->lex);
+                else throw lex_nao_identificado(token_lido->lex, num_linha);
                 break;
 
             // "{caractere}
@@ -349,7 +349,7 @@ void lexer::proximo_token()
                     case '$':
                     case '\n':
                     case '\r':
-                        throw lex_nao_identificado(token_lido->lex);
+                        throw lex_nao_identificado(token_lido->lex, num_linha);
 
                     default:
                         break;
@@ -399,7 +399,7 @@ void lexer::proximo_token()
                     token_lido->tipo_token = TK_OP_ATRIB;
                     estado = ES_FIM;
                 }
-                else throw lex_nao_identificado(token_lido->lex);
+                else throw lex_nao_identificado(token_lido->lex, num_linha);
                 break;
 
             // <

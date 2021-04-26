@@ -28,7 +28,7 @@ main(int argc, char* argv[])
     catch (const erro_fonte& e)
     {
         // Imprime o numero da linha, seguido da mensagem de erro
-        std::cout << p.get_linha() << std::endl;
+        std::cout << e.linha_erro << std::endl;
         std::cout << e.what() << std::endl;
 
         erro = true;

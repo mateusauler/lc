@@ -6,14 +6,14 @@
 class N : public erro_fonte \
 { \
 public: \
-    N() : erro_fonte(M) {} \
+    N(const int l) : erro_fonte(M, l) {} \
 }
 
 #define exc_lexema(N, M) \
 class N : public erro_fonte \
 { \
 public: \
-    N(std::string lex) : erro_fonte(M) {} \
+    N(std::string lex, const int l) : erro_fonte(M, l) {} \
 }
 
 class erro_fonte : public std::exception
@@ -22,7 +22,9 @@ protected:
     std::string msg;
 
 public:
-    erro_fonte(std::string m) : msg(m) {}
+    const int linha_erro;
+
+    erro_fonte(std::string m, const int l) : msg(m), linha_erro(l) {}
 
     const char * what() const throw() { return msg.c_str(); }
 };

@@ -33,7 +33,9 @@ public:
     // Ultimo token gerado pelo analisador lexico
     token_t *token_lido = nullptr;
 
-private:
+protected:
     int num_linha = 1; // Numero da linha atual do arquivo fonte
+
+private:
     FILE *arq_fonte;
 };
