@@ -12,6 +12,8 @@ SRC  != cd ${SRCDIR} ; ls *.cpp 2> /dev/null
 OBJ   = ${SRC:%.cpp=${DESTDIR}/%.o}
 HEAD != ls ${SRCDIR}/*.h 2> /dev/null
 
+SRCFILES != ls ${SRCDIR}/* | grep -E "\.(cpp|h)$$"
+
 all: ${DESTDIR} ${TARGET}
 
 ${OBJ}: ${DESTDIR}/%.o:${SRCDIR}/%.cpp ${HEAD}
@@ -23,10 +25,13 @@ ${TARGET}: ${OBJ}
 ${DESTDIR}:
 	mkdir -p ${DESTDIR}
 
-${TARGET}.cpp:
+${TARGET}.cpp: ${SRCFILES}
 	scripts/combineFiles.sh
 
 combine: ${TARGET}.cpp
+
+combined: combine
+	${CC} -o ${TARGET} ${TARGET}.cpp ${CFLAGS} ${LDFLAGS}
 
 test: all combine
 	scripts/test.sh
@@ -34,4 +39,4 @@ test: all combine
 clean:
 	rm -rf ${DESTDIR}/* ${TARGET} ${TARGET}.cpp vgcore.*
 
-.PHONY: all clean test combine
+.PHONY: all clean test combine combined

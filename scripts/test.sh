@@ -49,7 +49,7 @@ if [ ! -z "$erros" ] ; then
     exit 1
 fi
 
-SRCDIR=. make -e --no-print-directory
+make combined > /dev/null
 
 run_tests
 
