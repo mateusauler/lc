@@ -80,5 +80,8 @@ main
         ordenado := ordenado + 1;
     }
 
-    writeln(array);
+    for (i := 0; i < 49; i := i + 1)
+        write(array[i], ", ");
+
+    writeln(array[49]);
 }
