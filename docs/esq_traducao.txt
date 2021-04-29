@@ -1,15 +1,15 @@
 Prog -> {DecVar|DecConst} main BlocoCmd EOF
 
 DecVar -> (int (1) | char (2) | boolean (3)) (4) Var1 {, Var2} ;
-DecConst -> final ID (5) = [-] CONST (6) ;
+DecConst -> final ID (5) = [- (29) ] CONST (6) ;
 
-Var -> ID (7) [:= [-] CONST (8) | "[" CONST (9) "]" ]
+Var -> ID (7) [:= [- (30) ] CONST (8) | "[" CONST (9) "]" ]
 
 BlocoCmd -> "{" {CmdT} "}"
 
 CmdS -> ID (10) [ "[" Exp1 (11) "]" ] := Exp2 (12)
-CmdS -> readln "(" ID (13) [ "[" Exp (14) "]" ] ")"
-CmdS -> (write | writeln) "(" Exp {, Exp} ")"
+CmdS -> readln "(" ID (13) [ "[" Exp (14) "]" ] (32) ")"
+CmdS -> (write | writeln) "(" Exp1 (33) {, Exp2 (34) } ")"
 
 CmdFor -> for "(" [Cmd {, Cmd}] ; Exp (15) ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
 CmdIf -> if "(" Exp (16) ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
@@ -18,7 +18,7 @@ Cmd -> CmdS | CmdFor | CmdIf
 CmdT -> [CmdS] ; | CmdFor | CmdIf
 
 Exp -> Soma1 (17) [(=|<>|>|<|>=|<=) Soma2 (18)]
-Soma -> [-] Termo1 (19) {(+|-|or) Termo2 (20)}
+Soma -> [- (31) ] Termo1 (19) {(+|-|or) Termo2 (20)}
 Termo -> Fator1 (21) {(*|/|%|and) Fator2 (22)}
 Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" ] | CONST (28)
 
@@ -39,6 +39,8 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
 6- {
     se CONST.tipo = string
         Erro
+    se negacao && CONST.tipo != int
+        Erro
     senao
         ID.simbolo->tipo = CONST.tipo
 }
@@ -52,11 +54,13 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
 8- {
     se CONST.tipo != Var.tipo
         Erro
+    se negacao && CONST.tipo != int
+        Erro
 }
 9- {
     se CONST.tipo != int
         Erro
-    senao se CONST.valr * ID.tipo.tamanho > 8Kb
+    senao se CONST.valor * ID.tipo.tamanho > 8Kb
         Erro
     senao
         ID.tamanho = CONST.valor
@@ -70,9 +74,7 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         CmdS.tamanho = ID.tamanho
 }
 11- {
-    se Exp1.tipo != int
-        Erro
-    senao se CmdS.tamanho == 0
+    se Exp1.tipo != int || Exp1.tamanho > 0 || CmdS.tamanho == 0
         Erro
     senao
         CmdS.tamanho = 0
@@ -89,11 +91,15 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
 13- {
     se ID nao em T.S.
         Erro
-    senao se ID.classe = constante
+    se ID.classe == constante
         Erro
+    se ID.tipo == boolean
+        Erro
+
+    CmdS.tamanho = ID.tamanho
 }
 14- {
-    se Exp.tipo != ID.tipo
+    se Exp.tipo != int || Exp.tamanho > 0 || CmdS.tamanho == 0
         Erro
 }
 15- {
@@ -124,6 +130,9 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
     Exp.tipo = boolean
 }
 19- {
+    se negacao && (Termo1.tipo != int || Termo1.tamanho > 0)
+        Erro
+
     Soma.tipo = Termo1.tipo
     Soma.tamanho = Termo1.tamanho
 }
@@ -173,12 +182,31 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         Erro
 }
 27- {
-    se ID.tamanho == 0
+    se ID.tamanho == 0 || Exp2.tipo != int || Exp2.tamanho > 0
         Erro
-    senao
-        Fator.tamanho = 0
+
+    Fator.tamanho = 0
 }
 28- {
     Fator.tipo = CONST.tipo
     Fator.tamanho = CONST.tamanho
+}
+29- Lembrar da negacao
+30- Lembrar da negacao
+31- Lembrar da negacao
+32- {
+    se CmdS.tamanho > 0 && ID.tipo != char
+        Erro
+}
+33- {
+    se Exp1.tipo == boolean
+        Erro
+    se Exp1.tamanho > 0 && Exp1.tipo == int
+        Erro
+}
+34- {
+    se Exp2.tipo == boolean
+        Erro
+    se Exp2.tamanho > 0 && Exp2.tipo == int
+        Erro
 }
