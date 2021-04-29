@@ -114,7 +114,7 @@ void parser::dec_var()
 
 void parser::dec_const()
 {
-    // final ID = [+|-] CONST ;
+    // final ID = [-] CONST ;
 
     consome_token(TK_RES_FINAL); // final
 
@@ -130,8 +130,9 @@ void parser::dec_const()
 
     consome_token(TK_OP_EQ); // =
 
-    if      (token_lido->tipo_token == TK_OP_MAIS)  consome_token(TK_OP_MAIS);  // +
-    else if (token_lido->tipo_token == TK_OP_MENOS) consome_token(TK_OP_MENOS); // -
+    // [-]
+    if (token_lido->tipo_token == TK_OP_MENOS)
+        consome_token(TK_OP_MENOS);
 
     tipo_constante_t tipo_constante = token_lido->tipo_constante;
     linha_erro = num_linha;
@@ -147,7 +148,7 @@ void parser::dec_const()
 
 void parser::var(tipo_dados_t tipo)
 {
-    // ID [:= [+|-] CONST | "[" CONST "]" ]
+    // ID [:= [-] CONST | "[" CONST "]" ]
 
     registro_tabela_simbolos *rt = token_lido->simbolo;
     std::string lex = token_lido->lex;
@@ -167,11 +168,12 @@ void parser::var(tipo_dados_t tipo)
 
     switch (token_lido->tipo_token)
     {
-        case TK_OP_ATRIB: // := [+|-] CONST
+        case TK_OP_ATRIB: // := [-] CONST
             consome_token(TK_OP_ATRIB); // :=
 
-            if      (token_lido->tipo_token == TK_OP_MAIS)  consome_token(TK_OP_MAIS);  // +
-            else if (token_lido->tipo_token == TK_OP_MENOS) consome_token(TK_OP_MENOS); // -
+            // [-]
+            if (token_lido->tipo_token == TK_OP_MENOS)
+                consome_token(TK_OP_MENOS);
 
             tipo_constante = token_lido->tipo_constante;
             linha_erro = num_linha;
@@ -529,16 +531,16 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
 
 void parser::soma(tipo_dados_t &tipo, int &tamanho)
 {
-    // [+|-] Termo {(+|-|or) Termo}
+    // [-] Termo {(+|-|or) Termo}
 
     tipo_dados_t tipo_termo;
     int tamanho_termo;
 
     tipo_token_t operador;
 
-    // [+|-]
-    if      (token_lido->tipo_token == TK_OP_MAIS)  consome_token(TK_OP_MAIS);  // +
-    else if (token_lido->tipo_token == TK_OP_MENOS) consome_token(TK_OP_MENOS); // -
+    // [-]
+    if (token_lido->tipo_token == TK_OP_MENOS)
+        consome_token(TK_OP_MENOS);
 
     int linha_erro;
 

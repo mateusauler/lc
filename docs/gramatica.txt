@@ -1,9 +1,9 @@
 Prog -> {DecVar|DecConst} main BlocoCmd EOF
 
 DecVar -> (int | char | boolean) Var {, Var} ;
-DecConst -> final ID = [+|-] CONST ;
+DecConst -> final ID = [-] CONST ;
 
-Var -> ID [:= [+|-] CONST | "[" CONST "]" ]
+Var -> ID [:= [-] CONST | "[" CONST "]" ]
 
 BlocoCmd -> "{" {CmdT} "}"
 
@@ -18,6 +18,6 @@ Cmd -> CmdS | CmdFor | CmdIf
 CmdT -> [CmdS] ; | CmdFor | CmdIf
 
 Exp -> Soma [(=|<>|>|<|>=|<=) Soma]
-Soma -> [+|-] Termo {(+|-|or) Termo}
+Soma -> [-] Termo {(+|-|or) Termo}
 Termo -> Fator {(*|/|%|and) Fator}
 Fator -> not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
