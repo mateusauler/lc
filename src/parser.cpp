@@ -510,15 +510,10 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
                 if ((tipo == TP_CHAR && tipo_soma == TP_STR) ||
                     (tipo == TP_STR  && tipo_soma == TP_CHAR))
                 {
-                    if ((tamanho == 0 || tamanho_soma == 0) || (operador != TK_OP_EQ && operador != TK_OP_NE))
+                    if ((tamanho == 0 || tamanho_soma == 0) || operador != TK_OP_EQ)
                         throw tipo_incompativel(linha_erro);
                 }
                 else throw tipo_incompativel(linha_erro);
-            }
-            if (operador == TK_OP_EQ || operador == TK_OP_NE)
-            {
-                if (tamanho != tamanho_soma && (tamanho == 0 || tamanho_soma == 0))
-                    throw tipo_incompativel(linha_erro);
             }
             else if (tamanho > 0 || tamanho_soma > 0)
                 throw tipo_incompativel(linha_erro);
