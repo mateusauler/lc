@@ -460,25 +460,12 @@ void lexer::proximo_token()
     {
         switch (token_lido->tipo_constante)
         {
-            case CONST_NULL:
-                token_lido->tam_constante = 0;
-                break;
-
-            case CONST_INT:
-                token_lido->tam_constante = 2;
-                break;
-
-            case CONST_CHAR:
-            case CONST_HEX:
-                token_lido->tam_constante = 1;
-                break;
-
             case CONST_STR:
                 token_lido->tam_constante = lex_len - 1;
                 break;
 
-            case CONST_BOOL:
-                token_lido->tam_constante = 1;
+            default:
+                token_lido->tam_constante = 0;
                 break;
         }
     }

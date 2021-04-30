@@ -690,8 +690,6 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
     tipo_dados_t tipo_fator;
     int tamanho_fator;
 
-    tipo_constante_t tipo_constante;
-
     int linha_erro;
 
     registro_tabela_simbolos *rt = token_lido->simbolo;
@@ -759,13 +757,12 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
 
         default: // CONST
 
-            tipo_constante = token_lido->tipo_constante;
+            // Ação 28
+            tipo = converte_tipo_constante(token_lido->tipo_constante);
+            tamanho = token_lido->tam_constante;
 
             consome_token(TK_CONST);
 
-            // Ação 28
-            tipo = converte_tipo_constante(tipo_constante);
-            tamanho = 0;
             break;
     }
 }
