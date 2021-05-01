@@ -90,7 +90,11 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         senao se CmdS.tamanho < Exp2.tamanho
             Erro
     senao se CmdS.tamanho > 0
-        Erro
+        se ID.tipo == char
+            se CmdS.tamanho < Exp2.tamanho
+                Erro
+        senao
+            Erro
 }
 13- {
     se ID nao em T.S.

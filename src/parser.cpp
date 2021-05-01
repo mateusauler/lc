@@ -298,7 +298,15 @@ void parser::cmd_s()
                     throw tipo_incompativel(linha_erro);
             }
             else if (tamanho > 0)
-                throw tipo_incompativel(linha_erro);
+            {
+                if (rt->tipo == TP_CHAR)
+                {
+                    if (tamanho < tamanho_exp)
+                        throw tipo_incompativel(linha_erro);
+                }
+                else
+                    throw tipo_incompativel(linha_erro);
+            }
 
             break;
 
