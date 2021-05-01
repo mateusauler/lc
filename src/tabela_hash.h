@@ -23,11 +23,11 @@ class tabela_hash
 protected:
 
     hash_bkt<T> **tabela;
-    int tamanho_tbl; // Numero de buckets da tabela
+    const unsigned int tamanho_tbl; // Numero de buckets da tabela
 
 public:
 
-    tabela_hash(int tamanho = 128);
+    tabela_hash(const unsigned int tamanho = 128);
 
     ~tabela_hash();
 
@@ -49,11 +49,8 @@ public:
 };
 
 template<typename T>
-tabela_hash<T>::tabela_hash(int tamanho) : tamanho_tbl(tamanho)
+tabela_hash<T>::tabela_hash(const unsigned int tamanho) : tamanho_tbl(tamanho)
 {
-    if (tamanho_tbl <= 0)
-        tamanho_tbl = 128;
-
     tabela = new hash_bkt<T> *[tamanho];
 
     // Todos os itens da tabela sao inicialmente um ponteiro nulo
@@ -64,7 +61,7 @@ template<typename T>
 tabela_hash<T>::~tabela_hash()
 {
     // Limpa todos os membros de cada entrada da tabela
-    for (int i = 0; i < tamanho_tbl; ++i)
+    for (unsigned int i = 0; i < tamanho_tbl; ++i)
     {
         if (tabela[i])
         {
