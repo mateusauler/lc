@@ -15,7 +15,9 @@ struct token_t
 
 class lexer
 {
+
 public:
+
     tabela_simbolos tbl_simbolos;
 
     lexer(FILE *f) : arq_fonte(f) {}
@@ -31,8 +33,11 @@ public:
     token_t *token_lido = nullptr;
 
 protected:
+
     int num_linha = 1; // Numero da linha atual do arquivo fonte
 
 private:
+
     FILE *arq_fonte;
+
 };

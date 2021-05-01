@@ -29,10 +29,15 @@ public:
     const char * what() const throw() { return msg.c_str(); }
 };
 
+// Lexico
 exc_simples(char_invalido,         "caractere invalido.");
 exc_lexema(lex_nao_identificado,   "lexema nao identificado [" + lex + "].");
-exc_lexema(token_invalido,         "token nao esperado [" + lex + "].");
 exc_simples(eof_inesperado,        "fim de arquivo nao esperado.");
+
+// Sintatico
+exc_lexema(token_invalido,         "token nao esperado [" + lex + "].");
+
+// Semantico
 exc_lexema(id_nao_declarado,       "identificador nao declarado [" + lex + "].");
 exc_lexema(id_ja_declarado,        "identificador ja declarado [" + lex + "].");
 exc_lexema(classe_id_incompativel, "classe de identificador incompativel [" + lex + "].");

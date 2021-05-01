@@ -1,9 +1,9 @@
 #include <iostream>
+
 #include "parser.h"
 #include "excessoes.h"
 
-int
-main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     FILE *f;
 

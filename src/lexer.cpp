@@ -12,8 +12,8 @@
                        (c == ']'   || c == '_') || \
                        (c == '}'))
 
-#define E_CHAR(c)  ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-#define E_DIGITO(c) (c >= '0' && c <= '9')
+#define LETRA(c)  ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+#define DIGITO(c) (c >= '0' && c <= '9')
 
 lexer::~lexer()
 {
@@ -32,8 +32,11 @@ void lexer::proximo_token()
     char c;
     bool backtrack = false;
 
-    if (token_lido && token_lido->tipo_token == TK_EOF) return;
+    if (token_lido && token_lido->tipo_token == TK_EOF)
+        return;
+
     delete token_lido;
+
     token_lido = new token_t();
 
     while (estado != ES_FIM)
@@ -167,8 +170,8 @@ void lexer::proximo_token()
                         break;
 
                     default:
-                        if      (E_CHAR(c))   estado = ES_ID_NOME;
-                        else if (E_DIGITO(c)) estado = ES_CONST_NUM;
+                        if      (LETRA(c))  estado = ES_ID_NOME;
+                        else if (DIGITO(c)) estado = ES_CONST_NUM;
                         else throw lex_nao_identificado(token_lido->lex + c, num_linha);
                         break;
                 }
@@ -176,7 +179,7 @@ void lexer::proximo_token()
 
             // {_}+
             case ES_ID_UNDERLINE:
-                if (E_CHAR(c) || E_DIGITO(c))
+                if (LETRA(c) || DIGITO(c))
                     estado = ES_ID_NOME;
                 else if (c != '_') // Somente {_}+ e invalido
                     throw lex_nao_identificado(token_lido->lex, num_linha);
@@ -185,7 +188,7 @@ void lexer::proximo_token()
 
             // {_}(LETRA | DIGITO){LETRA | DIGITO | _}
             case ES_ID_NOME:
-                if (E_CHAR(c) || E_DIGITO(c) || (c == '_'))
+                if (LETRA(c) || DIGITO(c) || (c == '_'))
                     estado = ES_ID_NOME;
                 else
                 {
@@ -197,7 +200,7 @@ void lexer::proximo_token()
 
             // 0
             case ES_CONST_HEX_INICIO:
-                if (E_DIGITO(c)) // 0(0-9)
+                if (DIGITO(c)) // 0(0-9)
                     estado = ES_CONST_HEX_NUM1;
                 else if (c >= 'A' && c <= 'F') // 0(A-F)
                     estado = ES_CONST_HEX_ALPHA1;
@@ -213,7 +216,7 @@ void lexer::proximo_token()
 
             // 0(A-F)
             case ES_CONST_HEX_ALPHA1:
-                if (E_DIGITO(c) || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
+                if (DIGITO(c) || (c >= 'A' && c <= 'F')) // 0(A-F)(A-F | 0-9)
                     estado = ES_CONST_HEX_ALPHA2;
                 else
                     throw lex_nao_identificado(token_lido->lex, num_linha);
@@ -222,7 +225,7 @@ void lexer::proximo_token()
 
             // 0(0-9)
             case ES_CONST_HEX_NUM1:
-                if (E_DIGITO(c)) // 0(0-9)(0-9)
+                if (DIGITO(c)) // 0(0-9)(0-9)
                     estado = ES_CONST_HEX_NUM2;
                 else if (c >= 'A' && c <= 'F') // 0(0-9)(A-F)
                     estado = ES_CONST_HEX_ALPHA2;
@@ -245,14 +248,13 @@ void lexer::proximo_token()
 
                     estado = ES_FIM;
                 }
-                else
-                    throw lex_nao_identificado(token_lido->lex, num_linha);
+                else throw lex_nao_identificado(token_lido->lex, num_linha);
 
                 break;
 
             // 0(0-9)(0-9)
             case ES_CONST_HEX_NUM2:
-                if (E_DIGITO(c)) // 0(0-9)(0-9)(0-9)
+                if (DIGITO(c)) // 0(0-9)(0-9)(0-9)
                     estado = ES_CONST_NUM;
                 else if (c == 'h') // 0(0-9)(0-9)h
                 {
@@ -273,7 +275,7 @@ void lexer::proximo_token()
 
             // {0-9}+
             case ES_CONST_NUM:
-                if (!E_DIGITO(c))
+                if (!DIGITO(c))
                 {
                     token_lido->tipo_token = TK_CONST;
                     token_lido->tipo_constante = CONST_INT;
@@ -443,7 +445,7 @@ void lexer::proximo_token()
 
         token_lido->simbolo = tbl_simbolos.buscar(token_lido->lex);
 
-        if (token_lido->simbolo == nullptr) // Caso seja um ID novo
+        if (!token_lido->simbolo) // Caso seja um ID novo
             token_lido->simbolo = tbl_simbolos.inserir(token_lido->tipo_token, token_lido->lex);
         else
         {

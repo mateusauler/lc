@@ -21,10 +21,12 @@ class tabela_hash
 {
 
 protected:
+
     hash_bkt<T> **tabela;
     int tamanho_tbl; // Numero de buckets da tabela
 
 public:
+
     tabela_hash(int tamanho = 128);
 
     ~tabela_hash();
@@ -66,7 +68,6 @@ tabela_hash<T>::~tabela_hash()
     {
         if (tabela[i])
         {
-
             hash_bkt<T> *tmp = tabela[i];
             hash_bkt<T> *prox;
 
