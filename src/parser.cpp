@@ -558,7 +558,14 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
                 else throw tipo_incompativel(linha_erro);
             }
             else if (tamanho > 0 || tamanho_soma > 0)
-                throw tipo_incompativel(linha_erro);
+            {
+                if (tipo == TP_CHAR)
+                {
+                    if (operador != TK_OP_EQ || tamanho == 0 || tamanho_soma == 0)
+                        throw tipo_incompativel(linha_erro);
+                }
+                else throw tipo_incompativel(linha_erro);
+            }
 
             tipo = TP_BOOL;
 
@@ -756,8 +763,10 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
                 exp(tipo_exp, tamanho_exp);
 
                 // Ação 27
-                if (rt->tam == 0 || tipo_exp != TP_INT || tamanho_exp > 0) throw tipo_incompativel(linha_erro);
-                else tamanho = 0;
+                if (rt->tam == 0 || tipo_exp != TP_INT || tamanho_exp > 0)
+                    throw tipo_incompativel(linha_erro);
+                else
+                    tamanho = 0;
 
                 consome_token(TK_GRU_F_COL); // ]
             }
