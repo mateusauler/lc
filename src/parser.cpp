@@ -225,6 +225,9 @@ void parser::var(tipo_dados_t tipo)
             if (tipo_convertido != TP_INT)
                 throw tipo_incompativel(linha_erro);
 
+            if (valor_array == 0)
+                throw tipo_incompativel(linha_erro);
+
             if (valor_array * byte_tipo(tipo) > 8192)
                 throw tam_vet_excede_max(linha_erro);
 
@@ -317,12 +320,17 @@ void parser::cmd_s()
             {
                 if (rt->tipo == TP_CHAR)
                 {
+                    if (tamanho_exp == 0)
+                        throw tipo_incompativel(linha_erro);
+
                     if (tamanho < tamanho_exp)
                         throw tipo_incompativel(linha_erro);
                 }
                 else
                     throw tipo_incompativel(linha_erro);
             }
+            else if (tamanho_exp > 0)
+                throw tipo_incompativel(linha_erro);
 
             break;
 
@@ -431,7 +439,7 @@ void parser::cmd_for()
     exp(tipo_exp, tamanho_exp);
 
     // Ação 15
-    if (tipo_exp != TP_BOOL)
+    if (tipo_exp != TP_BOOL || tamanho_exp > 0)
         throw tipo_incompativel(linha_erro);
 
     consome_token(TK_FIM_DECL); // ;
@@ -471,7 +479,7 @@ void parser::cmd_if()
     exp(tipo_exp, tamanho_exp);
 
     // Ação 16
-    if (tipo_exp != TP_BOOL)
+    if (tipo_exp != TP_BOOL || tamanho_exp > 0)
         throw tipo_incompativel(linha_erro);
 
     consome_token(TK_GRU_F_PAR); // )
@@ -590,6 +598,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
             }
 
             tipo = TP_BOOL;
+            tamanho = 0;
 
         break;
 
@@ -654,6 +663,8 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
                 else if (tipo != TP_INT)
                     throw tipo_incompativel(linha_erro);
 
+                tamanho = 0;
+
                 break;
 
             default:
@@ -709,6 +720,8 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
                 else if (tipo != TP_INT)
                     throw tipo_incompativel(linha_erro);
 
+                tamanho = 0;
+
                 break;
 
             default:
@@ -747,7 +760,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
             fator(tipo_fator, tamanho_fator);
 
             // Ação 24
-            if (tipo_fator != TP_BOOL)
+            if (tipo_fator != TP_BOOL || tamanho_fator > 0)
                 throw tipo_incompativel(linha_erro);
 
             break;

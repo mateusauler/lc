@@ -63,6 +63,9 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
     se CONST.tipo != int
         Erro
 
+    se CONST.valor == 0
+        Erro
+
     se CONST.valor * ID.tipo.tamanho > 8Kb
         Erro
 
@@ -87,14 +90,19 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
     se ID.tipo != Exp2.tipo
         se ID.tipo != char && Exp2.tipo != string
             Erro
-        senao se CmdS.tamanho < Exp2.tamanho
+        se CmdS.tamanho < Exp2.tamanho
             Erro
     senao se CmdS.tamanho > 0
         se ID.tipo == char
+            se Exp2.tamanho == 0
+                Erro
+
             se CmdS.tamanho < Exp2.tamanho
                 Erro
         senao
             Erro
+    senao se Exp2.tamanho > 0
+        Erro
 }
 13- {
     se ID nao em T.S.
@@ -113,11 +121,11 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         Erro
 }
 15- {
-    se Exp.tipo != boolean
+    se Exp.tipo != boolean || Exp.tamanho > 0
         Erro
 }
 16- {
-    se Exp.tipo != boolean
+    se Exp.tipo != boolean || Exp.tamanho > 0
         Erro
 }
 17- {
@@ -142,6 +150,7 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
             Erro
 
     Exp.tipo = boolean
+    Exp.tamanho = 0
 }
 19- {
     se negacao && (Termo1.tipo != int || Termo1.tamanho > 0)
@@ -162,6 +171,8 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
             Erro
     senao se Soma.tipo != int
         Erro
+
+    Soma.tamanho = 0
 }
 21- {
     Termo.tipo = Fator1.tipo
@@ -179,13 +190,15 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
             Erro
     senao se Termo.tipo != int
         Erro
+
+    Termo.tamanho = 0
 }
 23- {
     Fator.tipo = boolean
     Fator.tamanho = 0
 }
 24- {
-    se Fator1.tipo != boolean
+    se Fator1.tipo != boolean || Fator1.tamanho > 0
         Erro
 }
 25- {
