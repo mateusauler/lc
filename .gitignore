@@ -6,3 +6,5 @@ lc
 lc.cpp
 
 vgcore.*
+
+*.asm

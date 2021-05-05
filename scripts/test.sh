@@ -3,6 +3,7 @@
 testes="ok lexico sintatico semantico"
 dirfonte=testes/fonte
 diresperado=testes/esperado/compilador
+dirresultado=testes/resultado
 
 erros=""
 
@@ -16,7 +17,8 @@ function run_tests()
     for d in $testes; do
         for f in $(ls $dirfonte/$d); do
             filename="$dirfonte/$d/$f"
-            s1=$(./lc $filename)
+            destino=$(echo "$dirresultado/$f" | sed "s/\.l$/.asm/g")
+            s1=$(./lc $filename $destino)
             s2=$(./lc < $filename)
 
             if [ "$s1" = "$s2" ] ; then

@@ -5,19 +5,28 @@
 
 int main(int argc, char* argv[])
 {
-    FILE *f;
+    FILE *arq_fonte, *arq_saida;
 
     // Se um nome de arquivo nao for passado, ler do stdin
-    if (argc == 2)
-        f = fopen(argv[1], "r");
+    if (argc == 3)
+    {
+        arq_fonte = fopen(argv[1], "r");
+        arq_saida = fopen(argv[2], "w");
+
+        if (!arq_saida)
+            return 1;
+    }
     else
-        f = stdin;
+    {
+        arq_fonte = stdin;
+        arq_saida = nullptr;
+    }
 
     // Caso houver algum erro ao abrir o arquivo
-    if (!f)
+    if (!arq_fonte)
         return 1;
 
-    parser p(f);
+    parser p(arq_fonte, arq_saida);
     bool erro = false; // Flag de erro
 
     try
@@ -31,10 +40,15 @@ int main(int argc, char* argv[])
         std::cout << e.linha_erro << std::endl;
         std::cout << e.what() << std::endl;
 
+        remove(argv[2]);
+
         erro = true;
     }
 
-    fclose(f);
+    if (arq_saida)
+        fclose(arq_saida);
+
+    fclose(arq_fonte);
 
 	if (!erro)
 	    std::cout << p.get_linha() << " linhas compiladas." << std::endl;

@@ -37,6 +37,6 @@ test: all combine
 	scripts/test.sh
 
 clean:
-	rm -rf ${DESTDIR}/* ${TARGET} ${TARGET}.cpp vgcore.*
+	rm -rf ${DESTDIR}/* ${TARGET} ${TARGET}.cpp testes/resultado/* vgcore.*
 
 .PHONY: all clean test combine combined
