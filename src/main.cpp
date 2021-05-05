@@ -12,9 +12,6 @@ int main(int argc, char* argv[])
     {
         arq_fonte = fopen(argv[1], "r");
         arq_saida = fopen(argv[2], "w");
-
-        if (!arq_saida)
-            return 1;
     }
     else
     {
