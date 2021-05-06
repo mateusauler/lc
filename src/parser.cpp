@@ -22,7 +22,7 @@ static int byte_tipo(tipo_dados_t tipo)
 static std::string converte_hex(int valor)
 {
 	std::stringstream stream;
-	stream << std::uppercase << std::hex << valor;
+	stream << 0 << std::uppercase << std::hex << valor;
 	return stream.str() + 'h';
 }
 
