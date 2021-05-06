@@ -355,7 +355,7 @@ void parser::cmd_s(std::string& destino)
 	std::string lex;
 
 	tipo_dados_t tipo_exp;
-	int tamanho_exp, tamanho, linha_erro;
+	int tamanho_exp, tamanho, linha_erro, endereco;
 
 	switch (token_lido->tipo_token)
 	{
@@ -380,7 +380,7 @@ void parser::cmd_s(std::string& destino)
 
 				linha_erro = num_linha;
 
-				exp(tipo_exp, tamanho_exp, destino);
+				exp(tipo_exp, tamanho_exp, destino, endereco);
 
 				// Ação 11
 				if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
@@ -395,7 +395,7 @@ void parser::cmd_s(std::string& destino)
 
 			linha_erro = num_linha;
 
-			exp(tipo_exp, tamanho_exp, destino);
+			exp(tipo_exp, tamanho_exp, destino, endereco);
 
 			// Ação 12
 			if (tipo_exp != rt->tipo)
@@ -448,7 +448,7 @@ void parser::cmd_s(std::string& destino)
 
 				linha_erro = num_linha;
 
-				exp(tipo_exp, tamanho_exp, destino);
+				exp(tipo_exp, tamanho_exp, destino, endereco);
 
 				// Ação 14
 				if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
@@ -475,7 +475,7 @@ void parser::cmd_s(std::string& destino)
 
 			linha_erro = num_linha;
 
-			exp(tipo_exp, tamanho_exp, destino);
+			exp(tipo_exp, tamanho_exp, destino, endereco);
 
 			// Ação 33
 			if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
@@ -488,7 +488,7 @@ void parser::cmd_s(std::string& destino)
 
 				linha_erro = num_linha;
 
-				exp(tipo_exp, tamanho_exp, destino);
+				exp(tipo_exp, tamanho_exp, destino, endereco);
 
 				// Ação 34
 				if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
@@ -505,7 +505,7 @@ void parser::cmd_for(std::string& destino)
 	// for "(" [Cmd {, Cmd}] ; Exp ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
 
 	tipo_dados_t tipo_exp;
-	int tamanho_exp;
+	int tamanho_exp, endereco;
 
 	consome_token(TK_RES_FOR);   // for
 	consome_token(TK_GRU_A_PAR); // (
@@ -526,7 +526,7 @@ void parser::cmd_for(std::string& destino)
 
 	int linha_erro = num_linha;
 
-	exp(tipo_exp, tamanho_exp, destino);
+	exp(tipo_exp, tamanho_exp, destino, endereco);
 
 	// Ação 15
 	if (tipo_exp != TP_BOOL || tamanho_exp > 0)
@@ -559,14 +559,14 @@ void parser::cmd_if(std::string& destino)
 	// if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
 
 	tipo_dados_t tipo_exp;
-	int tamanho_exp;
+	int tamanho_exp, endereco;
 
 	consome_token(TK_RES_IF);    // if
 	consome_token(TK_GRU_A_PAR); // (
 
 	int linha_erro = num_linha;
 
-	exp(tipo_exp, tamanho_exp, destino);
+	exp(tipo_exp, tamanho_exp, destino, endereco);
 
 	// Ação 16
 	if (tipo_exp != TP_BOOL || tamanho_exp > 0)
@@ -635,7 +635,7 @@ void parser::cmd(std::string& destino)
 	}
 }
 
-void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino)
+void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& endereco)
 {
 	// Soma [(=|<>|>|<|>=|<=) Soma]
 
@@ -646,7 +646,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 	tipo_token_t operador;
 
 	// Ação 17
-	soma(tipo, tamanho, destino);
+	soma(tipo, tamanho, destino, endereco);
 
 	// [(=|<>|>|<|>=|<=) Soma]
 	switch (token_lido->tipo_token)
@@ -664,7 +664,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 
 			linha_erro = num_linha;
 
-			soma(tipo_soma, tamanho_soma, destino);
+			soma(tipo_soma, tamanho_soma, destino, endereco);
 
 			// Ação 18
 			if (tipo != tipo_soma)
@@ -697,7 +697,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 	}
 }
 
-void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino)
+void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& endereco)
 {
 	// [-] Termo {(+|-|or) Termo}
 
@@ -718,7 +718,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 
 	// Ação 19
 	linha_erro = num_linha;
-	termo(tipo, tamanho, destino);
+	termo(tipo, tamanho, destino, endereco);
 	if (nega && (tipo != TP_INT || tamanho > 0)) throw tipo_incompativel(linha_erro);
 
 	// {(+|-|or) Termo}
@@ -736,7 +736,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 
 				linha_erro = num_linha;
 
-				termo(tipo_termo, tamanho_termo, destino);
+				termo(tipo_termo, tamanho_termo, destino, endereco);
 
 				// Ação 20
 				if (tipo != tipo_termo)
@@ -763,7 +763,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 	}
 }
 
-void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino)
+void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& endereco)
 {
 	// Fator {(*|/|%|and) Fator}
 
@@ -775,7 +775,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 	int linha_erro;
 
 	// Ação 21
-	fator(tipo, tamanho, destino);
+	fator(tipo, tamanho, destino, endereco);
 
 	// {(*|/|%|and) Fator}
 	while (true)
@@ -793,7 +793,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 
 				linha_erro = num_linha;
 
-				fator(tipo_fator, tamanho_fator, destino);
+				fator(tipo_fator, tamanho_fator, destino, endereco);
 
 				// Ação 22
 				if (tipo != tipo_fator)
@@ -820,7 +820,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 	}
 }
 
-void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino)
+void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& endereco)
 {
 	// not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
 
@@ -847,7 +847,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 
 			linha_erro = num_linha;
 
-			fator(tipo_fator, tamanho_fator, destino);
+			fator(tipo_fator, tamanho_fator, destino, endereco);
 
 			// Ação 24
 			if (tipo_fator != TP_BOOL || tamanho_fator > 0)
@@ -858,7 +858,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 		case TK_GRU_A_PAR: // "(" Exp ")"
 
 			consome_token(TK_GRU_A_PAR); // (
-			exp(tipo_exp, tamanho_exp, destino);
+			exp(tipo_exp, tamanho_exp, destino, endereco);
 
 			// Ação 25
 			tipo = tipo_exp;
@@ -887,7 +887,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 				linha_erro = num_linha;
 
 				consome_token(TK_GRU_A_COL); // [
-				exp(tipo_exp, tamanho_exp, destino);
+				exp(tipo_exp, tamanho_exp, destino, endereco);
 
 				// Ação 27
 				if (rt->tam == 0 || tipo_exp != TP_INT || tamanho_exp > 0)

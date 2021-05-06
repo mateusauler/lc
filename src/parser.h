@@ -51,15 +51,15 @@ private:
 	void cmd_t(std::string& destino);
 
 	// Expressao
-	void exp(tipo_dados_t &tipo, int &tamanho, std::string& destino);
+	void exp(tipo_dados_t& tipo, int& tamanho, std::string& destino, int& endereco);
 
 	// Lista de somas
-	void soma(tipo_dados_t &tipo, int &tamanho, std::string& destino);
+	void soma(tipo_dados_t& tipo, int& tamanho, std::string& destino, int& endereco);
 
 	// Termo de somas (lista de multiplicacoes)
-	void termo(tipo_dados_t &tipo, int &tamanho, std::string& destino);
+	void termo(tipo_dados_t& tipo, int& tamanho, std::string& destino, int& endereco);
 
 	// Fator de multiplicacoes
-	void fator(tipo_dados_t &tipo, int &tamanho, std::string& destino);
+	void fator(tipo_dados_t& tipo, int& tamanho, std::string& destino, int& endereco);
 
 };
