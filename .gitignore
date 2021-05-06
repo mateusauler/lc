@@ -8,3 +8,5 @@ lc.cpp
 vgcore.*
 
 *.asm
+*.EXE
+*.T
