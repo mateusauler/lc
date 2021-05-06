@@ -55,7 +55,7 @@ static int aloca(int bytes)
 {
     static int endereco = 0x4000;
     endereco += bytes;
-    return endereco;
+    return endereco - bytes;
 }
 
 void parser::exec_parser()
@@ -235,7 +235,6 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
     if (rt->classe != CL_NULL)
         throw id_ja_declarado(lex, linha_erro);
 
-    rt->endereco = aloca(byte_tipo(tipo));
     destino += tipo == TP_CHAR
         ? "\tbyte "
         : "\tsword ";
@@ -320,7 +319,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
         default:
             rt->endereco = aloca(byte_tipo(rt->tipo));
-            destino += " ?";
+            destino += "?";
             break;
     }
 
