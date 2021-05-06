@@ -3,31 +3,6 @@
 #include "parser.h"
 #include "excessoes.h"
 
-/* Converte um `tipo_constante_t` para um `tipo_dados_t`.
- * `t_const` Tipo de constante a ser convertido.
- */
-static tipo_dados_t converte_tipo_constante(tipo_constante_t t_const)
-{
-	switch (t_const)
-	{
-		case CONST_INT:
-			return TP_INT;
-
-		case CONST_CHAR:
-		case CONST_HEX:
-			return TP_CHAR;
-
-		case CONST_BOOL:
-			return TP_BOOL;
-
-		case CONST_STR:
-			return TP_STR;
-
-		default:
-			return TP_NULL;
-	}
-}
-
 static int byte_tipo(tipo_dados_t tipo)
 {
 	switch(tipo)
@@ -190,7 +165,7 @@ void parser::dec_const(std::string& destino)
 		nega = true;
 	}
 
-	tipo_constante_t tipo_constante = token_lido->tipo_constante;
+	tipo_dados_t tipo_constante = token_lido->tipo_constante;
 	linha_erro = num_linha;
 
 	std::string lex_const = token_lido->lex;
@@ -198,7 +173,7 @@ void parser::dec_const(std::string& destino)
 	consome_token(TK_CONST); // CONST
 
 	// Ação 6
-	rt->tipo = converte_tipo_constante(tipo_constante);
+	rt->tipo = tipo_constante;
 
 	if (nega && rt->tipo != TP_INT)
 		throw tipo_incompativel(linha_erro);
@@ -229,8 +204,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 	std::string lex = token_lido->lex;
 	std::string lex_id = lex;
 
-	tipo_constante_t tipo_constante;
-	tipo_dados_t tipo_convertido;
+	tipo_dados_t tipo_constante;
 
 	int valor_array;
 	int linha_erro = num_linha;
@@ -272,12 +246,11 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			consome_token(TK_CONST); // CONST
 
 			// Ação 8
-			tipo_convertido = converte_tipo_constante(tipo_constante);
 
-			if (nega && tipo_convertido != TP_INT)
+			if (nega && tipo_constante != TP_INT)
 				throw tipo_incompativel(linha_erro);
 
-			if (tipo_convertido != tipo)
+			if (tipo_constante != tipo)
 				throw tipo_incompativel(linha_erro);
 
 			rt->endereco = aloca(byte_tipo(rt->tipo));
@@ -292,7 +265,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
 			consome_token(TK_GRU_A_COL); // [
 
-			tipo_convertido = converte_tipo_constante(token_lido->tipo_constante);
+			tipo_constante = token_lido->tipo_constante;
 			lex = token_lido->lex;
 			linha_erro = num_linha;
 
@@ -301,7 +274,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			// Ação 9
 			valor_array = std::atoi(lex.c_str());
 
-			if (tipo_convertido != TP_INT)
+			if (tipo_constante != TP_INT)
 				throw tipo_incompativel(linha_erro);
 
 			if (valor_array == 0)
@@ -898,7 +871,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 		default: // CONST
 
 			// Ação 28
-			tipo = converte_tipo_constante(token_lido->tipo_constante);
+			tipo = token_lido->tipo_constante;
 			tamanho = token_lido->tam_constante;
 
 			consome_token(TK_CONST);

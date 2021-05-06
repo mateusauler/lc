@@ -207,7 +207,7 @@ void lexer::proximo_token()
 				else // 0
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_INT;
+					token_lido->tipo_constante = TP_INT;
 
 					estado = ES_FIM;
 					backtrack = true;
@@ -232,7 +232,7 @@ void lexer::proximo_token()
 				else
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_INT;
+					token_lido->tipo_constante = TP_INT;
 
 					estado = ES_FIM;
 					backtrack = true;
@@ -244,7 +244,7 @@ void lexer::proximo_token()
 				if (c == 'h') // 0 ((A-F)(A-F | 0-9) | (A-F | 0-9)(A-F)) h
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_HEX;
+					token_lido->tipo_constante = TP_CHAR;
 
 					estado = ES_FIM;
 				}
@@ -259,14 +259,14 @@ void lexer::proximo_token()
 				else if (c == 'h') // 0(0-9)(0-9)h
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_HEX;
+					token_lido->tipo_constante = TP_CHAR;
 
 					estado = ES_FIM;
 				}
 				else // 0(0-9)(0-9)
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_INT;
+					token_lido->tipo_constante = TP_INT;
 
 					estado = ES_FIM;
 					backtrack = true;
@@ -278,7 +278,7 @@ void lexer::proximo_token()
 				if (!DIGITO(c))
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_INT;
+					token_lido->tipo_constante = TP_INT;
 
 					estado = ES_FIM;
 					backtrack = true;
@@ -305,7 +305,7 @@ void lexer::proximo_token()
 				if (c == '\'') // '(caractere)'
 				{
 					token_lido->tipo_token = TK_CONST;
-					token_lido->tipo_constante = CONST_CHAR;
+					token_lido->tipo_constante = TP_CHAR;
 
 					estado = ES_FIM;
 				}
@@ -318,7 +318,7 @@ void lexer::proximo_token()
 				{
 					case '"': // "{caractere}"
 						token_lido->tipo_token = TK_CONST;
-						token_lido->tipo_constante = CONST_STR;
+						token_lido->tipo_constante = TP_STR;
 						estado = ES_FIM;
 						break;
 
@@ -454,7 +454,7 @@ void lexer::proximo_token()
 
 			// Se estiver na tabela de simbolos e for constante, e boleano
 			if (token_lido->tipo_token == TK_CONST)
-				token_lido->tipo_constante = CONST_BOOL;
+				token_lido->tipo_constante = TP_BOOL;
 		}
 	}
 
@@ -462,7 +462,7 @@ void lexer::proximo_token()
 	{
 		switch (token_lido->tipo_constante)
 		{
-			case CONST_STR:
+			case TP_STR:
 				token_lido->tam_constante = lex_len - 1;
 				break;
 

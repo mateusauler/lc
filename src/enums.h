@@ -81,16 +81,6 @@ enum estado_t
 	ES_OP_GT,              // Leu `>`
 };
 
-enum tipo_constante_t
-{
-	CONST_NULL,
-	CONST_INT,
-	CONST_CHAR,
-	CONST_HEX,
-	CONST_STR,
-	CONST_BOOL
-};
-
 enum classe_t
 {
 	CL_NULL,

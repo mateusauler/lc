@@ -9,7 +9,7 @@ struct token_t
 
 	registro_tabela_simbolos* simbolo = nullptr;
 
-	tipo_constante_t tipo_constante = CONST_NULL;
+	tipo_dados_t tipo_constante = TP_NULL;
 	int tam_constante = 0;
 };
 
