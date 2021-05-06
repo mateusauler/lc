@@ -902,10 +902,32 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 		default: // CONST
 
 			// Ação 28
-			tipo = token_lido->tipo_constante;
+			tipo    = token_lido->tipo_constante;
 			tamanho = token_lido->tam_constante;
+			lex     = token_lido->lex;
 
 			consome_token(TK_CONST);
+
+			if (tipo == TP_STR)
+			{
+				endereco = novo_tmp(tamanho);
+
+				if (lex.length() > 2) // Se nao for string vazia
+					destino += "\n" + gera_alocacao(TP_CHAR, tamanho, lex, "", true);
+
+				destino += "\n" + gera_alocacao(TP_CHAR, tamanho, "\"$\"", "", true);
+			}
+			else
+			{
+				if (tipo == TP_BOOL)
+					lex = converte_hex(lex == "TRUE");
+
+				endereco = novo_tmp(byte_tipo(tipo));
+				destino +=
+					"\n"
+					"	mov BX, " + lex + "\n"
+					"	mov DS:[" + converte_hex(endereco) + "], BX\n";
+			}
 
 			break;
 	}
