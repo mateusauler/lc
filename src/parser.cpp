@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "parser.h"
 #include "excessoes.h"
 
@@ -31,10 +33,10 @@ static int byte_tipo(tipo_dados_t tipo)
     switch(tipo)
     {
         case TP_INT:
+        case TP_BOOL:
             return 2;
 
         case TP_CHAR:
-        case TP_BOOL:
             return 1;
 
         default:
@@ -42,10 +44,26 @@ static int byte_tipo(tipo_dados_t tipo)
     }
 }
 
+static std::string converte_hex(int valor)
+{
+    std::stringstream stream;
+    stream << std::hex << valor;
+    return stream.str() + 'h';
+}
+
+static int aloca(int bytes)
+{
+    static int endereco = 0x4000;
+    endereco += bytes;
+    return endereco;
+}
+
 void parser::exec_parser()
 {
+    std::string programa;
     proximo_token();
-    prog();
+    prog(programa);
+    if(arq_saida) fprintf(arq_saida, "%s", programa.c_str());
 }
 
 void parser::consome_token(tipo_token_t token_esperado)
@@ -55,23 +73,39 @@ void parser::consome_token(tipo_token_t token_esperado)
     else                                       throw token_invalido(token_lido->lex, num_linha);
 }
 
-void parser::prog()
+void parser::prog(std::string& destino)
 {
     // {DecVar|DecConst} main BlocoCmd EOF
+
+    destino += std::string("") +
+        "sseg SEGMENT STACK\n" +
+            "\tbyte 4000h DUP(?)\n" +
+        "sseg ENDS\n\n" +
+        "dseg SEGMENT PUBLIC\n" +
+            "\tbyte 4000h DUP(?)\n";
 
     // {DecVar|DecConst}
     while (token_lido->tipo_token != TK_RES_MAIN)
     {
-        if (token_lido->tipo_token == TK_RES_FINAL) dec_const(); // final
-        else                                        dec_var();   // (int | char | boolean)
+        if (token_lido->tipo_token == TK_RES_FINAL) dec_const(destino); // final
+        else                                        dec_var(destino);   // (int | char | boolean)
     }
 
+    destino += "dseg ENDS\n\n";
+    destino += "cseg SEGMENT PUBLIC\n\tASSUME CS:cseg, DS:dseg\n\nstrt:\n";
+    destino += "\tmov AX, dseg\n";
+    destino += "\tmov DS, AX\n";
+
     consome_token(TK_RES_MAIN); // main
-    bloco_cmd();
+    bloco_cmd(destino);
     consome_token(TK_EOF); // EOF
+
+    destino += "\tmov AH, 4Ch\n";
+    destino += "\tint 21h\n";
+    destino += "cseg ENDS\nEND strt";
 }
 
-void parser::dec_var()
+void parser::dec_var(std::string& destino)
 {
     // (int | char | boolean) Var {, Var} ;
     tipo_dados_t tipo;
@@ -99,20 +133,20 @@ void parser::dec_var()
     }
 
     // Ação 4
-    var(tipo);
+    var(tipo, destino);
 
     // {, Var}
     while(token_lido->tipo_token == TK_OP_VIRGULA)
     {
         consome_token(TK_OP_VIRGULA); // ,
         // Ação 4
-        var(tipo);
+        var(tipo, destino);
     }
 
     consome_token(TK_FIM_DECL); // ;
 }
 
-void parser::dec_const()
+void parser::dec_const(std::string& destino)
 {
     // final ID = [-] CONST ;
 
@@ -143,6 +177,8 @@ void parser::dec_const()
     tipo_constante_t tipo_constante = token_lido->tipo_constante;
     linha_erro = num_linha;
 
+    std::string lex_const = token_lido->lex;
+
     consome_token(TK_CONST); // CONST
 
     // Ação 6
@@ -154,15 +190,35 @@ void parser::dec_const()
     if (rt->tipo == TP_STR || rt->tipo == TP_NULL)
         throw tipo_incompativel(linha_erro);
 
+    rt->endereco = aloca(byte_tipo(rt->tipo));
+    destino += rt->tipo == TP_CHAR
+        ? "\tbyte "
+        : "\tsword ";
+
+    if (rt->tipo == TP_BOOL)
+    {
+        destino += converte_hex(lex_const == "TRUE" ? 1 : 0);
+    }
+    else
+    {
+        if(nega) destino += '-';
+
+        destino += lex_const;
+    }
+
+    destino += "\t; " + lex;
+    destino += "\n";
+
     consome_token(TK_FIM_DECL); // ;
 }
 
-void parser::var(tipo_dados_t tipo)
+void parser::var(tipo_dados_t tipo, std::string& destino)
 {
     // ID [:= [-] CONST | "[" CONST "]" ]
 
     registro_tabela_simbolos *rt = token_lido->simbolo;
     std::string lex = token_lido->lex;
+    std::string lex_id = lex;
 
     tipo_constante_t tipo_constante;
     tipo_dados_t tipo_convertido;
@@ -171,11 +227,18 @@ void parser::var(tipo_dados_t tipo)
     int linha_erro = num_linha;
     bool nega = false;
 
+    std::string lex_const;
+
     consome_token(TK_ID); // ID
 
     // Ação 7
     if (rt->classe != CL_NULL)
         throw id_ja_declarado(lex, linha_erro);
+
+    rt->endereco = aloca(byte_tipo(tipo));
+    destino += tipo == TP_CHAR
+        ? "\tbyte "
+        : "\tsword ";
 
     rt->classe = CL_VAR;
     rt->tipo = tipo;
@@ -196,6 +259,8 @@ void parser::var(tipo_dados_t tipo)
             tipo_constante = token_lido->tipo_constante;
             linha_erro = num_linha;
 
+            lex_const = token_lido->lex;
+
             consome_token(TK_CONST); // CONST
 
             // Ação 8
@@ -206,6 +271,18 @@ void parser::var(tipo_dados_t tipo)
 
             if (tipo_convertido != tipo)
                 throw tipo_incompativel(linha_erro);
+
+            rt->endereco = aloca(byte_tipo(rt->tipo));
+            if (rt->tipo == TP_BOOL)
+            {
+                destino += converte_hex(lex_const == "TRUE" ? 1 : 0);
+            }
+            else
+            {
+                if(nega) destino += '-';
+
+                destino += lex_const;
+            }
 
             break;
 
@@ -235,14 +312,23 @@ void parser::var(tipo_dados_t tipo)
 
             consome_token(TK_GRU_F_COL); // ]
 
+            rt->endereco = aloca(byte_tipo(rt->tipo) * rt->tam);
+            destino += converte_hex(rt->tam);
+            destino += " DUP(?)";
+
             break;
 
         default:
+            rt->endereco = aloca(byte_tipo(rt->tipo));
+            destino += " ?";
             break;
     }
+
+    destino += "\t; " + lex_id;
+    destino += "\n";
 }
 
-void parser::bloco_cmd()
+void parser::bloco_cmd(std::string& destino)
 {
     // "{" {CmdT} "}"
 
@@ -250,12 +336,12 @@ void parser::bloco_cmd()
 
     // {CmdT}
     while (token_lido->tipo_token != TK_GRU_F_CHA)
-        cmd_t();
+        cmd_t(destino);
 
     consome_token(TK_GRU_F_CHA); // }
 }
 
-void parser::cmd_s()
+void parser::cmd_s(std::string& destino)
 {
     // ID [ "[" Exp "]" ] := Exp
     // readln "(" ID [ "[" Exp "]" ] ")"
@@ -290,7 +376,7 @@ void parser::cmd_s()
 
                 linha_erro = num_linha;
 
-                exp(tipo_exp, tamanho_exp);
+                exp(tipo_exp, tamanho_exp, destino);
 
                 // Ação 11
                 if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
@@ -305,7 +391,7 @@ void parser::cmd_s()
 
             linha_erro = num_linha;
 
-            exp(tipo_exp, tamanho_exp);
+            exp(tipo_exp, tamanho_exp, destino);
 
             // Ação 12
             if (tipo_exp != rt->tipo)
@@ -358,7 +444,7 @@ void parser::cmd_s()
 
                 linha_erro = num_linha;
 
-                exp(tipo_exp, tamanho_exp);
+                exp(tipo_exp, tamanho_exp, destino);
 
                 // Ação 14
                 if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
@@ -385,7 +471,7 @@ void parser::cmd_s()
 
             linha_erro = num_linha;
 
-            exp(tipo_exp, tamanho_exp);
+            exp(tipo_exp, tamanho_exp, destino);
 
             // Ação 33
             if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
@@ -398,7 +484,7 @@ void parser::cmd_s()
 
                 linha_erro = num_linha;
 
-                exp(tipo_exp, tamanho_exp);
+                exp(tipo_exp, tamanho_exp, destino);
 
                 // Ação 34
                 if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
@@ -410,7 +496,7 @@ void parser::cmd_s()
     }
 }
 
-void parser::cmd_for()
+void parser::cmd_for(std::string& destino)
 {
     // for "(" [Cmd {, Cmd}] ; Exp ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
 
@@ -423,20 +509,20 @@ void parser::cmd_for()
     // [Cmd {, Cmd}]
     if (token_lido->tipo_token != TK_FIM_DECL)
     {
-        cmd();
+        cmd(destino);
 
         // {, Cmd}
         while (token_lido->tipo_token == TK_OP_VIRGULA)
         {
             consome_token(TK_OP_VIRGULA); // ,
-            cmd();
+            cmd(destino);
         }
     }
     consome_token(TK_FIM_DECL); // ;
 
     int linha_erro = num_linha;
 
-    exp(tipo_exp, tamanho_exp);
+    exp(tipo_exp, tamanho_exp, destino);
 
     // Ação 15
     if (tipo_exp != TP_BOOL || tamanho_exp > 0)
@@ -447,24 +533,24 @@ void parser::cmd_for()
     // [Cmd {, Cmd}]
     if (token_lido->tipo_token != TK_GRU_F_PAR)
     {
-        cmd();
+        cmd(destino);
 
         // {, Cmd}
         while (token_lido->tipo_token == TK_OP_VIRGULA)
         {
             consome_token(TK_OP_VIRGULA); // ,
-            cmd();
+            cmd(destino);
         }
     }
 
     consome_token(TK_GRU_F_PAR); // )
 
     // (CmdT | BlocoCmd)
-    if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd();
-    else                                        cmd_t();
+    if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
+    else                                        cmd_t(destino);
 }
 
-void parser::cmd_if()
+void parser::cmd_if(std::string& destino)
 {
     // if "(" Exp ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
 
@@ -476,7 +562,7 @@ void parser::cmd_if()
 
     int linha_erro = num_linha;
 
-    exp(tipo_exp, tamanho_exp);
+    exp(tipo_exp, tamanho_exp, destino);
 
     // Ação 16
     if (tipo_exp != TP_BOOL || tamanho_exp > 0)
@@ -487,8 +573,8 @@ void parser::cmd_if()
     consome_token(TK_RES_THEN);  // then
 
     // (CmdT | BlocoCmd)
-    if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd();
-    else                                        cmd_t();
+    if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
+    else                                        cmd_t(destino);
 
     // [else (CmdT | BlocoCmd)]
     if (token_lido->tipo_token == TK_RES_ELSE)
@@ -496,56 +582,56 @@ void parser::cmd_if()
         consome_token(TK_RES_ELSE); // else
 
         // (CmdT | BlocoCmd)
-        if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd();
-        else                                        cmd_t();
+        if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
+        else                                        cmd_t(destino);
     }
 
 }
 
-void parser::cmd_t()
+void parser::cmd_t(std::string& destino)
 {
     // [CmdS] ; | CmdFor | CmdIf
 
     switch (token_lido->tipo_token)
     {
         case TK_RES_FOR: // for
-            cmd_for();
+            cmd_for(destino);
             break;
 
         case TK_RES_IF: // if
-            cmd_if();
+            cmd_if(destino);
             break;
 
         default:
             if (token_lido->tipo_token != TK_FIM_DECL) // [CmdS]
-                cmd_s();
+                cmd_s(destino);
 
             consome_token(TK_FIM_DECL); // ;
             break;
     }
 }
 
-void parser::cmd()
+void parser::cmd(std::string& destino)
 {
     // CmdS | CmdFor | CmdIf
 
     switch (token_lido->tipo_token)
     {
         case TK_RES_FOR: // for
-            cmd_for();
+            cmd_for(destino);
             break;
 
         case TK_RES_IF: // if
-            cmd_if();
+            cmd_if(destino);
             break;
 
         default:
-            cmd_s();
+            cmd_s(destino);
             break;
     }
 }
 
-void parser::exp(tipo_dados_t &tipo, int &tamanho)
+void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 {
     // Soma [(=|<>|>|<|>=|<=) Soma]
 
@@ -556,7 +642,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
     tipo_token_t operador;
 
     // Ação 17
-    soma(tipo, tamanho);
+    soma(tipo, tamanho, destino);
 
     // [(=|<>|>|<|>=|<=) Soma]
     switch (token_lido->tipo_token)
@@ -574,7 +660,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
 
             linha_erro = num_linha;
 
-            soma(tipo_soma, tamanho_soma);
+            soma(tipo_soma, tamanho_soma, destino);
 
             // Ação 18
             if (tipo != tipo_soma)
@@ -607,7 +693,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho)
     }
 }
 
-void parser::soma(tipo_dados_t &tipo, int &tamanho)
+void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 {
     // [-] Termo {(+|-|or) Termo}
 
@@ -628,7 +714,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
 
     // Ação 19
     linha_erro = num_linha;
-    termo(tipo, tamanho);
+    termo(tipo, tamanho, destino);
     if (nega && (tipo != TP_INT || tamanho > 0)) throw tipo_incompativel(linha_erro);
 
     // {(+|-|or) Termo}
@@ -646,7 +732,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
 
                 linha_erro = num_linha;
 
-                termo(tipo_termo, tamanho_termo);
+                termo(tipo_termo, tamanho_termo, destino);
 
                 // Ação 20
                 if (tipo != tipo_termo)
@@ -673,7 +759,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho)
     }
 }
 
-void parser::termo(tipo_dados_t &tipo, int &tamanho)
+void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 {
     // Fator {(*|/|%|and) Fator}
 
@@ -685,7 +771,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
     int linha_erro;
 
     // Ação 21
-    fator(tipo, tamanho);
+    fator(tipo, tamanho, destino);
 
     // {(*|/|%|and) Fator}
     while (true)
@@ -703,7 +789,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
 
                 linha_erro = num_linha;
 
-                fator(tipo_fator, tamanho_fator);
+                fator(tipo_fator, tamanho_fator, destino);
 
                 // Ação 22
                 if (tipo != tipo_fator)
@@ -730,7 +816,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho)
     }
 }
 
-void parser::fator(tipo_dados_t &tipo, int &tamanho)
+void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino)
 {
     // not Fator | "(" Exp ")" | ID [ "[" Exp "]" ] | CONST
 
@@ -757,7 +843,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
 
             linha_erro = num_linha;
 
-            fator(tipo_fator, tamanho_fator);
+            fator(tipo_fator, tamanho_fator, destino);
 
             // Ação 24
             if (tipo_fator != TP_BOOL || tamanho_fator > 0)
@@ -768,7 +854,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
         case TK_GRU_A_PAR: // "(" Exp ")"
 
             consome_token(TK_GRU_A_PAR); // (
-            exp(tipo_exp, tamanho_exp);
+            exp(tipo_exp, tamanho_exp, destino);
 
             // Ação 25
             tipo = tipo_exp;
@@ -797,13 +883,13 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho)
                 linha_erro = num_linha;
 
                 consome_token(TK_GRU_A_COL); // [
-                exp(tipo_exp, tamanho_exp);
+                exp(tipo_exp, tamanho_exp, destino);
 
                 // Ação 27
                 if (rt->tam == 0 || tipo_exp != TP_INT || tamanho_exp > 0)
                     throw tipo_incompativel(linha_erro);
-                else
-                    tamanho = 0;
+
+                tamanho = 0;
 
                 consome_token(TK_GRU_F_COL); // ]
             }

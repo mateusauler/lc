@@ -21,45 +21,45 @@ private:
     void consome_token(tipo_token_t token_esperado);
 
     // Simbolo inicial da gramatica
-    void prog();
+    void prog(std::string& destino);
 
     // Declaracao de variaveis
-    void dec_var();
+    void dec_var(std::string& destino);
 
     // Declaracao de constantes
-    void dec_const();
+    void dec_const(std::string& destino);
 
     // Lista de variaveis declaradas
-    void var(tipo_dados_t tipo);
+    void var(tipo_dados_t tipo, std::string& destino);
 
     // Bloco de comandos
-    void bloco_cmd();
+    void bloco_cmd(std::string& destino);
 
     // Comando simples
-    void cmd_s();
+    void cmd_s(std::string& destino);
 
     // Comando `for`
-    void cmd_for();
+    void cmd_for(std::string& destino);
 
     // Comando `if`
-    void cmd_if();
+    void cmd_if(std::string& destino);
 
     // Comando sem terminacao
-    void cmd();
+    void cmd(std::string& destino);
 
     // Comando terminado
-    void cmd_t();
+    void cmd_t(std::string& destino);
 
     // Expressao
-    void exp(tipo_dados_t &tipo, int &tamanho);
+    void exp(tipo_dados_t &tipo, int &tamanho, std::string& destino);
 
     // Lista de somas
-    void soma(tipo_dados_t &tipo, int &tamanho);
+    void soma(tipo_dados_t &tipo, int &tamanho, std::string& destino);
 
     // Termo de somas (lista de multiplicacoes)
-    void termo(tipo_dados_t &tipo, int &tamanho);
+    void termo(tipo_dados_t &tipo, int &tamanho, std::string& destino);
 
     // Fator de multiplicacoes
-    void fator(tipo_dados_t &tipo, int &tamanho);
+    void fator(tipo_dados_t &tipo, int &tamanho, std::string& destino);
 
 };
