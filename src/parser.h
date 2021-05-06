@@ -7,7 +7,7 @@ class parser : public lexer
 
 public:
 
-	parser(FILE *fonte, FILE *saida) : lexer(fonte), arq_saida(saida) {}
+	parser(FILE *fonte, std::string saida) : lexer(fonte), arq_saida(saida) {}
 
 	// Executa o parsing no arquivo passado para o construtor
 	void exec_parser();
@@ -15,7 +15,7 @@ public:
 private:
 
 	// Arquivo de saida
-	FILE *arq_saida;
+	std::string arq_saida;
 
 	// Verifica se o token lido tem o tipo esperado e le o proximo
 	void consome_token(tipo_token_t token_esperado);

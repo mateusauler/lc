@@ -5,18 +5,21 @@
 
 int main(int argc, char* argv[])
 {
-	FILE *arq_fonte, *arq_saida;
+	FILE *arq_fonte = stdin;
+	std::string arq_saida = "";
 
-	// Se um nome de arquivo nao for passado, ler do stdin
-	if (argc == 3)
+	// Determina de onde sera lido o programa fonte e para onde ira o codigo gerado
+	switch (argc)
 	{
-		arq_fonte = fopen(argv[1], "r");
-		arq_saida = fopen(argv[2], "w");
-	}
-	else
-	{
-		arq_fonte = stdin;
-		arq_saida = nullptr;
+		case 3:
+			arq_saida = argv[2];
+
+		case 2:
+			arq_fonte = fopen(argv[1], "r");
+			break;
+
+		default:
+			break;
 	}
 
 	// Caso houver algum erro ao abrir o arquivo
@@ -37,13 +40,8 @@ int main(int argc, char* argv[])
 		std::cout << e.linha_erro << std::endl;
 		std::cout << e.what() << std::endl;
 
-		remove(argv[2]);
-
 		erro = true;
 	}
-
-	if (arq_saida)
-		fclose(arq_saida);
 
 	fclose(arq_fonte);
 

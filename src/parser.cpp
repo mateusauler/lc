@@ -63,7 +63,13 @@ void parser::exec_parser()
 	std::string programa;
 	proximo_token();
 	prog(programa);
-	if(arq_saida) fprintf(arq_saida, "%s", programa.c_str());
+
+	if (!arq_saida.empty())
+	{
+		FILE *f = fopen(arq_saida.c_str(), "w");
+		fprintf(f, "%s", programa.c_str());
+		fclose(f);
+	}
 }
 
 void parser::consome_token(tipo_token_t token_esperado)
