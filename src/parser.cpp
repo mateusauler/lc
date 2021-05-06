@@ -77,12 +77,13 @@ void parser::prog(std::string& destino)
 {
 	// {DecVar|DecConst} main BlocoCmd EOF
 
-	destino += std::string("") +
-		"sseg SEGMENT STACK\n" +
-			"\tbyte 4000h DUP(?)\n" +
-		"sseg ENDS\n\n" +
-		"dseg SEGMENT PUBLIC\n" +
-			"\tbyte 4000h DUP(?)\n";
+	destino +=
+		"sseg SEGMENT STACK\n"
+		"	byte 4000h DUP(?)		; Pilha\n"
+		"sseg ENDS\n"
+		"\n"
+		"dseg SEGMENT PUBLIC\n"
+		"	byte 4000h DUP(?)		; Temporarios\n";
 
 	// {DecVar|DecConst}
 	while (token_lido->tipo_token != TK_RES_MAIN)
@@ -91,18 +92,27 @@ void parser::prog(std::string& destino)
 		else                                        dec_var(destino);   // (int | char | boolean)
 	}
 
-	destino += "dseg ENDS\n\n";
-	destino += "cseg SEGMENT PUBLIC\n\tASSUME CS:cseg, DS:dseg\n\nstrt:\n";
-	destino += "\tmov AX, dseg\n";
-	destino += "\tmov DS, AX\n";
+	destino +=
+		"dseg ENDS\n"
+		"\n"
+		"cseg SEGMENT PUBLIC\n"
+		"	ASSUME CS:cseg, DS:dseg\n"
+		"\n"
+		"strt:\n"
+		"	mov AX, dseg\n"
+		"	mov DS, AX\n"
+		"\n";
 
 	consome_token(TK_RES_MAIN); // main
 	bloco_cmd(destino);
 	consome_token(TK_EOF); // EOF
 
-	destino += "\tmov AH, 4Ch\n";
-	destino += "\tint 21h\n";
-	destino += "cseg ENDS\nEND strt";
+	destino +=
+		"\n"
+		"	mov AH, 4Ch\n"
+		"	int 21h\n"
+		"cseg ENDS\n"
+		"END strt";
 }
 
 void parser::dec_var(std::string& destino)
@@ -192,22 +202,15 @@ void parser::dec_const(std::string& destino)
 
 	rt->endereco = aloca(byte_tipo(rt->tipo));
 	destino += rt->tipo == TP_CHAR
-		? "\tbyte "
-		: "\tsword ";
+		? "	byte "
+		: "	sword ";
 
 	if (rt->tipo == TP_BOOL)
-	{
-		destino += converte_hex(lex_const == "TRUE" ? 1 : 0);
-	}
+		destino += converte_hex(lex_const == "TRUE");
 	else
-	{
-		if(nega) destino += '-';
+		destino += (nega ? "-" : "") + lex_const;
 
-		destino += lex_const;
-	}
-
-	destino += "\t; " + lex;
-	destino += "\n";
+	destino += "		; " + lex + "\n";
 
 	consome_token(TK_FIM_DECL); // ;
 }
@@ -236,8 +239,8 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 		throw id_ja_declarado(lex, linha_erro);
 
 	destino += tipo == TP_CHAR
-		? "\tbyte "
-		: "\tsword ";
+		? "	byte "
+		: "	sword ";
 
 	rt->classe = CL_VAR;
 	rt->tipo = tipo;
@@ -273,15 +276,9 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
 			rt->endereco = aloca(byte_tipo(rt->tipo));
 			if (rt->tipo == TP_BOOL)
-			{
-				destino += converte_hex(lex_const == "TRUE" ? 1 : 0);
-			}
+				destino += converte_hex(lex_const == "TRUE");
 			else
-			{
-				if(nega) destino += '-';
-
-				destino += lex_const;
-			}
+				destino += (nega ? "-" : "") + lex_const;
 
 			break;
 
@@ -312,8 +309,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			consome_token(TK_GRU_F_COL); // ]
 
 			rt->endereco = aloca(byte_tipo(rt->tipo) * rt->tam);
-			destino += converte_hex(rt->tam);
-			destino += " DUP(?)";
+			destino += converte_hex(rt->tam) + " DUP(?)";
 
 			break;
 
@@ -323,8 +319,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			break;
 	}
 
-	destino += "\t; " + lex_id;
-	destino += "\n";
+	destino += "		; " + lex_id + "\n";
 }
 
 void parser::bloco_cmd(std::string& destino)
