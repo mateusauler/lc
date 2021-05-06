@@ -441,7 +441,7 @@ void lexer::proximo_token()
 	{
 		// Se o lexema tiver mais de 32 caracteres, ignora a partir do 33
 		if (lex_len > 32)
-			token_lido->lex.erase(32, token_lido->lex.length() - 32);
+			token_lido->lex.erase(32, lex_len - 32);
 
 		token_lido->simbolo = tbl_simbolos.buscar(token_lido->lex);
 
