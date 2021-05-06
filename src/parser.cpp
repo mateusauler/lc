@@ -33,6 +33,42 @@ static int aloca(int bytes)
 	return endereco - bytes;
 }
 
+static std::string novo_rotulo()
+{
+	static int rotulo = 0;
+	return "R" + std::to_string(rotulo) + ":";
+}
+
+static int end_tmp = 0;
+
+static int novo_tmp(int bytes)
+{
+	end_tmp += bytes;
+	return end_tmp - bytes;
+}
+
+static std::string gera_alocacao(tipo_dados_t tipo, int tamanho, std::string dado = "", std::string nome = "", bool cabecalho = false)
+{
+	std::string codigo;
+
+	if (cabecalho)
+		codigo += "dseg SEGMENT PUBLIC\n";
+
+	codigo += tipo == TP_CHAR || tipo == TP_STR
+		? "	byte "
+		: "	sword ";
+
+	if (dado.empty())
+		dado = tamanho ? converte_hex(tamanho) + " DUP(?)" : "?";
+
+	codigo += dado + (nome.empty() ? "" : "		; " + nome) + "\n";
+
+	if (cabecalho)
+		codigo += "dseg ENDS\n";
+
+	return codigo;
+}
+
 void parser::exec_parser()
 {
 	std::string programa;
@@ -182,16 +218,15 @@ void parser::dec_const(std::string& destino)
 		throw tipo_incompativel(linha_erro);
 
 	rt->endereco = aloca(byte_tipo(rt->tipo));
-	destino += rt->tipo == TP_CHAR
-		? "	byte "
-		: "	sword ";
+
+	std::string valor;
 
 	if (rt->tipo == TP_BOOL)
-		destino += converte_hex(lex_const == "TRUE");
+		valor = converte_hex(lex_const == "TRUE");
 	else
-		destino += (nega ? "-" : "") + lex_const;
+		valor = (nega ? "-" : "") + lex_const;
 
-	destino += "		; " + lex + "\n";
+	destino += gera_alocacao(rt->tipo, 0, valor, lex);
 
 	consome_token(TK_FIM_DECL); // ;
 }
@@ -203,6 +238,8 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 	registro_tabela_simbolos *rt = token_lido->simbolo;
 	std::string lex = token_lido->lex;
 	std::string lex_id = lex;
+	std::string lex_const;
+	std::string valor = "";
 
 	tipo_dados_t tipo_constante;
 
@@ -210,17 +247,11 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 	int linha_erro = num_linha;
 	bool nega = false;
 
-	std::string lex_const;
-
 	consome_token(TK_ID); // ID
 
 	// Ação 7
 	if (rt->classe != CL_NULL)
 		throw id_ja_declarado(lex, linha_erro);
-
-	destino += tipo == TP_CHAR
-		? "	byte "
-		: "	sword ";
 
 	rt->classe = CL_VAR;
 	rt->tipo = tipo;
@@ -255,9 +286,11 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
 			rt->endereco = aloca(byte_tipo(rt->tipo));
 			if (rt->tipo == TP_BOOL)
-				destino += converte_hex(lex_const == "TRUE");
+				valor = converte_hex(lex_const == "TRUE");
 			else
-				destino += (nega ? "-" : "") + lex_const;
+				valor = (nega ? "-" : "") + lex_const;
+
+			destino += gera_alocacao(tipo, 0, valor, lex_id);
 
 			break;
 
@@ -288,17 +321,15 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			consome_token(TK_GRU_F_COL); // ]
 
 			rt->endereco = aloca(byte_tipo(rt->tipo) * rt->tam);
-			destino += converte_hex(rt->tam) + " DUP(?)";
+			destino += gera_alocacao(tipo, rt->tam, "", lex_id);
 
 			break;
 
 		default:
 			rt->endereco = aloca(byte_tipo(rt->tipo));
-			destino += "?";
+			destino += gera_alocacao(tipo, 0, "", lex_id);
 			break;
 	}
-
-	destino += "		; " + lex_id + "\n";
 }
 
 void parser::bloco_cmd(std::string& destino)
