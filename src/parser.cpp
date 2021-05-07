@@ -36,7 +36,7 @@ static int aloca(int bytes)
 static std::string novo_rotulo()
 {
 	static int rotulo = 0;
-	return "R" + std::to_string(rotulo) + ":";
+	return "R" + std::to_string(rotulo);
 }
 
 static int end_tmp = 0;
