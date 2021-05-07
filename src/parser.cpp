@@ -355,7 +355,9 @@ void parser::cmd_s(std::string& destino)
 	std::string lex;
 
 	tipo_dados_t tipo_exp;
-	int tamanho_exp, tamanho, linha_erro, endereco;
+	int tamanho_exp, tamanho, linha_erro, endereco = 0;
+
+	destino += "; " + std::to_string(num_linha) + "\n";
 
 	switch (token_lido->tipo_token)
 	{
@@ -373,6 +375,8 @@ void parser::cmd_s(std::string& destino)
 
 			tamanho = rt->tam;
 
+			destino += "; Atribuicao a [" + lex + "]\n\n";
+
 			// [ "[" Exp "]" ]
 			if (token_lido->tipo_token == TK_GRU_A_COL)
 			{
@@ -380,6 +384,9 @@ void parser::cmd_s(std::string& destino)
 
 				linha_erro = num_linha;
 
+				destino += "; Calcula endereco + desvio do vetor [" + lex + "]\n";
+
+				end_tmp = 0;
 				exp(tipo_exp, tamanho_exp, destino, endereco);
 
 				// Ação 11
@@ -388,13 +395,29 @@ void parser::cmd_s(std::string& destino)
 
 				tamanho = 0;
 
+				destino += "	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n";
+
+				if (rt->tipo == TP_INT || rt->tipo == TP_BOOL)
+					destino += "	add BX, BX ; int e boolean ocupa 2 bytes\n";
+
+				destino +=
+					"	add BX, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n"
+					"	push BX ; Armazena endereco na pilha\n";
+
 				consome_token(TK_GRU_F_COL); // ]
+			}
+			else
+			{
+				destino +=
+					"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco da variavel [" + lex + "]\n"
+					"	push BX ; Armazena endereco na pilha\n";
 			}
 
 			consome_token(TK_OP_ATRIB); // :=
 
 			linha_erro = num_linha;
 
+			end_tmp = 0;
 			exp(tipo_exp, tamanho_exp, destino, endereco);
 
 			// Ação 12
@@ -421,6 +444,15 @@ void parser::cmd_s(std::string& destino)
 			}
 			else if (tamanho_exp > 0)
 				throw tipo_incompativel(linha_erro);
+			else
+			{
+				destino +=
+					"	pop BX ; Recupera endereco\n"
+					"	mov CX, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
+					"	mov DS:[BX], CX ; Armazena resultado na memoria\n\n";
+			}
+
+			destino += "; Fim da atribuicao a [" + lex + "]\n\n";
 
 			break;
 
@@ -870,6 +902,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 		case TK_ID: // ID [ "[" Exp "]" ]
 
 			linha_erro = num_linha;
+			lex = token_lido->lex;
 
 			consome_token(TK_ID); // ID
 
@@ -881,12 +914,17 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			}
 			else throw id_nao_declarado(lex, linha_erro);
 
+			destino += "; Leitura de [" + lex + "]\n";
+
 			// [ "[" Exp "]" ]
 			if (token_lido->tipo_token == TK_GRU_A_COL)
 			{
 				linha_erro = num_linha;
 
 				consome_token(TK_GRU_A_COL); // [
+
+				destino += "	; Calcula endereco + desvio do vetor [" + lex + "]\n";
+
 				exp(tipo_exp, tamanho_exp, destino, endereco);
 
 				// Ação 27
@@ -895,8 +933,39 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 				tamanho = 0;
 
+				destino += "\n";
+				destino += "	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio\n";
+
+				if (tipo == TP_INT || tipo == TP_BOOL)
+					destino += "	add BX, BX ; int e boolean ocupa 2 bytes\n";
+
+				destino += "	add BX, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n";
+
+				endereco = novo_tmp(1 + (tipo != TP_CHAR));
+
+				destino +=
+					"	mov CX, DS:[BX] ; Recupera valor na posicao calculada\n"
+					"	mov DS:[" + converte_hex(endereco) + "], CX ; Armazena valor em um temporario\n\n";
+
 				consome_token(TK_GRU_F_COL); // ]
 			}
+			else if (tamanho == 0)
+			{
+				endereco = novo_tmp(1 + (tipo != TP_CHAR));
+				destino +=
+					"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor da variavel [" + lex + "]\n"
+					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n";
+			}
+			else
+			{
+				endereco = novo_tmp(2);
+				destino +=
+					"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco inicial do vetor [" + lex + "]\n"
+					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena endereco em um temporario\n";
+			}
+
+			destino += "; Fim da leitura de [" + lex + "]\n\n";
+
 			break;
 
 		default: // CONST
@@ -908,14 +977,16 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 			consome_token(TK_CONST);
 
+			destino += "\n; Constante [" + lex + "]\n";
+
 			if (tipo == TP_STR)
 			{
 				endereco = novo_tmp(tamanho);
 
 				if (lex.length() > 2) // Se nao for string vazia
-					destino += "\n" + gera_alocacao(TP_CHAR, tamanho, lex, "", true);
+					destino += gera_alocacao(TP_CHAR, tamanho, lex, "", true) + "\n";
 
-				destino += "\n" + gera_alocacao(TP_CHAR, tamanho, "\"$\"", "", true);
+				destino += gera_alocacao(TP_CHAR, tamanho, "\"$\"", "", true);
 			}
 			else
 			{
@@ -924,10 +995,11 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 				endereco = novo_tmp(byte_tipo(tipo));
 				destino +=
-					"\n"
 					"	mov BX, " + lex + "\n"
 					"	mov DS:[" + converte_hex(endereco) + "], BX\n";
 			}
+
+			destino += "; Fim da constante [" + lex + "]\n";
 
 			break;
 	}
