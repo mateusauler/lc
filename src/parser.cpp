@@ -358,197 +358,191 @@ void parser::cmd_s(std::string& destino)
 	tipo_dados_t tipo_exp;
 	int tamanho_exp, tamanho, linha_erro, endereco = 0;
 
-	switch (token_lido->tipo_token)
+	if (token_lido->tipo_token == TK_ID) // ID [ "[" Exp "]" ] := Exp
 	{
-		case TK_ID: // ID [ "[" Exp "]" ] := Exp
+		rt = token_lido->simbolo;
+		lex = token_lido->lex;
+		linha_erro = num_linha;
 
-			rt = token_lido->simbolo;
-			lex = token_lido->lex;
-			linha_erro = num_linha;
+		consome_token(TK_ID); // ID
 
-			consome_token(TK_ID); // ID
+		// Ação 10
+		if (rt->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
+		if (rt->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
 
-			// Ação 10
-			if (rt->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
-			if (rt->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
+		tamanho = rt->tam;
 
-			tamanho = rt->tam;
+		destino += "\n; Inicio da atribuicao a [" + lex + "]\n";
 
-			destino += "\n; Inicio da atribuicao a [" + lex + "]\n";
-
-			// [ "[" Exp "]" ]
-			if (token_lido->tipo_token == TK_GRU_A_COL)
-			{
-				consome_token(TK_GRU_A_COL); // [
-
-				linha_erro = num_linha;
-
-				destino +=
-					"; Calcula endereco + desvio do vetor [" + lex + "]\n"
-					"\n"
-					"; Inicio do calculo do desvio de [" + lex + "]\n";
-
-				end_tmp = 0;
-				exp(tipo_exp, tamanho_exp, destino, endereco);
-
-				destino += 
-					"\n"
-					"; Fim do calculo do desvio de [" + lex + "]\n";
-
-				// Ação 11
-				if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
-					throw tipo_incompativel(linha_erro);
-
-				tamanho = 0;
-
-				destino +=
-					"\n"
-					"	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n";
-
-				if (rt->tipo == TP_INT || rt->tipo == TP_BOOL)
-					destino += "	add BX, BX ; int e boolean ocupa 2 bytes\n";
-
-				destino +=
-					"	add BX, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n"
-					"	push BX ; Armazena endereco na pilha\n"
-					"\n"
-					"; Fim do calculo de endereco do vetor [" + lex + "]\n";
-
-				consome_token(TK_GRU_F_COL); // ]
-			}
-			else
-			{
-				destino +=
-					"; Armazena endereco da variavel [" + lex + "] na pilha\n"
-					"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco da variavel [" + lex + "]\n"
-					"	push BX ; Armazena endereco na pilha\n";
-			}
-
-			consome_token(TK_OP_ATRIB); // :=
+		// [ "[" Exp "]" ]
+		if (token_lido->tipo_token == TK_GRU_A_COL)
+		{
+			consome_token(TK_GRU_A_COL); // [
 
 			linha_erro = num_linha;
 
 			destino +=
+				"; Calcula endereco + desvio do vetor [" + lex + "]\n"
 				"\n"
-				"; Inicio do calculo do valor da atribuicao a [" + lex + "]\n";
+				"; Inicio do calculo do desvio de [" + lex + "]\n";
+
 			end_tmp = 0;
 			exp(tipo_exp, tamanho_exp, destino, endereco);
+
 			destino +=
 				"\n"
-				"; Fim do calculo do valor da atribuicao a [" + lex + "]\n";
+				"; Fim do calculo do desvio de [" + lex + "]\n";
 
-			// Ação 12
-			if (tipo_exp != rt->tipo)
+			// Ação 11
+			if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
+				throw tipo_incompativel(linha_erro);
+
+			tamanho = 0;
+
+			destino +=
+				"\n"
+				"	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n";
+
+			if (rt->tipo == TP_INT || rt->tipo == TP_BOOL)
+				destino += "	add BX, BX ; int e boolean ocupa 2 bytes\n";
+
+			destino +=
+				"	add BX, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n"
+				"	push BX ; Armazena endereco na pilha\n"
+				"\n"
+				"; Fim do calculo de endereco do vetor [" + lex + "]\n";
+
+			consome_token(TK_GRU_F_COL); // ]
+		}
+		else
+		{
+			destino +=
+				"; Armazena endereco da variavel [" + lex + "] na pilha\n"
+				"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco da variavel [" + lex + "]\n"
+				"	push BX ; Armazena endereco na pilha\n";
+		}
+
+		consome_token(TK_OP_ATRIB); // :=
+
+		linha_erro = num_linha;
+
+		destino +=
+			"\n"
+			"; Inicio do calculo do valor da atribuicao a [" + lex + "]\n";
+		end_tmp = 0;
+		exp(tipo_exp, tamanho_exp, destino, endereco);
+		destino +=
+			"\n"
+			"; Fim do calculo do valor da atribuicao a [" + lex + "]\n";
+
+		// Ação 12
+		if (tipo_exp != rt->tipo)
+		{
+			if (rt->tipo != TP_CHAR && tipo_exp != TP_STR)
+				throw tipo_incompativel(linha_erro);
+
+			if (tamanho < tamanho_exp)
+				throw tipo_incompativel(linha_erro);
+		}
+		else if (tamanho > 0)
+		{
+			if (rt->tipo == TP_CHAR)
 			{
-				if (rt->tipo != TP_CHAR && tipo_exp != TP_STR)
+				if (tamanho_exp == 0)
 					throw tipo_incompativel(linha_erro);
 
 				if (tamanho < tamanho_exp)
 					throw tipo_incompativel(linha_erro);
 			}
-			else if (tamanho > 0)
-			{
-				if (rt->tipo == TP_CHAR)
-				{
-					if (tamanho_exp == 0)
-						throw tipo_incompativel(linha_erro);
-
-					if (tamanho < tamanho_exp)
-						throw tipo_incompativel(linha_erro);
-				}
-				else
-					throw tipo_incompativel(linha_erro);
-			}
-			else if (tamanho_exp > 0)
-				throw tipo_incompativel(linha_erro);
 			else
-			{
-				destino +=
-					"\n"
-					"	pop BX ; Recupera endereco\n"
-					"	mov CX, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
-					"	mov DS:[BX], CX ; Armazena resultado na memoria\n";
-			}
-
+				throw tipo_incompativel(linha_erro);
+		}
+		else if (tamanho_exp > 0)
+			throw tipo_incompativel(linha_erro);
+		else
+		{
 			destino +=
 				"\n"
-				"; Fim da atribuicao a [" + lex + "]\n";
+				"	pop BX ; Recupera endereco\n"
+				"	mov CX, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
+				"	mov DS:[BX], CX ; Armazena resultado na memoria\n";
+		}
 
-			break;
+		destino +=
+			"\n"
+			"; Fim da atribuicao a [" + lex + "]\n";
+	}
+	else if (token_lido->tipo_token == TK_RES_READLN) // readln "(" ID [ "[" Exp "]" ] ")"
+	{
+		consome_token(TK_RES_READLN); // readln
+		consome_token(TK_GRU_A_PAR);  // (
 
-		case TK_RES_READLN: // readln "(" ID [ "[" Exp "]" ] ")"
+		rt = token_lido->simbolo;
+		linha_erro = num_linha;
 
-			consome_token(TK_RES_READLN); // readln
-			consome_token(TK_GRU_A_PAR);  // (
+		consome_token(TK_ID); // ID
 
-			rt = token_lido->simbolo;
-			linha_erro = num_linha;
+		// Ação 13
+		if (rt->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
+		if (rt->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
+		if (rt->tipo == TP_BOOL)    throw tipo_incompativel(linha_erro);
 
-			consome_token(TK_ID); // ID
+		tamanho = rt->tam;
 
-			// Ação 13
-			if (rt->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
-			if (rt->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
-			if (rt->tipo == TP_BOOL)    throw tipo_incompativel(linha_erro);
-
-			tamanho = rt->tam;
-
-			// [ "[" Exp "]" ]
-			if (token_lido->tipo_token == TK_GRU_A_COL)
-			{
-				consome_token(TK_GRU_A_COL); // [
-
-				linha_erro = num_linha;
-
-				exp(tipo_exp, tamanho_exp, destino, endereco);
-
-				// Ação 14
-				if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
-					throw tipo_incompativel(linha_erro);
-
-				tamanho = 0;
-
-				consome_token(TK_GRU_F_COL); // ]
-			}
-
-			// Ação 32
-			if (tamanho > 0 && rt->tipo != TP_CHAR)
-				throw tipo_incompativel(linha_erro);
-
-			consome_token(TK_GRU_F_PAR); // )
-			break;
-
-		default: // (write | writeln) "(" Exp {, Exp} ")"
-
-			if (token_lido->tipo_token == TK_RES_WRITE) consome_token(TK_RES_WRITE);   // write
-			else                                        consome_token(TK_RES_WRITELN); // writeln
-
-			consome_token(TK_GRU_A_PAR); // (
+		// [ "[" Exp "]" ]
+		if (token_lido->tipo_token == TK_GRU_A_COL)
+		{
+			consome_token(TK_GRU_A_COL); // [
 
 			linha_erro = num_linha;
 
 			exp(tipo_exp, tamanho_exp, destino, endereco);
 
-			// Ação 33
-			if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
+			// Ação 14
+			if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
 				throw tipo_incompativel(linha_erro);
 
-			// {, Exp}
-			while (token_lido->tipo_token == TK_OP_VIRGULA) // ,
-			{
-				consome_token(TK_OP_VIRGULA);
+			tamanho = 0;
 
-				linha_erro = num_linha;
+			consome_token(TK_GRU_F_COL); // ]
+		}
 
-				exp(tipo_exp, tamanho_exp, destino, endereco);
+		// Ação 32
+		if (tamanho > 0 && rt->tipo != TP_CHAR)
+			throw tipo_incompativel(linha_erro);
 
-				// Ação 34
-				if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
-					throw tipo_incompativel(linha_erro);
-			}
+		consome_token(TK_GRU_F_PAR); // )
+	}
+	else // (write | writeln) "(" Exp {, Exp} ")"
+	{
+		if (token_lido->tipo_token == TK_RES_WRITE) consome_token(TK_RES_WRITE);   // write
+		else                                        consome_token(TK_RES_WRITELN); // writeln
 
-			consome_token(TK_GRU_F_PAR); // )
-			break;
+		consome_token(TK_GRU_A_PAR); // (
+
+		linha_erro = num_linha;
+
+		exp(tipo_exp, tamanho_exp, destino, endereco);
+
+		// Ação 33
+		if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
+			throw tipo_incompativel(linha_erro);
+
+		// {, Exp}
+		while (token_lido->tipo_token == TK_OP_VIRGULA) // ,
+		{
+			consome_token(TK_OP_VIRGULA);
+
+			linha_erro = num_linha;
+
+			exp(tipo_exp, tamanho_exp, destino, endereco);
+
+			// Ação 34
+			if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
+				throw tipo_incompativel(linha_erro);
+		}
+
+		consome_token(TK_GRU_F_PAR); // )
 	}
 }
 
