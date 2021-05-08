@@ -854,9 +854,40 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 
 	tipo_dados_t tipo_soma;
 	int tamanho_soma;
-	int linha_erro;
+	int linha_erro, endereco_soma;
 
 	tipo_token_t operador;
+
+	std::string reg_a = "AX", reg_b = "BX", rot_verdadeiro, rot_fim;
+
+	auto compara_strings = [&]()
+	{
+		std::string rot_loop  = novo_rotulo();
+		std::string rot_falso = novo_rotulo();
+
+		destino +=
+			"	mov DX, 01h\n"
+			"	mov CL, 024h\n"
+			"	mov SI, " + converte_hex(endereco) + "\n"
+			"	mov DI, " + converte_hex(endereco_soma) + "\n" +
+			rot_loop + ":\n"
+			"	mov AL, DS:[SI]\n"
+			"	mov BL, DS:[DI]\n"
+			"	cmp AL, BL\n"
+			"	jne " + rot_falso + "\n"
+			"	cmp AL, CL\n"
+			"	je " + rot_fim + "\n"
+			"	add SI, 1\n"
+			"	add DI, 1\n"
+			"	jmp " + rot_loop + "\n" +
+			rot_falso + ":\n"
+			"	mov DX, 00h\n" +
+			rot_fim + ":\n";
+
+			endereco = novo_tmp(2);
+
+			destino += "	mov DS:[" + converte_hex(endereco) + "], DX\n";
+	};
 
 	// Ação 17
 	soma(tipo, tamanho, destino, endereco);
@@ -877,7 +908,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 
 			linha_erro = num_linha;
 
-			soma(tipo_soma, tamanho_soma, destino, endereco);
+			soma(tipo_soma, tamanho_soma, destino, endereco_soma);
 
 			// Ação 18
 			if (tipo != tipo_soma)
@@ -889,15 +920,79 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 						throw tipo_incompativel(linha_erro);
 				}
 				else throw tipo_incompativel(linha_erro);
+
+				compara_strings();
 			}
 			else if (tamanho > 0 || tamanho_soma > 0)
 			{
-				if (tipo == TP_CHAR)
+				if (tipo == TP_CHAR || tipo == TP_STR)
 				{
 					if (tamanho == 0 || tamanho_soma == 0 || operador != TK_OP_EQ)
 						throw tipo_incompativel(linha_erro);
 				}
 				else throw tipo_incompativel(linha_erro);
+
+				compara_strings();
+			}
+			else
+			{
+				if (tipo == TP_CHAR)
+				{
+					reg_a = "AL";
+					reg_b = "BL";
+
+					destino +=
+						"	mov AH, 0\n"
+						"	mov BH, 0\n";
+				}
+
+				rot_verdadeiro = novo_rotulo();
+				rot_fim = novo_rotulo();
+
+				destino +=
+					"	mov " + reg_a + ", DS:[" + converte_hex(endereco) + "]\n"
+					"	mov " + reg_b + ", DS:[" + converte_hex(endereco_soma) + "]\n"
+					"	cmp " + reg_a + ", " + reg_b + "\n";
+
+				switch (operador)
+				{
+					case TK_OP_EQ: // =
+						destino += "	je " + rot_verdadeiro + "\n";
+						break;
+
+					case TK_OP_NE: // <>
+						destino += "	jne " + rot_verdadeiro + "\n";
+						break;
+
+					case TK_OP_GT: // >
+						destino += "	jg " + rot_verdadeiro + "\n";
+						break;
+
+					case TK_OP_LT: // <
+						destino += "	jl " + rot_verdadeiro + "\n";
+						break;
+
+					case TK_OP_GE: // >=
+						destino += "	jge " + rot_verdadeiro + "\n";
+						break;
+
+					case TK_OP_LE: // <=
+						destino += "	jle " + rot_verdadeiro + "\n";
+						break;
+
+					default:
+						break;
+				}
+
+				endereco = novo_tmp(2);
+
+				destino +=
+					"	mov AX, 00h\n"
+					"	jmp " + rot_fim + "\n" +
+					rot_verdadeiro + ":\n"
+					"	mov AX, 01h\n" +
+					rot_fim + ":\n"
+					"	mov DS:[" + converte_hex(endereco) + "], AX\n";
 			}
 
 			tipo = TP_BOOL;
