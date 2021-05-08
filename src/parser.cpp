@@ -61,7 +61,7 @@ static std::string gera_alocacao(tipo_dados_t tipo, int tamanho, std::string dad
 	if (dado.empty())
 		dado = tamanho ? converte_hex(tamanho) + " DUP(?)" : "?";
 
-	codigo += dado + (nome.empty() ? "" : "		; " + nome) + "\n";
+	codigo += dado + (nome.empty() ? "" : " ; " + nome) + "\n";
 
 	if (cabecalho)
 		codigo += "dseg ENDS\n";
@@ -227,6 +227,7 @@ void parser::dec_const(std::string& destino)
 	else
 		valor = (nega ? "-" : "") + lex_const;
 
+	// Gera a alocacao da constante e preenche o valor
 	destino += gera_alocacao(rt->tipo, 0, valor, lex);
 
 	consome_token(TK_FIM_DECL); // ;
@@ -291,6 +292,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			else
 				valor = (nega ? "-" : "") + lex_const;
 
+			// Gera a alocacao da variavel e preenche o valor
 			destino += gera_alocacao(tipo, 0, valor, lex_id);
 
 			break;
@@ -308,10 +310,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			// Ação 9
 			valor_array = std::atoi(lex.c_str());
 
-			if (tipo_constante != TP_INT)
-				throw tipo_incompativel(linha_erro);
-
-			if (valor_array == 0)
+			if (tipo_constante != TP_INT || valor_array == 0)
 				throw tipo_incompativel(linha_erro);
 
 			if (valor_array * byte_tipo(tipo) > 8192)
@@ -321,12 +320,14 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
 			consome_token(TK_GRU_F_COL); // ]
 
+			// Aloca os bytes necessarios para o vetor
 			rt->endereco = aloca(byte_tipo(rt->tipo) * rt->tam);
 			destino += gera_alocacao(tipo, rt->tam, "", lex_id);
 
 			break;
 
 		default:
+			// Aloca uma variavel vazia
 			rt->endereco = aloca(byte_tipo(rt->tipo));
 			destino += gera_alocacao(tipo, 0, "", lex_id);
 			break;
@@ -377,6 +378,8 @@ void parser::cmd_s(std::string& destino)
 		// [ "[" Exp "]" ]
 		if (token_lido->tipo_token == TK_GRU_A_COL)
 		{
+			// Gera o calculo do endereco + desvio do vetor
+
 			consome_token(TK_GRU_A_COL); // [
 
 			linha_erro = num_linha;
@@ -417,6 +420,7 @@ void parser::cmd_s(std::string& destino)
 		}
 		else
 		{
+			// Recupera o endereco inicial da variavel e armazena ele na pilha
 			destino +=
 				"\n"
 				"; Armazena endereco da variavel [" + lex + "] na pilha\n"
@@ -428,6 +432,7 @@ void parser::cmd_s(std::string& destino)
 
 		linha_erro = num_linha;
 
+		// Calcula o valor a ser atribuido
 		destino +=
 			"\n"
 			"; Inicio do calculo do valor da atribuicao a [" + lex + "]\n";
@@ -440,11 +445,11 @@ void parser::cmd_s(std::string& destino)
 		// Ação 12
 		if (tipo_exp != rt->tipo)
 		{
-			if (rt->tipo != TP_CHAR && tipo_exp != TP_STR)
+			if ((rt->tipo != TP_CHAR && tipo_exp != TP_STR) || tamanho < tamanho_exp)
 				throw tipo_incompativel(linha_erro);
 
-			if (tamanho < tamanho_exp)
-				throw tipo_incompativel(linha_erro);
+			// Atribuicao de constante string a vetor de caracteres
+			// Copia os caracteres da constante para o vetor
 
 			std::string rot_copia_str = novo_rotulo();
 
@@ -470,6 +475,9 @@ void parser::cmd_s(std::string& destino)
 		{
 			if (rt->tipo != TP_CHAR || tamanho_exp == 0 || tamanho < tamanho_exp)
 				throw tipo_incompativel(linha_erro);
+
+			// Atribuicao de um vetor de caracteres a outro vetor de caracteres
+			// Copia os caracteres de um vetor para outro
 
 			std::string rot_copia_vet = novo_rotulo();
 
@@ -983,6 +991,8 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			// [ "[" Exp "]" ]
 			if (token_lido->tipo_token == TK_GRU_A_COL)
 			{
+				// Calcula o endereco + desvio do vetor e copia o valor da posicao para um temporario
+
 				linha_erro = num_linha;
 
 				consome_token(TK_GRU_A_COL); // [
@@ -1025,12 +1035,13 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			}
 			else if (tamanho == 0)
 			{
+				// Caso seja uma variavel escalar ou constante, copia ele para um temporario
 				endereco = novo_tmp(1 + (tipo != TP_CHAR));
 				destino +=
-					"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor da variavel [" + lex + "]\n"
+					"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
 					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n";
 			}
-			else
+			else // Se for um vetor, armazena seu endereco
 				endereco = rt->endereco;
 
 			destino +=
