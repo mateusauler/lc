@@ -382,6 +382,7 @@ void parser::cmd_s(std::string& destino)
 			linha_erro = num_linha;
 
 			destino +=
+				"\n"
 				"; Calcula endereco + desvio do vetor [" + lex + "]\n"
 				"\n"
 				"; Inicio do calculo do desvio de [" + lex + "]\n";
@@ -417,6 +418,7 @@ void parser::cmd_s(std::string& destino)
 		else
 		{
 			destino +=
+				"\n"
 				"; Armazena endereco da variavel [" + lex + "] na pilha\n"
 				"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco da variavel [" + lex + "]\n"
 				"	push BX ; Armazena endereco na pilha\n";
@@ -443,19 +445,51 @@ void parser::cmd_s(std::string& destino)
 
 			if (tamanho < tamanho_exp)
 				throw tipo_incompativel(linha_erro);
+
+			std::string rot_copia_str = novo_rotulo();
+
+			destino +=
+				"; Copia de constante string para [" + lex + "]\n"
+				"\n"
+				"	pop DI ; Endereco do vetor\n"
+				"	mov SI, " + converte_hex(endereco) + " ; Endereco da origem\n";
+
+			destino +=  "\n" + rot_copia_str + ":\n";
+
+			destino +=
+				"	mov AX, DS:[SI] ; Le o proximo caractere\n"
+				"	mov DS:[DI], AX ; Armazena este caractere em [" + lex + "]\n"
+				"	add DI, 1\n"
+				"	add SI, 1\n"
+				"	cmp AX, 024h ; Compara com $\n"
+				"	jne " + rot_copia_str + " ; Continua copiando, se nao for o final da string\n"
+				"\n"
+				"; Fim do copia de constante string para [" + lex + "]\n";
 		}
 		else if (tamanho > 0)
 		{
-			if (rt->tipo == TP_CHAR)
-			{
-				if (tamanho_exp == 0)
-					throw tipo_incompativel(linha_erro);
-
-				if (tamanho < tamanho_exp)
-					throw tipo_incompativel(linha_erro);
-			}
-			else
+			if (rt->tipo != TP_CHAR || tamanho_exp == 0 || tamanho < tamanho_exp)
 				throw tipo_incompativel(linha_erro);
+
+			std::string rot_copia_vet = novo_rotulo();
+
+			destino +=
+				"; Copia de vetor de char para [" + lex + "]\n"
+				"\n"
+				"	pop DI ; Endereco do vetor\n"
+				"	mov SI, " + converte_hex(endereco) + " ; Endereco da origem\n";
+
+			destino += "\n" + rot_copia_vet + ":\n";
+
+			destino +=
+				"	mov AX, DS:[SI] ; Le o proximo caractere\n"
+				"	mov DS:[DI], AX ; Armazena este caractere em [" + lex + "]\n"
+				"	add DI, 1\n"
+				"	add SI, 1\n"
+				"	cmp AX, 024h ; Compara com $\n"
+				"	jne " + rot_copia_vet + " ; Continua copiando, se nao for o final da string\n"
+				"\n"
+				"; Fim do copia de vetor de char para [" + lex + "]\n";
 		}
 		else if (tamanho_exp > 0)
 			throw tipo_incompativel(linha_erro);
@@ -985,12 +1019,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n";
 			}
 			else
-			{
-				endereco = novo_tmp(2);
-				destino +=
-					"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco inicial do vetor [" + lex + "]\n"
-					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena endereco em um temporario\n";
-			}
+				endereco = rt->endereco;
 
 			destino +=
 				"; Fim da leitura de [" + lex + "]\n";
@@ -1012,7 +1041,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 			if (tipo == TP_STR)
 			{
-				endereco = novo_tmp(tamanho);
+				endereco = aloca(tamanho);
 
 				if (lex.length() > 2) // Se nao for string vazia
 					destino += gera_alocacao(TP_CHAR, tamanho, lex, "", true);
