@@ -940,12 +940,8 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 		case TK_GRU_A_PAR: // "(" Exp ")"
 
 			consome_token(TK_GRU_A_PAR); // (
-			exp(tipo_exp, tamanho_exp, destino, endereco);
-
 			// Ação 25
-			tipo = tipo_exp;
-			tamanho = tamanho_exp;
-
+			exp(tipo, tamanho, destino, endereco);
 			consome_token(TK_GRU_F_PAR); // )
 			break;
 
