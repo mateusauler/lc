@@ -915,7 +915,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 	// [-] Termo {(+|-|or) Termo}
 
 	tipo_dados_t tipo_termo;
-	int tamanho_termo;
+	int tamanho_termo, endereco_termo;
 	bool nega = false;
 
 	tipo_token_t operador;
@@ -957,7 +957,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 
 				linha_erro = num_linha;
 
-				termo(tipo_termo, tamanho_termo, destino, endereco);
+				termo(tipo_termo, tamanho_termo, destino, endereco_termo);
 
 				// Ação 20
 				if (tipo != tipo_termo)
@@ -975,6 +975,38 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 					throw tipo_incompativel(linha_erro);
 
 				tamanho = 0;
+
+				destino +=
+					"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
+					"	mov BX, DS:[" + converte_hex(endereco_termo) + "]\n";
+
+				switch (operador)
+				{
+					case TK_OP_MAIS:  // +
+						destino += "	add AX, BX\n";
+						break;
+
+					case TK_OP_MENOS: // -
+						destino += "	sub AX, BX\n";
+						break;
+
+					case TK_RES_OR:   // or
+						destino +=
+							"	neg AX\n"
+							"	add AX, 1\n"
+							"	neg BX\n"
+							"	add BX, 1\n"
+							"	mov DX, 0\n"
+							"	imul BX\n"
+							"	neg AX\n"
+							"	add AX, 1\n";
+						break;
+
+					default:
+						break;
+				}
+
+				destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
 
 				break;
 
