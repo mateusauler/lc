@@ -1166,10 +1166,20 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			else if (tamanho == 0)
 			{
 				// Caso seja uma variavel escalar ou constante, copia ele para um temporario
-				endereco = novo_tmp(2);
-				destino +=
-					"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
-					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n";
+				if (tipo == TP_CHAR)
+				{
+					endereco = novo_tmp(1);
+					destino +=
+						"	mov BL, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
+						"	mov DS:[" + converte_hex(endereco) + "], BL ; Armazena valor em um temporario\n";
+				}
+				else
+				{
+					endereco = novo_tmp(2);
+					destino +=
+						"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
+						"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n";
+				}
 			}
 			else // Se for um vetor, armazena seu endereco
 				endereco = rt->endereco;
