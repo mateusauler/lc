@@ -5,7 +5,7 @@ main
     c1 := "Teste";
     c0 := c1;
     writeln(c0);
-    c2 := 'T';
+    c2 := 'A';
     c3 := c2;
     writeln(c3);
 }
