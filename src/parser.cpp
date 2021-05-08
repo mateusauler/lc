@@ -1089,6 +1089,12 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			if (tipo_fator != TP_BOOL || tamanho_fator > 0)
 				throw tipo_incompativel(linha_erro);
 
+			destino +=
+				"	mov BX, DS:[" + converte_hex(endereco) + "]\n"
+				"	neg BX\n"
+				"	add BX, 1\n"
+				"	mov DS:[" + converte_hex(endereco) + "], BX\n";
+
 			break;
 
 		case TK_GRU_A_PAR: // "(" Exp ")"
