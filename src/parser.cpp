@@ -573,6 +573,8 @@ void parser::cmd_s(std::string& destino)
 	}
 	else // (write | writeln) "(" Exp {, Exp} ")"
 	{
+		bool nova_linha = token_lido->tipo_token == TK_RES_WRITELN; // Armazena se deve imprimir nova linha
+
 		if (token_lido->tipo_token == TK_RES_WRITE) consome_token(TK_RES_WRITE);   // write
 		else                                        consome_token(TK_RES_WRITELN); // writeln
 
@@ -580,11 +582,129 @@ void parser::cmd_s(std::string& destino)
 
 		linha_erro = num_linha;
 
+		end_tmp = 0;
 		exp(tipo_exp, tamanho_exp, destino, endereco);
 
 		// Ação 33
 		if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
 			throw tipo_incompativel(linha_erro);
+
+		auto gera_impressao = [&]()
+		{
+			if (tipo_exp == TP_CHAR || tipo_exp == TP_STR)
+			{
+				if (tamanho_exp == 0)
+				{
+					// Imprimir um unico caractere
+
+					// Aloca espaco para a nova linha (se necessario) e o $
+					int temp_impressao = novo_tmp(1 + 2 * nova_linha);
+
+					if (nova_linha)
+					{
+						destino +=
+							"	mov BX, 0A0Dh ; nova linha\n"
+							"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n";
+					}
+
+					destino +=
+						"	mov BL, 024h\n"
+						"	mov DS:[" + converte_hex(temp_impressao + 2 * nova_linha) + "], BL\n"
+						"	mov DX, " + converte_hex(endereco) + "\n"
+						"	mov AH, 09h\n"
+						"	int 21h\n";
+				}
+				else
+				{
+					// Imprimir uma string
+
+					destino +=
+						"	mov DX, " + converte_hex(endereco) + "\n"
+						"	mov AH, 09h\n"
+						"	int 21h\n";
+
+					if (nova_linha)
+					{
+						int temp_impressao = novo_tmp(3);
+						destino +=
+							"	mov BX, 0A0Dh ; nova linha\n"
+							"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n"
+							"	mov BL, 024h\n"
+							"	mov DS:[" + converte_hex(temp_impressao + 2) + "], BL\n"
+							"	mov DX, " + converte_hex(temp_impressao) + "\n"
+							"	mov AH, 09h\n"
+							"	int 21h\n";
+					}
+				}
+			}
+			else
+			{
+				// Imprimir um inteiro
+
+				int temp_impressao = novo_tmp(9);
+
+				std::string rot_divisor  = novo_rotulo();
+				std::string rot_divide   = novo_rotulo();
+				std::string rot_converte = novo_rotulo();
+
+				destino +=
+					"\n"
+					"	mov AX, DS:[" + converte_hex(endereco) + "] ; Carrega valor de do inteiro\n"
+					"	mov DI, " + converte_hex(temp_impressao) + " ; Endereco da string para impressao\n"
+					"	mov CX, 0 ; Contador\n"
+					"	cmp AX, 0 ; Verifica sinal\n"
+					"	jge " + rot_divisor + " ; Salta se numero positivo\n"
+					"\n"
+					"	mov BL, 2Dh ; Senao, escreve sinal –\n"
+					"	mov DS:[DI], BL\n"
+					"	add DI, 1 ; Incrementa indice\n"
+					"	neg AX ; Toma modulo do numero\n"
+					"\n" +
+					rot_divisor + ":\n"
+					"	mov BX, 10 ; Divisor\n"
+					"\n" +
+					rot_divide + ":\n"
+					"	add CX, 1 ; Incrementa contador\n"
+					"	mov DX, 0 ; Estende 32bits p/ div.\n"
+					"	idiv BX ; Divide DXAX por BX\n"
+					"	push DX ; Empilha valor do resto\n"
+					"	cmp AX, 0 ; Verifica se quoc. e 0\n"
+					"	jne " + rot_divide + " ; se nao e 0, continua\n"
+					"\n" +
+					rot_converte +":\n"
+					"	pop DX ; desempilha valor\n"
+					"	add DX, 30h ; transforma em caractere\n"
+					"	mov DS:[DI], DL ; escreve caractere\n"
+					"	add DI, 1 ; incrementa base\n"
+					"	add CX, -1 ; decrementa contador\n"
+					"	cmp CX, 0 ; verifica pilha vazia\n"
+					"	jne " + rot_converte + " ; se não pilha vazia, loop\n";
+
+					if (nova_linha)
+					{
+						destino +=
+							"	mov BX, 0A0Dh ; nova linha\n"
+							"	mov DS:[DI], BX\n"
+							"	add DI, 2\n";
+					}
+
+				destino +=
+					"\n"
+					";grava fim de string\n"
+					"\n"
+					"	mov DL, 024h ; fim de string\n"
+					"	mov DS:[DI], DL ; grava '$'\n"
+					"\n"
+					";exibe string\n"
+					"\n"
+					"	mov DX, " + converte_hex(temp_impressao) + "\n"
+					"	mov AH, 09h\n"
+					"	int 21h\n";
+			}
+	
+		};
+
+		gera_impressao();
 
 		// {, Exp}
 		while (token_lido->tipo_token == TK_OP_VIRGULA) // ,
@@ -593,11 +713,14 @@ void parser::cmd_s(std::string& destino)
 
 			linha_erro = num_linha;
 
+			end_tmp = 0;
 			exp(tipo_exp, tamanho_exp, destino, endereco);
 
 			// Ação 34
 			if (tipo_exp == TP_BOOL || (tamanho_exp > 0 && tipo_exp == TP_INT))
 				throw tipo_incompativel(linha_erro);
+
+			gera_impressao();
 		}
 
 		consome_token(TK_GRU_F_PAR); // )
@@ -827,6 +950,14 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 	termo(tipo, tamanho, destino, endereco);
 	if (nega && (tipo != TP_INT || tamanho > 0)) throw tipo_incompativel(linha_erro);
 
+	if (nega)
+	{
+		destino +=
+			"	mov BX, DS:[" + converte_hex(endereco) + "]\n"
+			"	neg BX\n"
+			"	mov DS:[" + converte_hex(endereco) + "], BX\n";
+	}
+
 	// {(+|-|or) Termo}
 	while (true)
 	{
@@ -1036,7 +1167,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			else if (tamanho == 0)
 			{
 				// Caso seja uma variavel escalar ou constante, copia ele para um temporario
-				endereco = novo_tmp(1 + (tipo != TP_CHAR));
+				endereco = novo_tmp(2);
 				destino +=
 					"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
 					"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n";
