@@ -598,14 +598,7 @@ void parser::cmd_s(std::string& destino)
 					// Imprimir um unico caractere
 
 					// Aloca espaco para a nova linha (se necessario) e o $
-					int temp_impressao = novo_tmp(1 + 2 * nova_linha);
-
-					if (nova_linha)
-					{
-						destino +=
-							"	mov BX, 0A0Dh ; nova linha\n"
-							"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n";
-					}
+					int temp_impressao = novo_tmp(1);
 
 					destino +=
 						"	mov BL, 024h\n"
@@ -622,26 +615,13 @@ void parser::cmd_s(std::string& destino)
 						"	mov DX, " + converte_hex(endereco) + "\n"
 						"	mov AH, 09h\n"
 						"	int 21h\n";
-
-					if (nova_linha)
-					{
-						int temp_impressao = novo_tmp(3);
-						destino +=
-							"	mov BX, 0A0Dh ; nova linha\n"
-							"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n"
-							"	mov BL, 024h\n"
-							"	mov DS:[" + converte_hex(temp_impressao + 2) + "], BL\n"
-							"	mov DX, " + converte_hex(temp_impressao) + "\n"
-							"	mov AH, 09h\n"
-							"	int 21h\n";
-					}
 				}
 			}
 			else
 			{
 				// Imprimir um inteiro
 
-				int temp_impressao = novo_tmp(9);
+				int temp_impressao = novo_tmp(7);
 
 				std::string rot_divisor  = novo_rotulo();
 				std::string rot_divide   = novo_rotulo();
@@ -680,14 +660,6 @@ void parser::cmd_s(std::string& destino)
 					"	cmp CX, 0 ; verifica pilha vazia\n"
 					"	jne " + rot_converte + " ; se não pilha vazia, loop\n";
 
-					if (nova_linha)
-					{
-						destino +=
-							"	mov BX, 0A0Dh ; nova linha\n"
-							"	mov DS:[DI], BX\n"
-							"	add DI, 2\n";
-					}
-
 				destino +=
 					"\n"
 					";grava fim de string\n"
@@ -720,6 +692,19 @@ void parser::cmd_s(std::string& destino)
 				throw tipo_incompativel(linha_erro);
 
 			gera_impressao();
+		}
+
+		if (nova_linha)
+		{
+			int temp_impressao = novo_tmp(3);
+			destino +=
+				"	mov BX, 0D0Ah ; nova linha\n"
+				"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n"
+				"	mov BL, 024h\n"
+				"	mov DS:[" + converte_hex(temp_impressao + 2) + "], BL\n"
+				"	mov DX, " + converte_hex(temp_impressao) + "\n"
+				"	mov AH, 09h\n"
+				"	int 21h\n";
 		}
 
 		consome_token(TK_GRU_F_PAR); // )
