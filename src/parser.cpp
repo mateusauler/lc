@@ -701,7 +701,6 @@ void parser::cmd_s(std::string& destino)
 					"	mov AH, 09h\n"
 					"	int 21h\n";
 			}
-	
 		};
 
 		gera_impressao();
