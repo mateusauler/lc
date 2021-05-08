@@ -457,11 +457,11 @@ void parser::cmd_s(std::string& destino)
 			destino +=  "\n" + rot_copia_str + ":\n";
 
 			destino +=
-				"	mov AX, DS:[SI] ; Le o proximo caractere\n"
-				"	mov DS:[DI], AX ; Armazena este caractere em [" + lex + "]\n"
+				"	mov AL, DS:[SI] ; Le o proximo caractere\n"
+				"	mov DS:[DI], AL ; Armazena este caractere em [" + lex + "]\n"
 				"	add DI, 1\n"
 				"	add SI, 1\n"
-				"	cmp AX, 024h ; Compara com $\n"
+				"	cmp AL, 024h ; Compara com $\n"
 				"	jne " + rot_copia_str + " ; Continua copiando, se nao for o final da string\n"
 				"\n"
 				"; Fim do copia de constante string para [" + lex + "]\n";
@@ -482,11 +482,11 @@ void parser::cmd_s(std::string& destino)
 			destino += "\n" + rot_copia_vet + ":\n";
 
 			destino +=
-				"	mov AX, DS:[SI] ; Le o proximo caractere\n"
-				"	mov DS:[DI], AX ; Armazena este caractere em [" + lex + "]\n"
+				"	mov AL, DS:[SI] ; Le o proximo caractere\n"
+				"	mov DS:[DI], AL ; Armazena este caractere em [" + lex + "]\n"
 				"	add DI, 1\n"
 				"	add SI, 1\n"
-				"	cmp AX, 024h ; Compara com $\n"
+				"	cmp AL, 024h ; Compara com $\n"
 				"	jne " + rot_copia_vet + " ; Continua copiando, se nao for o final da string\n"
 				"\n"
 				"; Fim do copia de vetor de char para [" + lex + "]\n";
@@ -495,11 +495,27 @@ void parser::cmd_s(std::string& destino)
 			throw tipo_incompativel(linha_erro);
 		else
 		{
-			destino +=
-				"\n"
-				"	pop BX ; Recupera endereco\n"
-				"	mov CX, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
-				"	mov DS:[BX], CX ; Armazena resultado na memoria\n";
+			// Atribuicao escalar de uma variavel
+			// Copia o conteudo calculado pela expressao e guarda na memoria
+
+			if (rt->tipo == TP_CHAR)
+			{
+				// Caso for char, deve-se copiar somente 1 byte
+				destino +=
+					"\n"
+					"	pop DI ; Recupera endereco\n"
+					"	mov CL, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
+					"	mov DS:[DI], CL ; Armazena resultado na memoria\n";
+			}
+			else
+			{
+				// Caso for int ou boolean, deve-se copiar 2 bytes
+				destino +=
+					"\n"
+					"	pop DI ; Recupera endereco\n"
+					"	mov CX, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
+					"	mov DS:[DI], CX ; Armazena resultado na memoria\n";
+			}
 		}
 
 		destino +=
@@ -1050,9 +1066,21 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 					lex = converte_hex(lex == "TRUE");
 
 				endereco = novo_tmp(byte_tipo(tipo));
-				destino +=
-					"	mov BX, " + lex + "\n"
-					"	mov DS:[" + converte_hex(endereco) + "], BX\n";
+
+				if (tipo == TP_CHAR)
+				{
+					// Caso for um caractere, deve-se movimentar 1 byte
+					destino +=
+						"	mov BL, " + lex + "\n"
+						"	mov DS:[" + converte_hex(endereco) + "], BL\n";
+				}
+				else
+				{
+					// Caso for um int ou boolean, deve-se movimentar 2 bytes
+					destino +=
+						"	mov BX, " + lex + "\n"
+						"	mov DS:[" + converte_hex(endereco) + "], BX\n";
+				}
 			}
 
 			destino += "; Fim da constante [" + lex + "]\n";
