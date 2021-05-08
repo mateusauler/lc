@@ -989,7 +989,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 	// Fator {(*|/|%|and) Fator}
 
 	tipo_dados_t tipo_fator;
-	int tamanho_fator;
+	int tamanho_fator, endereco_fator;
 
 	tipo_token_t operador;
 
@@ -1014,7 +1014,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 				linha_erro = num_linha;
 
-				fator(tipo_fator, tamanho_fator, destino, endereco);
+				fator(tipo_fator, tamanho_fator, destino, endereco_fator);
 
 				// Ação 22
 				if (tipo != tipo_fator)
@@ -1032,6 +1032,36 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 					throw tipo_incompativel(linha_erro);
 
 				tamanho = 0;
+
+				destino +=
+					"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
+					"	mov BX, DS:[" + converte_hex(endereco_fator) + "]\n";
+				
+				switch (operador)
+				{
+					case TK_OP_MUL:      // *
+					case TK_RES_AND:     // and
+						destino += "	imul BX\n";
+						break;
+
+					case TK_OP_BARRA:    // /
+						destino +=
+							"	cwd\n"
+							"	idiv BX\n";
+						break;
+
+					case TK_OP_PORCENTO: // %
+						destino += 
+							"	cwd\n"
+							"	idiv BX\n"
+							"	mov AX, DX\n";
+						break;
+
+					default:
+						break;
+				}
+
+				destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
 
 				break;
 
