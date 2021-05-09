@@ -1025,6 +1025,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 	{
 		std::string rot_loop  = novo_rotulo();
 		std::string rot_falso = novo_rotulo();
+		rot_fim = novo_rotulo();
 
 		destino +=
 			"	mov DX, 01h\n"
