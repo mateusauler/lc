@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "enums.h"
 #include "parser.h"
 #include "excessoes.h"
 
@@ -554,6 +555,7 @@ void parser::cmd_s(std::string& destino)
 
 			linha_erro = num_linha;
 
+			end_tmp = 0;
 			exp(tipo_exp, tamanho_exp, destino, endereco);
 
 			// Ação 14
@@ -563,11 +565,131 @@ void parser::cmd_s(std::string& destino)
 			tamanho = 0;
 
 			consome_token(TK_GRU_F_COL); // ]
+
+			destino +=
+				"	mov DI, " + converte_hex(rt->endereco) + "\n"
+				"	mov AX, DS:[" + converte_hex(endereco) + "]\n";
+
+			if (rt->tipo != TP_CHAR)
+				destino += "	add AX, AX\n";
+
+			destino +=
+				"	add DI, AX\n";
 		}
+		else
+			destino += "	mov DI, " + converte_hex(rt->endereco) + "\n";
 
 		// Ação 32
 		if (tamanho > 0 && rt->tipo != TP_CHAR)
 			throw tipo_incompativel(linha_erro);
+
+		if (tamanho == 0)
+		{
+			if (rt->tipo == TP_CHAR)
+			{
+				int buffer_leitura = novo_tmp(4);
+				destino +=
+					"	mov DX, " + converte_hex(buffer_leitura) + "\n"
+					"	mov AL, 04h\n"
+					"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
+					"	mov AH, 0Ah\n"
+					"	int 21h\n"
+					"	mov AH, 02h\n"
+					"	mov DL, 0Dh\n"
+					"	int 21h\n"
+					"	mov DL, 0Ah\n"
+					"	int 21h\n"
+					"	mov AL, DS:[" + converte_hex(buffer_leitura) + "]\n"
+					"	mov DS:[" + converte_hex(rt->endereco) + "], AL\n";
+			}
+			else
+			{
+				int buffer_leitura = novo_tmp(258);
+
+				std::string rot_sinal = novo_rotulo(), rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
+
+				destino +=
+					"	push DI\n"
+					"	mov DX, " + converte_hex(buffer_leitura) + "\n"
+					"	mov AL, 0FFh\n"
+					"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
+					"; Executa leitura\n"
+					"	mov AH, 0Ah\n"
+					"	int 21h\n"
+					"; Imprime nova linha\n"
+					"	mov AH, 02h\n"
+					"	mov DL, 0Dh\n"
+					"	int 21h\n"
+					"	mov DL, 0Ah\n"
+					"	int 21h\n"
+					"\n"
+					"	mov DI, " + converte_hex(buffer_leitura + 2) +" ;posição do string\n"
+					"	mov AX, 0 ;acumulador\n"
+					"	mov CX, 10 ;base decimal\n"
+					"	mov DX, 1 ;valor sinal +\n"
+					"	mov BH, 0\n"
+					"	mov BL, DS:[DI] ;caractere\n"
+					"	cmp BX, 02Dh ;verifica sinal\n"
+					"	jne " + rot_sinal + " ;se não negativo\n"
+					"	mov DX, -1 ;valor sinal -\n"
+					"	add DI, 1 ;incrementa base\n"
+					"	mov BL, DS:[DI] ;próximo caractere\n" +
+					rot_sinal + ":\n"
+					"	push DX ;empilha sinal\n"
+					"	mov DX, 0 ;reg. multiplicação\n" +
+					rot_loop + ":\n"
+					"	cmp BX, 0Dh ;verifica fim string\n"
+					"	je " + rot_fim + " ;salta se fim string\n"
+					"	imul CX ;mult. 10\n"
+					"	add BX, -48 ;converte caractere\n"
+					"	add AX, BX ;soma valor caractere\n"
+					"	add DI, 1 ;incrementa base\n"
+					"	mov BH, 0\n"
+					"	mov BL, DS:[DI] ;próximo caractere\n"
+					"	jmp " + rot_loop + " ;loop\n" +
+					rot_fim + ":\n"
+					"	pop CX ;desempilha sinal\n"
+					"	imul CX ;mult. sinal;\n"
+					"	pop DI\n"
+					"	mov DS:[DI], AX\n";
+			}
+		}
+		else
+		{
+			int tamanho_buffer = 258;
+
+			if (rt->tam < 255)
+				tamanho_buffer = rt->tam + 3;
+
+			int buffer_leitura = novo_tmp(tamanho_buffer);
+
+			std::string rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
+
+			destino +=
+				"	mov DX, " + converte_hex(buffer_leitura) + "\n"
+				"	mov AL, " + converte_hex(tamanho_buffer) + "\n"
+				"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
+				"	mov AH, 0Ah\n"
+				"	int 21h\n"
+				"	mov AH, 02h\n"
+				"	mov DL, 0Dh\n"
+				"	int 21h\n"
+				"	mov DL, 0Ah\n"
+				"	int 21h\n"
+				"	mov AH, 0\n"
+				"	mov DI, " + converte_hex(rt->endereco) + "\n"
+				"	mov SI, " + converte_hex(buffer_leitura + 2) + "\n" +
+				rot_loop + ":\n"
+				"	mov AL, DS:[SI]\n"
+				"	cmp AL, 0Dh\n"
+				"	je " + rot_fim + "\n"
+				"	mov DS:[DI], AL\n"
+				"	add DI, 1\n"
+				"	add SI, 1\n"
+				"	jmp " + rot_loop + "\n" +
+				rot_fim + ":\n"
+				"	mov DS:[DI], 024h\n";
+		}
 
 		consome_token(TK_GRU_F_PAR); // )
 	}
