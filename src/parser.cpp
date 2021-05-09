@@ -537,6 +537,7 @@ void parser::cmd_s(std::string& destino)
 
 		rt = token_lido->simbolo;
 		linha_erro = num_linha;
+		lex = token_lido->lex;
 
 		consome_token(TK_ID); // ID
 
