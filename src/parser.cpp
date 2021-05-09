@@ -445,8 +445,11 @@ void parser::cmd_s(std::string& destino)
 		// Ação 12
 		if (tipo_exp != rt->tipo)
 		{
-			if ((rt->tipo != TP_CHAR && tipo_exp != TP_STR) || tamanho < tamanho_exp)
+			if ((rt->tipo != TP_CHAR && tipo_exp != TP_STR))
 				throw tipo_incompativel(linha_erro);
+
+			if (tamanho < tamanho_exp)
+				throw tam_vet_excede_max(linha_erro);
 
 			// Atribuicao de constante string a vetor de caracteres
 			// Copia os caracteres da constante para o vetor
@@ -473,8 +476,11 @@ void parser::cmd_s(std::string& destino)
 		}
 		else if (tamanho > 0)
 		{
-			if (rt->tipo != TP_CHAR || tamanho_exp == 0 || tamanho < tamanho_exp)
+			if (rt->tipo != TP_CHAR || tamanho_exp == 0)
 				throw tipo_incompativel(linha_erro);
+
+			if (tamanho < tamanho_exp)
+				throw tam_vet_excede_max(linha_erro);
 
 			// Atribuicao de um vetor de caracteres a outro vetor de caracteres
 			// Copia os caracteres de um vetor para outro
