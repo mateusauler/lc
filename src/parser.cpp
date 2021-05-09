@@ -717,6 +717,7 @@ void parser::cmd_for(std::string& destino)
 
 	tipo_dados_t tipo_exp;
 	int tamanho_exp, endereco;
+	std::string codigo_final = "", rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
 
 	consome_token(TK_RES_FOR);   // for
 	consome_token(TK_GRU_A_PAR); // (
@@ -737,24 +738,32 @@ void parser::cmd_for(std::string& destino)
 
 	int linha_erro = num_linha;
 
+	destino += rot_loop + ":\n";
+
+	end_tmp = 0;
 	exp(tipo_exp, tamanho_exp, destino, endereco);
 
 	// Ação 15
 	if (tipo_exp != TP_BOOL || tamanho_exp > 0)
 		throw tipo_incompativel(linha_erro);
 
+	destino +=
+		"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
+		"	cmp AX, 00h\n"
+		"	je " + rot_fim + "\n";
+
 	consome_token(TK_FIM_DECL); // ;
 
 	// [Cmd {, Cmd}]
 	if (token_lido->tipo_token != TK_GRU_F_PAR)
 	{
-		cmd(destino);
+		cmd(codigo_final);
 
 		// {, Cmd}
 		while (token_lido->tipo_token == TK_OP_VIRGULA)
 		{
 			consome_token(TK_OP_VIRGULA); // ,
-			cmd(destino);
+			cmd(codigo_final);
 		}
 	}
 
@@ -763,6 +772,11 @@ void parser::cmd_for(std::string& destino)
 	// (CmdT | BlocoCmd)
 	if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
 	else                                        cmd_t(destino);
+
+	destino += codigo_final;
+	destino +=
+		"	jmp " + rot_loop + "\n" +
+		rot_fim + ":\n";
 }
 
 void parser::cmd_if(std::string& destino)
@@ -779,6 +793,7 @@ void parser::cmd_if(std::string& destino)
 
 	int linha_erro = num_linha;
 
+	end_tmp = 0;
 	exp(tipo_exp, tamanho_exp, destino, endereco);
 
 	// Ação 16
@@ -1186,7 +1201,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 				destino +=
 					"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
 					"	mov BX, DS:[" + converte_hex(endereco_fator) + "]\n";
-				
+
 				switch (operador)
 				{
 					case TK_OP_MUL:      // *
@@ -1201,7 +1216,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 						break;
 
 					case TK_OP_PORCENTO: // %
-						destino += 
+						destino +=
 							"	cwd\n"
 							"	idiv BX\n"
 							"	mov AX, DX\n";
