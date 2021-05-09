@@ -772,6 +772,8 @@ void parser::cmd_if(std::string& destino)
 	tipo_dados_t tipo_exp;
 	int tamanho_exp, endereco;
 
+	std::string rot_caso_falso = novo_rotulo();
+
 	consome_token(TK_RES_IF);    // if
 	consome_token(TK_GRU_A_PAR); // (
 
@@ -787,6 +789,12 @@ void parser::cmd_if(std::string& destino)
 
 	consome_token(TK_RES_THEN);  // then
 
+	// Gera comparacao com jump para o caso_falso
+	destino +=
+		"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
+		"	cmp AX, 00h\n"
+		"	je " + rot_caso_falso + "\n";
+
 	// (CmdT | BlocoCmd)
 	if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
 	else                                        cmd_t(destino);
@@ -794,13 +802,28 @@ void parser::cmd_if(std::string& destino)
 	// [else (CmdT | BlocoCmd)]
 	if (token_lido->tipo_token == TK_RES_ELSE)
 	{
+		std::string rot_fim = novo_rotulo();
+
 		consome_token(TK_RES_ELSE); // else
+
+		// Gera jmp para o fim
+		// Gera rotulo do caso_falso
+		destino	+=
+			"	jmp " + rot_fim + "\n" +
+			rot_caso_falso + ":\n";
 
 		// (CmdT | BlocoCmd)
 		if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
 		else                                        cmd_t(destino);
-	}
 
+		// Gera rotulo do fim
+		destino += rot_fim + ":\n";
+	}
+	else
+	{
+		// Gera o rotulo do caso_falso
+		destino += rot_caso_falso + ":\n";
+	}
 }
 
 void parser::cmd_t(std::string& destino)
