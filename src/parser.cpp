@@ -1,6 +1,5 @@
 #include <sstream>
 
-#include "enums.h"
 #include "parser.h"
 #include "excessoes.h"
 
@@ -688,7 +687,8 @@ void parser::cmd_s(std::string& destino)
 				"	add SI, 1\n"
 				"	jmp " + rot_loop + "\n" +
 				rot_fim + ":\n"
-				"	mov DS:[DI], 024h\n";
+				"	mov AL, 024h\n"
+				"	mov DS:[DI], AL\n";
 		}
 
 		consome_token(TK_GRU_F_PAR); // )
