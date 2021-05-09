@@ -6,6 +6,8 @@ dir_base=$(pwd)
 
 dir_tst=$dir_base/testes
 
+dir_entrada=$dir_tst/entradas
+
 dir_fonte=$dir_tst/fonte
 dir_esperado=$dir_tst/esperado/compilador
 
@@ -76,9 +78,15 @@ fi
 if [ ! -z "$(command -v dosbox)" ] && [ ! -z "$(command -v jwasm)" ] ; then
 	make -C $dir_result --no-print-directory
 
+    cp $dir_entrada/*.e $dir_exe
+
 	cd $dir_exe
-	cmd=$(ls *.EXE | sed -E "s/(^|\\s+)(.+)(\.EXE)/ -c \\2\\3>\\2.T/g")
-	dosbox -c "mount c ." -c "c:" $cmd -c "exit" > /dev/null
+	cmd=$(ls *.EXE | sed -E "s/(^|\s+)(.+)(\.EXE)/\2\3 < \2.E > \2.T\n/g")
+    echo "$cmd" > progs.bat
+    echo "exit" >> progs.bat
+	dosbox -c "mount c ." -c "c:" -c progs.bat > /dev/null
+
+    rm *.e progs.bat
 
 	mv *.T $dir_saida
 	cd $dir_base
