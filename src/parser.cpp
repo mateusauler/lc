@@ -825,14 +825,11 @@ void parser::cmd_s(std::string& destino)
 
 		if (nova_linha)
 		{
-			int temp_impressao = novo_tmp(3);
 			destino +=
-				"	mov BX, 0D0Ah ; nova linha\n"
-				"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n"
-				"	mov BL, 024h\n"
-				"	mov DS:[" + converte_hex(temp_impressao + 2) + "], BL\n"
-				"	mov DX, " + converte_hex(temp_impressao) + "\n"
-				"	mov AH, 09h\n"
+				"	mov AH, 02h\n"
+				"	mov DL, 0Dh\n"
+				"	int 21h\n"
+				"	mov DL, 0Ah\n"
 				"	int 21h\n";
 		}
 
