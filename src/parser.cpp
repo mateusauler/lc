@@ -601,8 +601,6 @@ void parser::cmd_s(std::string& destino)
 					"	mov AH, 0Ah\n"
 					"	int 21h\n"
 					"	mov AH, 02h\n"
-					"	mov DL, 0Dh\n"
-					"	int 21h\n"
 					"	mov DL, 0Ah\n"
 					"	int 21h\n"
 					"	mov AL, DS:[" + converte_hex(buffer_leitura) + "]\n"
@@ -624,8 +622,6 @@ void parser::cmd_s(std::string& destino)
 					"	int 21h\n"
 					"; Imprime nova linha\n"
 					"	mov AH, 02h\n"
-					"	mov DL, 0Dh\n"
-					"	int 21h\n"
 					"	mov DL, 0Ah\n"
 					"	int 21h\n"
 					"\n"
@@ -678,8 +674,6 @@ void parser::cmd_s(std::string& destino)
 				"	mov AH, 0Ah\n"
 				"	int 21h\n"
 				"	mov AH, 02h\n"
-				"	mov DL, 0Dh\n"
-				"	int 21h\n"
 				"	mov DL, 0Ah\n"
 				"	int 21h\n"
 				"	mov AH, 0\n"
@@ -730,10 +724,10 @@ void parser::cmd_s(std::string& destino)
 					int temp_impressao = novo_tmp(2);
 
 					destino +=
-						"	mov BH, DS:[" + converte_hex(endereco) + "]\n"
-						"	mov BL, 024h\n"
+						"	mov BL, DS:[" + converte_hex(endereco) + "]\n"
+						"	mov BH, 024h\n"
 						"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n"
-						"	mov DX, " + converte_hex(endereco) + "\n"
+						"	mov DX, " + converte_hex(temp_impressao) + "\n"
 						"	mov AH, 09h\n"
 						"	int 21h\n";
 				}
