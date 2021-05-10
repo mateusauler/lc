@@ -10,6 +10,7 @@ dir_entrada=$dir_tst/entradas
 
 dir_fonte=$dir_tst/fonte
 dir_esperado=$dir_tst/esperado/compilador
+dir_res_esperado=$dir_tst/esperado/programa
 
 dir_result=$dir_tst/resultado
 
@@ -89,5 +90,30 @@ if [ ! -z "$(command -v dosbox)" ] && [ ! -z "$(command -v jwasm)" ] ; then
     rm *.e progs.bat
 
 	mv *.T $dir_saida
-	cd $dir_base
+	cd $dir_saida
+
+    for f in $(ls *.T); do
+        f_esperado=$(echo $f | sed -E "s/\.T/\.se/g")
+
+        if [ -f "$dir_res_esperado/$f_esperado" ] ; then
+            conteudo_esperado=$(cat $dir_res_esperado/$f_esperado)
+            conteudo_resultado=$(cat $f)
+
+            if [ "$conteudo_esperado" != "$conteudo_resultado" ] ; then
+                cat_erro "\n$f:"
+                cat_erro "Resultado final inesperado"
+                cat_erro "Esperado:"
+                cat_erro "$conteudo_esperado"
+                cat_erro "Gerado:"
+                cat_erro "$conteudo_resultado\n"
+            fi
+        fi
+    done
+
+    cd $dir_base
+
+    if [ ! -z "$erros" ] ; then
+        printf "%b" "$erros"
+        exit 1
+    fi
 fi
