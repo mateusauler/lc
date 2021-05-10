@@ -669,7 +669,7 @@ void parser::cmd_s(std::string& destino)
 
 			destino +=
 				"	mov DX, " + converte_hex(buffer_leitura) + "\n"
-				"	mov AL, " + converte_hex(tamanho_buffer) + "\n"
+				"	mov AL, " + converte_hex(tamanho_buffer - 3) + "\n"
 				"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
 				"	mov AH, 0Ah\n"
 				"	int 21h\n"
