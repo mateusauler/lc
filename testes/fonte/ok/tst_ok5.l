@@ -1,6 +1,6 @@
 int a, v[6];
 final f = 7;
-char str1[15], str2[15];
+char str1[15], str2[15], tmp;
 
 main
 {
@@ -52,4 +52,6 @@ main
 
     writeln("Valor de str1: '", str1, "'");
     write("Valor de str2: '", str2, "'");
+
+    readln(tmp);
 }

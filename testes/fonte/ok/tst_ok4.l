@@ -1,4 +1,4 @@
-char c0[20], c1[20], c2, c3;
+char c0[20], c1[20], c2, c3, tmp;
 
 main
 {
@@ -17,4 +17,6 @@ main
 
     writeln(-63);
     write("Numero: ", -264);
+
+    readln(tmp);
 }

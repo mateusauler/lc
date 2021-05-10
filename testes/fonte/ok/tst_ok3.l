@@ -1,5 +1,6 @@
 int array[50];
 int inicio, fim, meio, ordenado, atual, i, j;
+char tmp;
 
 main
 {
@@ -84,4 +85,6 @@ main
         write(array[i], ", ");
 
     writeln(array[49]);
+
+    readln(tmp);
 }
