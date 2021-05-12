@@ -1158,7 +1158,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 			tipo = TP_BOOL;
 			tamanho = 0;
 
-		break;
+			break;
 
 		default:
 			break;
@@ -1198,76 +1198,69 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 	}
 
 	// {(+|-|or) Termo}
-	while (true)
+	while
+	(
+		token_lido->tipo_token == TK_OP_MAIS  || // +
+		token_lido->tipo_token == TK_OP_MENOS || // -
+		token_lido->tipo_token == TK_RES_OR      // or
+	)
 	{
-		switch (token_lido->tipo_token)
+		operador = token_lido->tipo_token;
+
+		consome_token(token_lido->tipo_token); // (+|-|or)
+
+		linha_erro = num_linha;
+
+		termo(tipo_termo, tamanho_termo, destino, endereco_termo);
+
+		// Ação 20
+		if (tipo != tipo_termo)
+			throw tipo_incompativel(linha_erro);
+
+		if (tamanho_termo != 0 || tamanho != 0)
+			throw tipo_incompativel(linha_erro);
+
+		if (operador == TK_RES_OR)
+		{
+			if (tipo != TP_BOOL)
+				throw tipo_incompativel(linha_erro);
+		}
+		else if (tipo != TP_INT)
+			throw tipo_incompativel(linha_erro);
+
+		tamanho = 0;
+
+		destino +=
+			"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
+			"	mov BX, DS:[" + converte_hex(endereco_termo) + "]\n";
+
+		switch (operador)
 		{
 			case TK_OP_MAIS:  // +
+				destino += "	add AX, BX\n";
+				break;
+
 			case TK_OP_MENOS: // -
+				destino += "	sub AX, BX\n";
+				break;
+
 			case TK_RES_OR:   // or
-
-				operador = token_lido->tipo_token;
-
-				consome_token(token_lido->tipo_token); // (+|-|or)
-
-				linha_erro = num_linha;
-
-				termo(tipo_termo, tamanho_termo, destino, endereco_termo);
-
-				// Ação 20
-				if (tipo != tipo_termo)
-					throw tipo_incompativel(linha_erro);
-
-				if (tamanho_termo != 0 || tamanho != 0)
-					throw tipo_incompativel(linha_erro);
-
-				if (operador == TK_RES_OR)
-				{
-					if (tipo != TP_BOOL)
-						throw tipo_incompativel(linha_erro);
-				}
-				else if (tipo != TP_INT)
-					throw tipo_incompativel(linha_erro);
-
-				tamanho = 0;
-
 				destino +=
-					"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
-					"	mov BX, DS:[" + converte_hex(endereco_termo) + "]\n";
-
-				switch (operador)
-				{
-					case TK_OP_MAIS:  // +
-						destino += "	add AX, BX\n";
-						break;
-
-					case TK_OP_MENOS: // -
-						destino += "	sub AX, BX\n";
-						break;
-
-					case TK_RES_OR:   // or
-						destino +=
-							"	neg AX\n"
-							"	add AX, 1\n"
-							"	neg BX\n"
-							"	add BX, 1\n"
-							"	mov DX, 0\n"
-							"	imul BX\n"
-							"	neg AX\n"
-							"	add AX, 1\n";
-						break;
-
-					default:
-						break;
-				}
-
-				destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
-
+					"	neg AX\n"
+					"	add AX, 1\n"
+					"	neg BX\n"
+					"	add BX, 1\n"
+					"	mov DX, 0\n"
+					"	imul BX\n"
+					"	neg AX\n"
+					"	add AX, 1\n";
 				break;
 
 			default:
-				return;
+				break;
 		}
+
+		destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
 	}
 }
 
@@ -1286,75 +1279,68 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 	fator(tipo, tamanho, destino, endereco);
 
 	// {(*|/|%|and) Fator}
-	while (true)
+	while
+	(
+		token_lido->tipo_token == TK_OP_MUL      || // *
+		token_lido->tipo_token == TK_OP_BARRA    || // /
+		token_lido->tipo_token == TK_OP_PORCENTO || // %
+		token_lido->tipo_token == TK_RES_AND        // and
+	)
 	{
-		switch (token_lido->tipo_token)
+		operador = token_lido->tipo_token;
+
+		consome_token(token_lido->tipo_token); // (*|/|%|and)
+
+		linha_erro = num_linha;
+
+		fator(tipo_fator, tamanho_fator, destino, endereco_fator);
+
+		// Ação 22
+		if (tipo != tipo_fator)
+			throw tipo_incompativel(linha_erro);
+
+		if (tamanho_fator != 0 || tamanho != 0)
+			throw tipo_incompativel(linha_erro);
+
+		if (operador == TK_RES_AND)
+		{
+			if (tipo != TP_BOOL)
+				throw tipo_incompativel(linha_erro);
+		}
+		else if (tipo != TP_INT)
+			throw tipo_incompativel(linha_erro);
+
+		tamanho = 0;
+
+		destino +=
+			"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
+			"	mov BX, DS:[" + converte_hex(endereco_fator) + "]\n";
+
+		switch (operador)
 		{
 			case TK_OP_MUL:      // *
-			case TK_OP_BARRA:    // /
-			case TK_OP_PORCENTO: // %
 			case TK_RES_AND:     // and
+				destino += "	imul BX\n";
+				break;
 
-				operador = token_lido->tipo_token;
-
-				consome_token(token_lido->tipo_token); // (*|/|%|and)
-
-				linha_erro = num_linha;
-
-				fator(tipo_fator, tamanho_fator, destino, endereco_fator);
-
-				// Ação 22
-				if (tipo != tipo_fator)
-					throw tipo_incompativel(linha_erro);
-
-				if (tamanho_fator != 0 || tamanho != 0)
-					throw tipo_incompativel(linha_erro);
-
-				if (operador == TK_RES_AND)
-				{
-					if (tipo != TP_BOOL)
-						throw tipo_incompativel(linha_erro);
-				}
-				else if (tipo != TP_INT)
-					throw tipo_incompativel(linha_erro);
-
-				tamanho = 0;
-
+			case TK_OP_BARRA:    // /
 				destino +=
-					"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
-					"	mov BX, DS:[" + converte_hex(endereco_fator) + "]\n";
+					"	cwd\n"
+					"	idiv BX\n";
+				break;
 
-				switch (operador)
-				{
-					case TK_OP_MUL:      // *
-					case TK_RES_AND:     // and
-						destino += "	imul BX\n";
-						break;
-
-					case TK_OP_BARRA:    // /
-						destino +=
-							"	cwd\n"
-							"	idiv BX\n";
-						break;
-
-					case TK_OP_PORCENTO: // %
-						destino +=
-							"	cwd\n"
-							"	idiv BX\n"
-							"	mov AX, DX\n";
-						break;
-
-					default:
-						break;
-				}
-
-				destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
-
+			case TK_OP_PORCENTO: // %
+				destino +=
+					"	cwd\n"
+					"	idiv BX\n"
+					"	mov AX, DX\n";
 				break;
 
 			default:
-				return;
+				break;
 		}
+
+		destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
 	}
 }
 
