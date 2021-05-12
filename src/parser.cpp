@@ -726,15 +726,9 @@ void parser::cmd_s(std::string& destino)
 				{
 					// Imprimir um unico caractere
 
-					// Aloca espaco para o caractere e o $
-					int temp_impressao = novo_tmp(2);
-
 					destino +=
-						"	mov BL, DS:[" + converte_hex(endereco) + "]\n"
-						"	mov BH, 024h\n"
-						"	mov DS:[" + converte_hex(temp_impressao) + "], BX\n"
-						"	mov DX, " + converte_hex(temp_impressao) + "\n"
-						"	mov AH, 09h\n"
+						"	mov DL, DS:[" + converte_hex(endereco) + "]\n"
+						"	mov AH, 02h\n"
 						"	int 21h\n";
 				}
 				else
