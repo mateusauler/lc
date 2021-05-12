@@ -1372,6 +1372,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 	registro_tabela_simbolos *rt = token_lido->simbolo;
 	std::string lex = token_lido->lex;
+	std::string valor = lex;
 
 	switch (token_lido->tipo_token)
 	{
@@ -1502,7 +1503,6 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			// Ação 28
 			tipo    = token_lido->tipo_constante;
 			tamanho = token_lido->tam_constante;
-			lex     = token_lido->lex;
 
 			consome_token(TK_CONST);
 
@@ -1522,7 +1522,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			else
 			{
 				if (tipo == TP_BOOL)
-					lex = converte_hex(lex == "TRUE");
+					valor = converte_hex(lex == "TRUE");
 
 				endereco = novo_tmp(byte_tipo(tipo));
 
@@ -1530,14 +1530,14 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 				{
 					// Caso for um caractere, deve-se movimentar 1 byte
 					destino +=
-						"	mov BL, " + lex + "\n"
+						"	mov BL, " + valor + "\n"
 						"	mov DS:[" + converte_hex(endereco) + "], BL\n";
 				}
 				else
 				{
 					// Caso for um int ou boolean, deve-se movimentar 2 bytes
 					destino +=
-						"	mov BX, " + lex + "\n"
+						"	mov BX, " + valor + "\n"
 						"	mov DS:[" + converte_hex(endereco) + "], BX\n";
 				}
 			}
