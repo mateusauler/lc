@@ -1339,7 +1339,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 				break;
 		}
 
-		destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
+		destino += "	mov DS:[" + converte_hex(endereco) + "], AX\n";
 	}
 }
 
