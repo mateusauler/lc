@@ -96,11 +96,11 @@ void parser::prog(std::string& destino)
 
 	destino +=
 		"sseg SEGMENT STACK\n"
-		"	byte 4000h DUP(?)		; Pilha\n"
+		"	byte 4000h DUP(?) ; Pilha\n"
 		"sseg ENDS\n"
 		"\n"
 		"dseg SEGMENT PUBLIC\n"
-		"	byte 4000h DUP(?)		; Temporarios\n";
+		"	byte 4000h DUP(?) ; Temporarios\n";
 
 	// {DecVar|DecConst}
 	while (token_lido->tipo_token != TK_RES_MAIN)
@@ -223,7 +223,7 @@ void parser::dec_const(std::string& destino)
 	std::string valor;
 
 	if (rt->tipo == TP_BOOL)
-		valor = converte_hex(lex_const == "TRUE");
+		valor = std::to_string(lex_const == "TRUE");
 	else
 		valor = (nega ? "-" : "") + lex_const;
 
@@ -288,7 +288,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
 			rt->endereco = aloca(byte_tipo(rt->tipo));
 			if (rt->tipo == TP_BOOL)
-				valor = converte_hex(lex_const == "TRUE");
+				valor = std::to_string(lex_const == "TRUE");
 			else
 				valor = (nega ? "-" : "") + lex_const;
 
@@ -469,7 +469,7 @@ void parser::cmd_s(std::string& destino)
 				"	mov DS:[DI], AL ; Armazena este caractere em [" + lex + "]\n"
 				"	add DI, 1\n"
 				"	add SI, 1\n"
-				"	cmp AL, 024h ; Compara com $\n"
+				"	cmp AL, '$' ; Compara com $\n"
 				"	jne " + rot_copia_str + " ; Continua copiando, se nao for o final da string\n"
 				"\n"
 				"; Fim do copia de constante string para [" + lex + "]\n";
@@ -500,7 +500,7 @@ void parser::cmd_s(std::string& destino)
 				"	mov DS:[DI], AL ; Armazena este caractere em [" + lex + "]\n"
 				"	add DI, 1\n"
 				"	add SI, 1\n"
-				"	cmp AL, 024h ; Compara com $\n"
+				"	cmp AL, '$' ; Compara com $\n"
 				"	jne " + rot_copia_vet + " ; Continua copiando, se nao for o final da string\n"
 				"\n"
 				"; Fim do copia de vetor de char para [" + lex + "]\n";
@@ -629,13 +629,13 @@ void parser::cmd_s(std::string& destino)
 					"	mov DL, 0Ah\n"
 					"	int 21h\n"
 					"\n"
-					"	mov DI, " + converte_hex(buffer_leitura + 2) +" ;posição do string\n"
+					"	mov DI, " + converte_hex(buffer_leitura + 2) + " ;posição do string\n"
 					"	mov AX, 0 ;acumulador\n"
 					"	mov CX, 10 ;base decimal\n"
 					"	mov DX, 1 ;valor sinal +\n"
 					"	mov BH, 0\n"
 					"	mov BL, DS:[DI] ;caractere\n"
-					"	cmp BX, 02Dh ;verifica sinal\n"
+					"	cmp BX, '-' ;verifica sinal\n"
 					"	jne " + rot_sinal + " ;se não negativo\n"
 					"	mov DX, -1 ;valor sinal -\n"
 					"	add DI, 1 ;incrementa base\n"
@@ -662,18 +662,18 @@ void parser::cmd_s(std::string& destino)
 		}
 		else
 		{
-			int tamanho_buffer = 258;
+			int tamanho_buffer = 255;
 
-			if (rt->tam < 255)
-				tamanho_buffer = rt->tam + 3;
+			if (rt->tam < tamanho_buffer)
+				tamanho_buffer = rt->tam;
 
-			int buffer_leitura = novo_tmp(tamanho_buffer);
+			int buffer_leitura = novo_tmp(tamanho_buffer + 3);
 
 			std::string rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
 
 			destino +=
 				"	mov DX, " + converte_hex(buffer_leitura) + "\n"
-				"	mov AL, " + converte_hex(tamanho_buffer - 3) + "\n"
+				"	mov AL, " + converte_hex(tamanho_buffer) + "\n"
 				"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
 				"	mov AH, 0Ah\n"
 				"	int 21h\n"
@@ -694,7 +694,7 @@ void parser::cmd_s(std::string& destino)
 				"	add SI, 1\n"
 				"	jmp " + rot_loop + "\n" +
 				rot_fim + ":\n"
-				"	mov AL, 024h\n"
+				"	mov AL, '$'\n"
 				"	mov DS:[DI], AL\n";
 		}
 
@@ -759,7 +759,7 @@ void parser::cmd_s(std::string& destino)
 					"	cmp AX, 0 ; Verifica sinal\n"
 					"	jge " + rot_divisor + " ; Salta se numero positivo\n"
 					"\n"
-					"	mov BL, 2Dh ; Senao, escreve sinal –\n"
+					"	mov BL, '-' ; Senao, escreve sinal –\n"
 					"	mov DS:[DI], BL\n"
 					"	add DI, 1 ; Incrementa indice\n"
 					"	neg AX ; Toma modulo do numero\n"
@@ -788,7 +788,7 @@ void parser::cmd_s(std::string& destino)
 					"\n"
 					";grava fim de string\n"
 					"\n"
-					"	mov DL, 024h ; fim de string\n"
+					"	mov DL, '$' ; fim de string\n"
 					"	mov DS:[DI], DL ; grava '$'\n"
 					"\n"
 					";exibe string\n"
@@ -870,7 +870,7 @@ void parser::cmd_for(std::string& destino)
 
 	destino +=
 		"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
-		"	cmp AX, 00h\n"
+		"	cmp AX, 0\n"
 		"	je " + rot_fim + "\n";
 
 	consome_token(TK_FIM_DECL); // ;
@@ -928,7 +928,7 @@ void parser::cmd_if(std::string& destino)
 	// Gera comparacao com jump para o caso_falso
 	destino +=
 		"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
-		"	cmp AX, 00h\n"
+		"	cmp AX, 0\n"
 		"	je " + rot_caso_falso + "\n";
 
 	// (CmdT | BlocoCmd)
@@ -1034,13 +1034,13 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 			"	mov BL, DS:[DI]\n"
 			"	cmp AL, BL\n"
 			"	jne " + rot_falso + "\n"
-			"	cmp AL, 024h\n"
+			"	cmp AL, '$'\n"
 			"	je " + rot_fim + "\n"
 			"	add SI, 1\n"
 			"	add DI, 1\n"
 			"	jmp " + rot_loop + "\n" +
 			rot_falso + ":\n"
-			"	mov DX, 00h\n" +
+			"	mov DX, 0\n" +
 			rot_fim + ":\n";
 
 			endereco = novo_tmp(2);
@@ -1146,10 +1146,10 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 				endereco = novo_tmp(2);
 
 				destino +=
-					"	mov AX, 00h\n"
+					"	mov AX, 0\n"
 					"	jmp " + rot_fim + "\n" +
 					rot_verdadeiro + ":\n"
-					"	mov AX, 01h\n" +
+					"	mov AX, 1\n" +
 					rot_fim + ":\n"
 					"	mov DS:[" + converte_hex(endereco) + "], AX\n";
 			}
@@ -1507,7 +1507,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			else
 			{
 				if (tipo == TP_BOOL)
-					valor = converte_hex(lex == "TRUE");
+					valor = std::to_string(lex == "TRUE");
 
 				endereco = novo_tmp(byte_tipo(tipo));
 
