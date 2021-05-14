@@ -1027,7 +1027,6 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 
 		destino +=
 			"	mov DX, 01h\n"
-			"	mov CL, 024h\n"
 			"	mov SI, " + converte_hex(endereco) + "\n"
 			"	mov DI, " + converte_hex(endereco_soma) + "\n" +
 			rot_loop + ":\n"
@@ -1035,7 +1034,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 			"	mov BL, DS:[DI]\n"
 			"	cmp AL, BL\n"
 			"	jne " + rot_falso + "\n"
-			"	cmp AL, CL\n"
+			"	cmp AL, 024h\n"
 			"	je " + rot_fim + "\n"
 			"	add SI, 1\n"
 			"	add DI, 1\n"
