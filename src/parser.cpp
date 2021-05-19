@@ -47,28 +47,6 @@ static int novo_tmp(int bytes)
 	return end_tmp - bytes;
 }
 
-static std::string gera_alocacao(tipo_dados_t tipo, int tamanho, std::string dado = "", std::string nome = "", bool cabecalho = false)
-{
-	std::string codigo;
-
-	if (cabecalho)
-		codigo += "dseg SEGMENT PUBLIC\n";
-
-	codigo += tipo == TP_CHAR || tipo == TP_STR
-		? "	byte "
-		: "	sword ";
-
-	if (dado.empty())
-		dado = tamanho ? converte_hex(tamanho) + " DUP(?)" : "?";
-
-	codigo += dado + (nome.empty() ? "" : " ; " + nome) + "\n";
-
-	if (cabecalho)
-		codigo += "dseg ENDS\n";
-
-	return codigo;
-}
-
 void parser::exec_parser()
 {
 	std::string programa;
@@ -210,14 +188,15 @@ void parser::dec_const(std::string& destino)
 	consome_token(TK_CONST); // CONST
 
 	// Ação 6
+	if (nega && tipo_constante != TP_INT)
+		throw tipo_incompativel(linha_erro);
+
+	if (tipo_constante == TP_STR || tipo_constante == TP_NULL)
+		throw tipo_incompativel(linha_erro);
+
+	// Gera a alocacao da constante e preenche o valor
+
 	rt->tipo = tipo_constante;
-
-	if (nega && rt->tipo != TP_INT)
-		throw tipo_incompativel(linha_erro);
-
-	if (rt->tipo == TP_STR || rt->tipo == TP_NULL)
-		throw tipo_incompativel(linha_erro);
-
 	rt->endereco = aloca(byte_tipo(rt->tipo));
 
 	std::string valor;
@@ -227,8 +206,9 @@ void parser::dec_const(std::string& destino)
 	else
 		valor = (nega ? "-" : "") + lex_const;
 
-	// Gera a alocacao da constante e preenche o valor
-	destino += gera_alocacao(rt->tipo, 0, valor, lex);
+	destino +=
+		(tipo_constante == TP_CHAR ? "	byte " : "	sword ") +
+		valor + " ; " + lex + "\n";
 
 	consome_token(TK_FIM_DECL); // ;
 }
@@ -286,14 +266,17 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			if (tipo_constante != tipo)
 				throw tipo_incompativel(linha_erro);
 
+			// Gera a alocacao da variavel e preenche o valor
+
 			rt->endereco = aloca(byte_tipo(rt->tipo));
 			if (rt->tipo == TP_BOOL)
 				valor = std::to_string(lex_const == "TRUE");
 			else
 				valor = (nega ? "-" : "") + lex_const;
 
-			// Gera a alocacao da variavel e preenche o valor
-			destino += gera_alocacao(tipo, 0, valor, lex_id);
+			destino +=
+				(tipo == TP_CHAR ? "	byte " : "	sword ") +
+				valor + " ; " + lex + "\n";
 
 			break;
 
@@ -322,14 +305,17 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 
 			// Aloca os bytes necessarios para o vetor
 			rt->endereco = aloca(byte_tipo(rt->tipo) * rt->tam);
-			destino += gera_alocacao(tipo, rt->tam, "", lex_id);
+			destino +=
+				(tipo == TP_CHAR ? "	byte " : "	sword ") +
+				std::to_string(rt->tam) + " DUP(?) ; " + lex_id + "\n";
 
 			break;
 
 		default:
 			// Aloca uma variavel vazia
 			rt->endereco = aloca(byte_tipo(rt->tipo));
-			destino += gera_alocacao(tipo, 0, "", lex_id);
+			destino += (tipo == TP_CHAR ? "	byte " : "	sword ");
+			destino += "? ; " + lex + "\n";
 			break;
 	}
 }
@@ -1499,10 +1485,14 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 			{
 				endereco = aloca(tamanho);
 
-				if (lex.length() > 2) // Se nao for string vazia
-					destino += gera_alocacao(TP_CHAR, tamanho, lex, "", true);
+				destino += "dseg SEGMENT PUBLIC\n";
 
-				destino += gera_alocacao(TP_CHAR, tamanho, "\"$\"", "", true);
+				if (lex.length() > 2) // Se nao for string vazia
+					destino += "	byte " + lex + "\n";
+
+				destino +=
+					"	byte '$'\n"
+					"dseg ENDS\n";
 			}
 			else
 			{

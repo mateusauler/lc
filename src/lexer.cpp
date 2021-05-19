@@ -58,7 +58,7 @@ void lexer::proximo_token()
 			// Qualquer caractere que nao e especificado explicitamente, e considerado erro
 			case ES_INICIO:
 				// Limpa o lexema
-				token_lido->lex = "";
+				token_lido->lex.clear();
 				switch(c)
 				{
 					case '_':
@@ -188,9 +188,7 @@ void lexer::proximo_token()
 
 			// {_}(LETRA | DIGITO){LETRA | DIGITO | _}
 			case ES_ID_NOME:
-				if (LETRA(c) || DIGITO(c) || (c == '_'))
-					estado = ES_ID_NOME;
-				else
+				if (!LETRA(c) && !DIGITO(c) && c != '_')
 				{
 					token_lido->tipo_token = TK_ID;
 					estado = ES_FIM;
