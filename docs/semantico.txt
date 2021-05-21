@@ -1,0 +1,245 @@
+Prog -> {DecVar|DecConst} main BlocoCmd EOF
+
+DecVar -> (int (1) | char (2) | boolean (3)) (4) Var1 {, Var2} ;
+DecConst -> final ID (5) = [- (29) ] CONST (6) ;
+
+Var -> ID (7) [:= [- (30) ] CONST (8) | "[" CONST (9) "]" ]
+
+BlocoCmd -> "{" {CmdT} "}"
+
+CmdS -> ID (10) [ "[" Exp1 (11) "]" ] := Exp2 (12)
+CmdS -> readln "(" ID (13) [ "[" Exp (14) "]" ] (32) ")"
+CmdS -> (write | writeln) "(" Exp1 (33) {, Exp2 (34) } ")"
+
+CmdFor -> for "(" [Cmd {, Cmd}] ; Exp (15) ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
+CmdIf -> if "(" Exp (16) ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
+
+Cmd -> CmdS | CmdFor | CmdIf
+CmdT -> [CmdS] ; | CmdFor | CmdIf
+
+Exp -> Soma1 (17) [(=|<>|>|<|>=|<=) Soma2 (18)]
+Soma -> [- (31) ] Termo1 (19) {(+|-|or) Termo2 (20)}
+Termo -> Fator1 (21) {(*|/|%|and) Fator2 (22)}
+Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" ] | CONST (28)
+
+
+1- DecVar.tipo = int
+2- DecVar.tipo = char
+3- DecVar.tipo = boolean
+4- {
+   Var1.tipo = DecVar.tipo
+   Var2.tipo = DecVar.tipo
+}
+5- {
+    se ID em T.S.
+        Erro
+
+    ID.simbolo->classe = constante
+}
+6- {
+    se CONST.tipo = string
+        Erro
+
+    se negacao && CONST.tipo != int
+        Erro
+
+    ID.simbolo->tipo = CONST.tipo
+}
+7- {
+    se ID em T.S.
+        Erro
+
+    ID.simbolo->classe = variavel
+    ID.simbolo->tipo = Var.tipo
+}
+8- {
+    se CONST.tipo != Var.tipo
+        Erro
+
+    se negacao && CONST.tipo != int
+        Erro
+}
+9- {
+    se CONST.tipo != int
+        Erro
+
+    se CONST.valor == 0
+        Erro
+
+    se CONST.valor * ID.tipo.tamanho > 8Kb
+        Erro
+
+    ID.tamanho = CONST.valor
+}
+10- {
+    se ID nao em T.S.
+        Erro
+
+    se ID.classe = constante
+        Erro
+
+    CmdS.tamanho = ID.tamanho
+}
+11- {
+    se Exp1.tipo != int || Exp1.tamanho > 0 || CmdS.tamanho == 0
+        Erro
+
+    CmdS.tamanho = 0
+}
+12- {
+    se ID.tipo != Exp2.tipo
+        se ID.tipo != char && Exp2.tipo != string
+            Erro
+        se CmdS.tamanho < Exp2.tamanho
+            Erro
+    senao se CmdS.tamanho > 0
+        se ID.tipo == char
+            se Exp2.tamanho == 0
+                Erro
+
+            se CmdS.tamanho < Exp2.tamanho
+                Erro
+        senao
+            Erro
+    senao se Exp2.tamanho > 0
+        Erro
+}
+13- {
+    se ID nao em T.S.
+        Erro
+
+    se ID.classe == constante
+        Erro
+
+    se ID.tipo == boolean
+        Erro
+
+    CmdS.tamanho = ID.tamanho
+}
+14- {
+    se Exp.tipo != int || Exp.tamanho > 0 || CmdS.tamanho == 0
+        Erro
+}
+15- {
+    se Exp.tipo != boolean || Exp.tamanho > 0
+        Erro
+}
+16- {
+    se Exp.tipo != boolean || Exp.tamanho > 0
+        Erro
+}
+17- {
+    Exp.tipo = Soma1.tipo
+    Exp.tamanho = Soma1.tamanho
+}
+18- {
+    se (Soma1.tipo != Soma2.tipo)
+        se (Soma1.tipo == char   && Soma2.tipo == string) ||
+           (Soma1.tipo == string && Soma2.tipo == char))
+            se Soma1.tamanho == 0 || Soma2.tamanho == 0
+                Erro
+            senao se operador != =
+                Erro
+        senao
+            Erro
+    senao se Soma1.tamanho > 0 || Soma2.tamanho > 0
+        se Soma1.tipo == char
+            se operador != = || Soma1.tamanho == 0 || Soma2.tamanho == 0
+                Erro
+        senao
+            Erro
+
+    Exp.tipo = boolean
+    Exp.tamanho = 0
+}
+19- {
+    se negacao && (Termo1.tipo != int || Termo1.tamanho > 0)
+        Erro
+
+    Soma.tipo = Termo1.tipo
+    Soma.tamanho = Termo1.tamanho
+}
+20- {
+    se Soma.tipo != Termo2.tipo
+        Erro
+
+    se Termo1.tamanho != 0 || Termo2.tamanho != 0
+        Erro
+
+    se operador == or
+        se Soma.tipo != boolean
+            Erro
+    senao se Soma.tipo != int
+        Erro
+
+    Soma.tamanho = 0
+}
+21- {
+    Termo.tipo = Fator1.tipo
+    Termo.tamanho = Fator1.tamanho
+}
+22- {
+    se Termo.tipo != Fator2.tipo
+        Erro
+
+    se Fator1.tamanho != 0 || Fator2.tamanho != 0
+        Erro
+
+    se operador == and
+        se Termo.tipo != boolean
+            Erro
+    senao se Termo.tipo != int
+        Erro
+
+    Termo.tamanho = 0
+}
+23- {
+    Fator.tipo = boolean
+    Fator.tamanho = 0
+}
+24- {
+    se Fator1.tipo != boolean || Fator1.tamanho > 0
+        Erro
+}
+25- {
+    Fator.tipo = Exp1.tipo
+    Fator.tamanho = Exp1.tamanho
+}
+26- {
+    se ID nao em T.S.
+        Erro
+
+    Fator.tipo = ID.tipo
+    Fator.tamanho = ID.tamanho
+}
+27- {
+    se ID.tamanho == 0 || Exp2.tipo != int || Exp2.tamanho > 0
+        Erro
+
+    Fator.tamanho = 0
+}
+28- {
+    Fator.tipo = CONST.tipo
+    Fator.tamanho = CONST.tamanho
+}
+29- Lembrar da negacao
+30- Lembrar da negacao
+31- Lembrar da negacao
+32- {
+    se CmdS.tamanho > 0 && ID.tipo != char
+        Erro
+}
+33- {
+    se Exp1.tipo == boolean
+        Erro
+
+    se Exp1.tamanho > 0 && Exp1.tipo == int
+        Erro
+}
+34- {
+    se Exp2.tipo == boolean
+        Erro
+
+    se Exp2.tamanho > 0 && Exp2.tipo == int
+        Erro
+}
