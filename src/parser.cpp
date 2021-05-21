@@ -590,7 +590,7 @@ void parser::cmd_s(std::string& destino)
 					"	mov DL, 0Ah\n"
 					"	int 21h\n"
 					"	mov AL, DS:[" + converte_hex(buffer_leitura) + "]\n"
-					"	mov DS:[" + converte_hex(rt->endereco) + "], AL\n";
+					"	mov DS:[DI], AL\n";
 			}
 			else
 			{
@@ -1276,7 +1276,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 				break;
 		}
 
-		destino += " mov DS:[" + converte_hex(endereco) + "], AX\n";
+		destino += "	mov DS:[" + converte_hex(endereco) + "], AX\n";
 	}
 }
 
