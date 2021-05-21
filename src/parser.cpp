@@ -26,22 +26,18 @@ static std::string converte_hex(int valor)
 	return stream.str() + 'h';
 }
 
-static int aloca(int bytes)
+int parser::aloca(int bytes)
 {
-	static int endereco = 0x4000;
 	endereco += bytes;
 	return endereco - bytes;
 }
 
-static std::string novo_rotulo()
+std::string parser::novo_rotulo()
 {
-	static int rotulo = 0;
 	return "R" + std::to_string(rotulo++);
 }
 
-static int end_tmp = 0;
-
-static int novo_tmp(int bytes)
+int parser::novo_tmp(int bytes)
 {
 	end_tmp += bytes;
 	return end_tmp - bytes;
@@ -580,7 +576,9 @@ void parser::cmd_s(std::string& destino)
 			if (rt->tipo == TP_CHAR)
 			{
 				int buffer_leitura = novo_tmp(4);
+
 				destino +=
+					"; Leitura de char\n"
 					"	mov DX, " + converte_hex(buffer_leitura) + "\n"
 					"	mov AL, 04h\n"
 					"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
@@ -601,6 +599,7 @@ void parser::cmd_s(std::string& destino)
 				std::string rot_sinal = novo_rotulo(), rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
 
 				destino +=
+					"; Leitura de int\n"
 					"	push DI\n"
 					"	mov DX, " + converte_hex(buffer_leitura) + "\n"
 					"	mov AL, 0FFh\n"
@@ -658,6 +657,7 @@ void parser::cmd_s(std::string& destino)
 			std::string rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
 
 			destino +=
+				"; Leitura de string\n"
 				"	mov DX, " + converte_hex(buffer_leitura) + "\n"
 				"	mov AL, " + converte_hex(tamanho_buffer) + "\n"
 				"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
@@ -713,6 +713,7 @@ void parser::cmd_s(std::string& destino)
 					// Imprimir um unico caractere
 
 					destino +=
+						"; Impressao de caractere\n"
 						"	mov DL, DS:[" + converte_hex(endereco) + "]\n"
 						"	mov AH, 02h\n"
 						"	int 21h\n";
@@ -722,6 +723,7 @@ void parser::cmd_s(std::string& destino)
 					// Imprimir uma string
 
 					destino +=
+						"; Impressao de string\n"
 						"	mov DX, " + converte_hex(endereco) + "\n"
 						"	mov AH, 09h\n"
 						"	int 21h\n";
@@ -739,6 +741,7 @@ void parser::cmd_s(std::string& destino)
 
 				destino +=
 					"\n"
+					"; Impressao de int\n"
 					"	mov AX, DS:[" + converte_hex(endereco) + "] ; Carrega valor de do inteiro\n"
 					"	mov DI, " + converte_hex(temp_impressao) + " ; Endereco da string para impressao\n"
 					"	mov CX, 0 ; Contador\n"
@@ -768,9 +771,7 @@ void parser::cmd_s(std::string& destino)
 					"	add DI, 1 ; incrementa base\n"
 					"	add CX, -1 ; decrementa contador\n"
 					"	cmp CX, 0 ; verifica pilha vazia\n"
-					"	jne " + rot_converte + " ; se não pilha vazia, loop\n";
-
-				destino +=
+					"	jne " + rot_converte + " ; se não pilha vazia, loop\n"
 					"\n"
 					";grava fim de string\n"
 					"\n"
@@ -807,6 +808,8 @@ void parser::cmd_s(std::string& destino)
 		if (nova_linha)
 		{
 			destino +=
+				"\n"
+				"; Impressao de nova linha\n"
 				"	mov AH, 02h\n"
 				"	mov DL, 0Dh\n"
 				"	int 21h\n"
@@ -829,6 +832,10 @@ void parser::cmd_for(std::string& destino)
 	consome_token(TK_RES_FOR);   // for
 	consome_token(TK_GRU_A_PAR); // (
 
+	destino +=
+		"\n"
+		"; Inicio do loop\n";
+
 	// [Cmd {, Cmd}]
 	if (token_lido->tipo_token != TK_FIM_DECL)
 	{
@@ -847,6 +854,10 @@ void parser::cmd_for(std::string& destino)
 
 	destino += rot_loop + ":\n";
 
+	destino +=
+		"\n"
+		"; Expressao do loop\n";
+
 	end_tmp = 0;
 	exp(tipo_exp, tamanho_exp, destino, endereco);
 
@@ -855,9 +866,11 @@ void parser::cmd_for(std::string& destino)
 		throw tipo_incompativel(linha_erro);
 
 	destino +=
+		"\n"
+		"; Verifica se a expressao foi verdadeira\n"
 		"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
-		"	cmp AX, 0\n"
-		"	je " + rot_fim + "\n";
+		"	cmp AX, 1\n"
+		"	jne " + rot_fim + "\n";
 
 	consome_token(TK_FIM_DECL); // ;
 
@@ -882,7 +895,8 @@ void parser::cmd_for(std::string& destino)
 
 	destino += codigo_final;
 	destino +=
-		"	jmp " + rot_loop + "\n" +
+		"	jmp " + rot_loop + "\n"
+		"; Final do loop\n" +
 		rot_fim + ":\n";
 }
 
@@ -900,6 +914,10 @@ void parser::cmd_if(std::string& destino)
 
 	int linha_erro = num_linha;
 
+	destino +=
+		"\n"
+		"; Expressao do if\n";
+
 	end_tmp = 0;
 	exp(tipo_exp, tamanho_exp, destino, endereco);
 
@@ -913,9 +931,11 @@ void parser::cmd_if(std::string& destino)
 
 	// Gera comparacao com jump para o caso_falso
 	destino +=
+		"\n"
+		"; Verifica resultado da expressao\n"
 		"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
-		"	cmp AX, 0\n"
-		"	je " + rot_caso_falso + "\n";
+		"	cmp AX, 1\n"
+		"	jne " + rot_caso_falso + "\n";
 
 	// (CmdT | BlocoCmd)
 	if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
@@ -931,7 +951,8 @@ void parser::cmd_if(std::string& destino)
 		// Gera jmp para o fim
 		// Gera rotulo do caso_falso
 		destino	+=
-			"	jmp " + rot_fim + "\n" +
+			"	jmp " + rot_fim + "\n"
+			"; Else\n" +
 			rot_caso_falso + ":\n";
 
 		// (CmdT | BlocoCmd)
@@ -939,7 +960,9 @@ void parser::cmd_if(std::string& destino)
 		else                                        cmd_t(destino);
 
 		// Gera rotulo do fim
-		destino += rot_fim + ":\n";
+		destino +=
+			"; Fim else\n"+
+			rot_fim + ":\n";
 	}
 	else
 	{
@@ -1012,6 +1035,8 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 		rot_fim = novo_rotulo();
 
 		destino +=
+			"\n"
+			"; Comparacao de strings\n"
 			"	mov DX, 01h\n"
 			"	mov SI, " + converte_hex(endereco) + "\n"
 			"	mov DI, " + converte_hex(endereco_soma) + "\n" +
@@ -1081,6 +1106,10 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 			}
 			else
 			{
+				destino +=
+					"\n"
+					"; Comparacao de escalares\n";
+
 				if (tipo == TP_CHAR)
 				{
 					reg_a = "AL";
@@ -1177,6 +1206,8 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 	if (nega)
 	{
 		destino +=
+			"\n"
+			"; Nega o primeiro termo\n"
 			"	mov BX, DS:[" + converte_hex(endereco) + "]\n"
 			"	neg BX\n"
 			"	mov DS:[" + converte_hex(endereco) + "], BX\n";
