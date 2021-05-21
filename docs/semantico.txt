@@ -136,14 +136,12 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
     se (Soma1.tipo != Soma2.tipo)
         se (Soma1.tipo == char   && Soma2.tipo == string) ||
            (Soma1.tipo == string && Soma2.tipo == char))
-            se Soma1.tamanho == 0 || Soma2.tamanho == 0
-                Erro
-            senao se operador != =
+            se Soma1.tamanho == 0 || Soma2.tamanho == 0 || operador != =
                 Erro
         senao
             Erro
     senao se Soma1.tamanho > 0 || Soma2.tamanho > 0
-        se Soma1.tipo == char
+        se Soma1.tipo == char || Soma1.tipo == string
             se operador != = || Soma1.tamanho == 0 || Soma2.tamanho == 0
                 Erro
         senao

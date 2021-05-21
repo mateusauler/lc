@@ -3,16 +3,16 @@ Prog -> {DecVar|DecConst} main BlocoCmd EOF
 DecVar -> (int (1) | char (2) | boolean (3)) (4) Var1 {, Var2} ;
 DecConst -> final ID (5) = [- (29) ] CONST (6) ;
 
-Var -> ID (7) [:= [- (30) ] CONST (8) | "[" CONST (9) "]" ]
+Var -> ID (7) [:= [- (30) ] CONST (8) | "[" CONST (9) "]" ] (42)
 
 BlocoCmd -> "{" {CmdT} "}"
 
-CmdS -> ID (10) [ "[" Exp1 (11) "]" ] := Exp2 (12)
+CmdS -> ID (10) [ "[" Exp1 (11) "]" ] (43) := Exp2 (12)
 CmdS -> readln "(" ID (13) [ "[" Exp (14) "]" ] (32) ")"
-CmdS -> (write | writeln) "(" Exp1 (33) {, Exp2 (34) } ")"
+CmdS -> (write | writeln) "(" Exp1 (33) {, Exp2 (34) } ")" (35)
 
-CmdFor -> for "(" [Cmd {, Cmd}] ; Exp (15) ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd)
-CmdIf -> if "(" Exp (16) ")" then (CmdT | BlocoCmd) [else (CmdT | BlocoCmd)]
+CmdFor -> for "(" [Cmd {, Cmd}] ; (36) Exp (15) ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd) (37)
+CmdIf -> if "(" Exp (16) ")" then (CmdT | BlocoCmd) [else (38) (CmdT | BlocoCmd) (39)] (40)
 
 Cmd -> CmdS | CmdFor | CmdIf
 CmdT -> [CmdS] ; | CmdFor | CmdIf
@@ -20,226 +20,364 @@ CmdT -> [CmdS] ; | CmdFor | CmdIf
 Exp -> Soma1 (17) [(=|<>|>|<|>=|<=) Soma2 (18)]
 Soma -> [- (31) ] Termo1 (19) {(+|-|or) Termo2 (20)}
 Termo -> Fator1 (21) {(*|/|%|and) Fator2 (22)}
-Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" ] | CONST (28)
+Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" ] (41) | CONST (28)
 
 
-1- DecVar.tipo = int
-2- DecVar.tipo = char
-3- DecVar.tipo = boolean
-4- {
-   Var1.tipo = DecVar.tipo
-   Var2.tipo = DecVar.tipo
-}
-5- {
-    se ID em T.S.
-        Erro
-
-    ID.simbolo->classe = constante
-}
 6- {
-    se CONST.tipo = string
-        Erro
+    Aloca espaco para 1 elemento do tipo gerado
+    ID.simbolo.end = endereco alocado
 
-    se negacao && CONST.tipo != int
-        Erro
+    se tipo == boolean
+        valor = (CONST.lex == "TRUE")
+    senao
+        se nega
+            valor = "- CONST.lex"
+        senao
+            valor = "CONST.lex"
 
-    ID.simbolo->tipo = CONST.tipo
-}
-7- {
-    se ID em T.S.
-        Erro
+    se tipo == char
+        "byte"
+    senao
+        "sword"
 
-    ID.simbolo->classe = variavel
-    ID.simbolo->tipo = Var.tipo
+    "valor"
 }
 8- {
-    se CONST.tipo != Var.tipo
-        Erro
+    Aloca espaco para 1 elemento do tipo 'tipo'
+    ID.simbolo.end = endereco alocado
 
-    se negacao && CONST.tipo != int
-        Erro
+    se tipo == boolean
+        valor = (CONST.lex == "TRUE")
+    senao
+        se nega
+            valor = "- CONST.lex"
+        senao
+            valor = "CONST.lex"
+
+    se tipo == char
+        "byte"
+    senao
+        "sword"
+
+    "valor"
 }
 9- {
-    se CONST.tipo != int
-        Erro
+    ID.simbolo.tamanho = CONST.val * numero de bytes do tipo
+    Aloca espaco para ID.simbolo.tamanho bytes
+    ID.simbolo.end = endereco alocado
 
-    se CONST.valor == 0
-        Erro
+    se tipo == char
+        "byte"
+    senao
+        "sword"
 
-    se CONST.valor * ID.tipo.tamanho > 8Kb
-        Erro
-
-    ID.tamanho = CONST.valor
-}
-10- {
-    se ID nao em T.S.
-        Erro
-
-    se ID.classe = constante
-        Erro
-
-    CmdS.tamanho = ID.tamanho
+    "ID.simbolo.tamanho DUP(?)"
 }
 11- {
-    se Exp1.tipo != int || Exp1.tamanho > 0 || CmdS.tamanho == 0
-        Erro
+    "mov BX, DS:[Exp1.end]"
 
-    CmdS.tamanho = 0
+    se tipo == int || tipo == boolean
+        "add BX, BX"
+
+    "add BX, ID.simbolo.end"
+    "push BX"
 }
 12- {
     se ID.tipo != Exp2.tipo
-        se ID.tipo != char && Exp2.tipo != string
-            Erro
-        se CmdS.tamanho < Exp2.tamanho
-            Erro
+        rot_copia_str = novo_rotulo
+
+        "pop DI"
+        "mov SI, Exp2.end"
+        "rot_copia_str:"
+        "mov AL, DS:[SI]"
+        "mov DS:[DI], AL"
+        "add DI, 1"
+        "add SI, 1"
+        "cmp AL, '$'"
+        "jne rot_copia_str"
+
     senao se CmdS.tamanho > 0
-        se ID.tipo == char
-            se Exp2.tamanho == 0
-                Erro
+        rot_copia_vet = novo_rotulo
 
-            se CmdS.tamanho < Exp2.tamanho
-                Erro
+        "pop DI"
+        "mov SI, Exp2.end";
+        "rot_copia_vet:"
+        "mov AL, DS:[SI]"
+        "mov DS:[DI], AL"
+        "add DI, 1"
+        "add SI, 1"
+        "cmp AL, '$'"
+        "jne rot_copia_vet"
+
+    senao se Exp2.tamanho == 0
+        se tipo == char
+            "pop DI"
+            "mov CL, DS:[Exp2.end]"
+            "mov DS:[DI], CL"
         senao
-            Erro
-    senao se Exp2.tamanho > 0
-        Erro
-}
-13- {
-    se ID nao em T.S.
-        Erro
-
-    se ID.classe == constante
-        Erro
-
-    se ID.tipo == boolean
-        Erro
-
-    CmdS.tamanho = ID.tamanho
+			"pop DI"
+            "mov CX, DS:[Exp2.end]"
+            "mov DS:[DI], CX"
 }
 14- {
-    se Exp.tipo != int || Exp.tamanho > 0 || CmdS.tamanho == 0
-        Erro
+    "mov DI, ID.simbolo.end"
+    "mov AX, DS:[Exp.end]"
+
+    se ID.simbolo.tipo != char
+        "add AX, AX"
+
+    "add DI, AX"
 }
 15- {
-    se Exp.tipo != boolean || Exp.tamanho > 0
-        Erro
+    "mov AX, DS:[Exp.end]"
+    "cmp AX, 1"
+    "jne rot_fim"
 }
 16- {
-    se Exp.tipo != boolean || Exp.tamanho > 0
-        Erro
-}
-17- {
-    Exp.tipo = Soma1.tipo
-    Exp.tamanho = Soma1.tamanho
+    rot_caso_falso = novo_rotulo
+
+    "mov AX, DS:[Exp.end]"
+    "cmp AX, 1"
+    "jne rot_caso_falso"
 }
 18- {
-    se (Soma1.tipo != Soma2.tipo)
-        se (Soma1.tipo == char   && Soma2.tipo == string) ||
-           (Soma1.tipo == string && Soma2.tipo == char))
-            se Soma1.tamanho == 0 || Soma2.tamanho == 0
-                Erro
-            senao se operador != =
-                Erro
-        senao
-            Erro
-    senao se Soma1.tamanho > 0 || Soma2.tamanho > 0
-        se Soma1.tipo == char
-            se operador != = || Soma1.tamanho == 0 || Soma2.tamanho == 0
-                Erro
-        senao
-            Erro
+    se Soma1.tipo != Soma2.tipo || Soma1.tamanho > 0 || Soma2.tamanho > 0
+        Exp.end = novo_tmp
 
-    Exp.tipo = boolean
-    Exp.tamanho = 0
+        rot_loop = novo_rotulo
+        rot_falso = novo_rotulo
+        rot_fim = novo_rotulo
+
+        "mov DX, 01h"
+        "mov SI, Soma.end"
+        "mov DI, Soma2.end"
+        "rot_loop:"
+        "mov AL, DS:[SI]"
+        "mov BL, DS:[DI]"
+        "cmp AL, BL"
+        "jne rot_falso"
+        "cmp AL, '$'"
+        "je rot_fim"
+        "add SI, 1"
+        "add DI, 1"
+        "jmp rot_loop"
+        "rot_falso:"
+        "mov DX, 0"
+        "rot_fim:"
+    senao
+       rot_verdadeiro = novo_rotulo
+       rot_fim = novo_rotulo
+       Exp.end = novo_tmp
+
+        se tipo == char
+            "mov AH, 0"
+            "mov BH, 0"
+            "mov AL, DS:[Soma1.end]"
+            "mov BL, DS:[Soma2.end]"
+            "cmp AL, BL"
+        senao
+            "mov AX, DS:[Soma1.end]"
+            "mov BX, DS:[Soma2.end]"
+            "cmp AX, BX"
+
+        se operador = =
+            "je rot_verdadeiro"
+        se operador = <>
+            "jne rot_verdadeiro"
+        se operador = >
+            "jg rot_verdadeiro"
+        se operador = <
+            "jl rot_verdadeiro"
+        se operador = >=
+            "jge rot_verdadeiro"
+        se operador = <=
+            "jle rot_verdadeiro"
+        "mov AX, 0"
+        "jmp rot_fim"
+        "rot_verdadeiro:"
+        "mov AX, 1"
+        "rot_fim:"
+        "mov DS:[Exp.end], AX"
 }
 19- {
-    se negacao && (Termo1.tipo != int || Termo1.tamanho > 0)
-        Erro
-
-    Soma.tipo = Termo1.tipo
-    Soma.tamanho = Termo1.tamanho
+    se negacao
+        "mov BX, DS:[Termo1.end]"
+        "neg BX"
+        "mov DS:[Termo1.end], BX"
 }
 20- {
-    se Soma.tipo != Termo2.tipo
-        Erro
+    "mov AX, DS:[Termo1.end]"
+    "mov BX, DS:[Termo2.end]"
 
-    se Termo1.tamanho != 0 || Termo2.tamanho != 0
-        Erro
+    se operador == +
+        "add AX, BX"
+    senao se operador == -
+        "sub AX, BX"
+    senao
+        "neg AX"
+        "add AX, 1"
+        "neg BX"
+        "add BX, 1"
+        "mov DX, 0"
+        "imul BX"
+        "neg AX"
+        "add AX, 1"
 
-    se operador == or
-        se Soma.tipo != boolean
-            Erro
-    senao se Soma.tipo != int
-        Erro
-
-    Soma.tamanho = 0
-}
-21- {
-    Termo.tipo = Fator1.tipo
-    Termo.tamanho = Fator1.tamanho
+    "mov DS:[Soma.end], AX"
 }
 22- {
-    se Termo.tipo != Fator2.tipo
-        Erro
+    "mov AX, DS:[Fator1.end]"
+    "mov BX, DS:[Fator2.end]"
 
-    se Fator1.tamanho != 0 || Fator2.tamanho != 0
-        Erro
+    se operador == * || operador == and
+        "imul BX"
+    senao se operador == /
+        "cwd"
+        "idiv BX"
+    senao
+        "cwd"
+        "idiv BX"
+        "mov AX, DX"
 
-    se operador == and
-        se Termo.tipo != boolean
-            Erro
-    senao se Termo.tipo != int
-        Erro
-
-    Termo.tamanho = 0
-}
-23- {
-    Fator.tipo = boolean
-    Fator.tamanho = 0
+    mov DS:[Termo.end], AX
 }
 24- {
-    se Fator1.tipo != boolean || Fator1.tamanho > 0
-        Erro
-}
-25- {
-    Fator.tipo = Exp1.tipo
-    Fator.tamanho = Exp1.tamanho
-}
-26- {
-    se ID nao em T.S.
-        Erro
-
-    Fator.tipo = ID.tipo
-    Fator.tamanho = ID.tamanho
+    Fator.end = novo_tmp
+    "	mov BX, DS:[Fator1.end]"
+    "	neg BX"
+    "	add BX, 1"
+    "	mov DS:[Fator.end], BX"
 }
 27- {
-    se ID.tamanho == 0 || Exp2.tipo != int || Exp2.tamanho > 0
-        Erro
+    Fator.end = novo_tmp
 
-    Fator.tamanho = 0
+    "mov BX, DS:[Exp2.end]"
+
+    se Exp2.tipo == int || Exp2.tipo == boolean
+        "add BX, BX"
+
+    "add BX, ID.end"
+    "mov CX, DS:[BX]"
+    "mov DS:[Fator.end], CX"
 }
 28- {
-    Fator.tipo = CONST.tipo
-    Fator.tamanho = CONST.tamanho
+    se CONST.tipo == string
+        "dseg SEGMENT PUBLIC"
+        se CONST.len > 2
+            "byte CONST.lex"
+        "byte '$'"
+        "dseg ENDS"
+    senao
+        se CONST.tipo == boolean
+            valor = (CONST.lex == "TRUE")
+        senao
+            valor = CONST.lex
+
+        Fator.end == novo_tmp
+
+        se CONST.tipo == char
+            "mov BL, valor"
+            "mov DS:[Fator.end], BL"
+        senao
+            "mov BX, valor"
+            "mov DS:[Fator.end], BX"
 }
-29- Lembrar da negacao
-30- Lembrar da negacao
-31- Lembrar da negacao
 32- {
-    se CmdS.tamanho > 0 && ID.tipo != char
-        Erro
+    se tamanho == 0 && ID.simbolo.tipo == char
+        buffer = novo_tmp
+
+        "mov DX, buffer.end"
+        "mov AL, 04h"
+        "mov DS:[buffer.end], AL"
+        "mov AH, 0Ah"
+        "int 21h"
+        "mov AH, 02h"
+        "mov DL, 0Dh"
+        "int 21h"
+        "mov DL, 0Ah"
+        "int 21h"
+        "mov AL, DS:[buffer.end]"
+        "mov DS:[DI], AL"
+    senao
+        Gerar leitura de acordo com o pdf
 }
 33- {
-    se Exp1.tipo == boolean
-        Erro
-
-    se Exp1.tamanho > 0 && Exp1.tipo == int
-        Erro
+    se Exp1.tipo == char || Exp1.tipo == string
+        se Exp1.tamanho == 0
+            "mov DL, DS:[Exp1.end]"
+            "mov AH, 02h"
+            "int 21h"
+        else
+            "mov DX, Exp1.end"
+            "mov AH, 09h"
+            "int 21h"
+    senao
+        Gerar leitura de acordo com o pdf
 }
 34- {
-    se Exp2.tipo == boolean
-        Erro
+    se Exp2.tipo == char || Exp2.tipo == string
+        se Exp2.tamanho == 0
+            "mov DL, DS:[Exp2.end]"
+            "mov AH, 02h"
+            "int 21h"
+        else
+            "mov DX, Exp2.end"
+            "mov AH, 09h"
+            "int 21h"
+    senao
+        Gerar leitura de acordo com o pdf
+}
+35- {
+    se deve imprimir nova linha
+        "mov AH, 02h"
+        "mov DL, 0Dh"
+        "int 21h"
+        "mov DL, 0Ah"
+        "int 21h"
+}
+36- {
+    rot_loop = novo_rotulo
+    rot_fim = novo_rotulo
 
-    se Exp2.tamanho > 0 && Exp2.tipo == int
-        Erro
+    "rot_loop:"
+}
+37- {
+    "jmp rot_loop"
+    "rot_fim:"
+}
+38- {
+    rot_fim = novo_rotulo
+    "jmp rot_fim"
+    "rot_caso_falso:"
+}
+39- {
+    "rot_fim:"
+}
+40- {
+    se nao houver else
+        "rot_caso_falso:"
+}
+41- {
+    se nao houver acesso a array && ID.simbolo.tamanho == 0
+        se ID.simbolo.tipo == char
+            Fator.end = novo_tmp
+            "mov BL, DS:[ID.simbolo.end]"
+            "mov DS:[Fator.end], BL"
+        senao
+            Fator.end = novo_tmp
+            "mov BX, DS:[ID.simbolo.end]"
+            "mov DS:[Fator.end], BX"
+    senao
+        Fator.end = ID.simbolo.end
+}
+42- {
+    se nao houver atribuicao nem vetor
+        se tipo == char
+            "byte ?"
+        senao
+            "sword ?"
+}
+43- {
+    "mov BX, ID.simbolo.end"
+    "push BX"
 }
