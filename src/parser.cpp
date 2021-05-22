@@ -1,4 +1,5 @@
 #include <sstream>
+#include <string>
 
 #include "parser.h"
 #include "excessoes.h"
@@ -727,7 +728,7 @@ void parser::cmd_s()
 			(
 				"; Leitura de string\n"
 				"	mov DX, " + converte_hex(buffer_leitura) + "\n"
-				"	mov AL, " + converte_hex(tamanho_buffer) + "\n"
+				"	mov AL, " + std::to_string(tamanho_buffer) + "\n"
 				"	mov DS:[" + converte_hex(buffer_leitura) + "], AL\n"
 				"	mov AH, 0Ah\n"
 				"	int 21h\n"
@@ -738,7 +739,7 @@ void parser::cmd_s()
 				"	int 21h\n"
 				"	mov AH, 0\n"
 				"	mov DI, " + converte_hex(rt->endereco) + "\n"
-				"	mov SI, " + converte_hex(buffer_leitura + 2) + "\n" +
+				"	mov SI, " + std::to_string(buffer_leitura + 2) + "\n" +
 				rot_loop + ":\n"
 				"	mov AL, DS:[SI]\n"
 				"	cmp AL, 0Dh\n"
