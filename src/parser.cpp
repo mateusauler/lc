@@ -750,6 +750,7 @@ void parser::cmd_s()
 				rot_fim + ":\n"
 				"	mov AL, '$'\n"
 				"	mov DS:[DI], AL\n"
+				"; Fim da leitura de string\n"
 			);
 		}
 
