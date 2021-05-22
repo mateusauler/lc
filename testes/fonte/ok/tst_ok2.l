@@ -7,8 +7,8 @@ main
 {
     for (i:=0; i<3; i:=i+1)
     {
-      write("Digite um numero: ");
-      readln(n[i]);
+        write("Digite um numero: ");
+        readln(n[i]);
     }
 
     if (n[0] > n[1]) then
@@ -21,9 +21,9 @@ main
     else if (n[1] > n[2]) then
         max:=n[1];
     else
-        max:=n[2]; 
+        max:=n[2];
 
     writeln("O maior numero e' ",max);
 
     readln(tmp);
-}  
+}
