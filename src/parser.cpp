@@ -294,7 +294,7 @@ void parser::var(tipo_dados_t tipo)
 			else
 				valor = (nega ? "-" : "") + lex_const;
 
-			// Aloca 1 ou 2 bytes (dependendo do tipo da constante) e preenche o valor
+			// Aloca 1 ou 2 bytes (dependendo do tipo da variavel) e preenche o valor
 			concatena_saida((tipo == TP_CHAR ? "	byte " : "	sword ") + valor + " ; " + lex + "\n");
 
 			break;
