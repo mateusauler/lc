@@ -173,6 +173,7 @@ void parser::dec_const(std::string& destino)
 	if (token_lido->tipo_token == TK_OP_MENOS)
 	{
 		consome_token(TK_OP_MENOS);
+		// Ação 29
 		nega = true;
 	}
 
@@ -244,6 +245,7 @@ void parser::var(tipo_dados_t tipo, std::string& destino)
 			if (token_lido->tipo_token == TK_OP_MENOS)
 			{
 				consome_token(TK_OP_MENOS);
+				// Ação 30
 				nega = true;
 			}
 
@@ -444,7 +446,7 @@ void parser::cmd_s(std::string& destino)
 				"	pop DI ; Endereco do vetor\n"
 				"	mov SI, " + converte_hex(endereco) + " ; Endereco da origem\n";
 
-			destino +=  "\n" + rot_copia_str + ":\n";
+			destino += "\n" + rot_copia_str + ":\n";
 
 			destino +=
 				"	mov AL, DS:[SI] ; Le o proximo caractere\n"
@@ -499,7 +501,7 @@ void parser::cmd_s(std::string& destino)
 				// Caso for char, deve-se copiar somente 1 byte
 				destino +=
 					"\n"
-					"	pop DI ; Recupera endereco\n"
+					"	pop DI ; Recupera endereco de [" + lex + "]\n"
 					"	mov CL, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
 					"	mov DS:[DI], CL ; Armazena resultado na memoria\n";
 			}
@@ -508,7 +510,7 @@ void parser::cmd_s(std::string& destino)
 				// Caso for int ou boolean, deve-se copiar 2 bytes
 				destino +=
 					"\n"
-					"	pop DI ; Recupera endereco\n"
+					"	pop DI ; Recupera endereco de [" + lex + "]\n"
 					"	mov CX, DS:[" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
 					"	mov DS:[DI], CX ; Armazena resultado na memoria\n";
 			}
@@ -543,6 +545,10 @@ void parser::cmd_s(std::string& destino)
 
 			linha_erro = num_linha;
 
+			destino +=
+				"\n"
+				"; Calculo do desvio de [" + lex + "]\n";
+
 			end_tmp = 0;
 			exp(tipo_exp, tamanho_exp, destino, endereco);
 
@@ -555,6 +561,7 @@ void parser::cmd_s(std::string& destino)
 			consome_token(TK_GRU_F_COL); // ]
 
 			destino +=
+				"\n"
 				"	mov DI, " + converte_hex(rt->endereco) + "\n"
 				"	mov AX, DS:[" + converte_hex(endereco) + "]\n";
 
@@ -562,7 +569,9 @@ void parser::cmd_s(std::string& destino)
 				destino += "	add AX, AX\n";
 
 			destino +=
-				"	add DI, AX\n";
+				"	add DI, AX\n"
+				"; Fim do calculo do desvio de [" + lex + "]\n"
+				"\n";
 		}
 		else
 			destino += "	mov DI, " + converte_hex(rt->endereco) + "\n";
@@ -590,7 +599,8 @@ void parser::cmd_s(std::string& destino)
 					"	mov DL, 0Ah\n"
 					"	int 21h\n"
 					"	mov AL, DS:[" + converte_hex(buffer_leitura) + "]\n"
-					"	mov DS:[DI], AL\n";
+					"	mov DS:[DI], AL\n"
+					"; Fim leitura de char\n";
 			}
 			else
 			{
@@ -614,20 +624,20 @@ void parser::cmd_s(std::string& destino)
 					"	mov DL, 0Ah\n"
 					"	int 21h\n"
 					"\n"
-					"	mov DI, " + converte_hex(buffer_leitura + 2) + " ;posição do string\n"
+					"	mov DI, " + converte_hex(buffer_leitura + 2) + " ;posicao do string\n"
 					"	mov AX, 0 ;acumulador\n"
 					"	mov CX, 10 ;base decimal\n"
 					"	mov DX, 1 ;valor sinal +\n"
 					"	mov BH, 0\n"
 					"	mov BL, DS:[DI] ;caractere\n"
 					"	cmp BX, '-' ;verifica sinal\n"
-					"	jne " + rot_sinal + " ;se não negativo\n"
+					"	jne " + rot_sinal + " ;se nao negativo\n"
 					"	mov DX, -1 ;valor sinal -\n"
 					"	add DI, 1 ;incrementa base\n"
 					"	mov BL, DS:[DI] ;próximo caractere\n" +
 					rot_sinal + ":\n"
 					"	push DX ;empilha sinal\n"
-					"	mov DX, 0 ;reg. multiplicação\n" +
+					"	mov DX, 0 ;reg. multiplicacao\n" +
 					rot_loop + ":\n"
 					"	cmp BX, 0Dh ;verifica fim string\n"
 					"	je " + rot_fim + " ;salta se fim string\n"
@@ -642,7 +652,8 @@ void parser::cmd_s(std::string& destino)
 					"	pop CX ;desempilha sinal\n"
 					"	imul CX ;mult. sinal;\n"
 					"	pop DI\n"
-					"	mov DS:[DI], AX\n";
+					"	mov DS:[DI], AX\n"
+					"; Fim leitura de int\n";
 			}
 		}
 		else
@@ -742,7 +753,7 @@ void parser::cmd_s(std::string& destino)
 				destino +=
 					"\n"
 					"; Impressao de int\n"
-					"	mov AX, DS:[" + converte_hex(endereco) + "] ; Carrega valor de do inteiro\n"
+					"	mov AX, DS:[" + converte_hex(endereco) + "] ; Carrega valor do inteiro\n"
 					"	mov DI, " + converte_hex(temp_impressao) + " ; Endereco da string para impressao\n"
 					"	mov CX, 0 ; Contador\n"
 					"	cmp AX, 0 ; Verifica sinal\n"
@@ -771,7 +782,7 @@ void parser::cmd_s(std::string& destino)
 					"	add DI, 1 ; incrementa base\n"
 					"	add CX, -1 ; decrementa contador\n"
 					"	cmp CX, 0 ; verifica pilha vazia\n"
-					"	jne " + rot_converte + " ; se não pilha vazia, loop\n"
+					"	jne " + rot_converte + " ; se nao pilha vazia, loop\n"
 					"\n"
 					";grava fim de string\n"
 					"\n"
@@ -782,7 +793,8 @@ void parser::cmd_s(std::string& destino)
 					"\n"
 					"	mov DX, " + converte_hex(temp_impressao) + "\n"
 					"	mov AH, 09h\n"
-					"	int 21h\n";
+					"	int 21h\n"
+					"; Fim impressao de int\n";
 			}
 		};
 
@@ -852,7 +864,7 @@ void parser::cmd_for(std::string& destino)
 
 	int linha_erro = num_linha;
 
-	destino += rot_loop + ":\n";
+	destino += "\n" + rot_loop + ":\n";
 
 	destino +=
 		"\n"
@@ -1056,7 +1068,9 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 
 			endereco = novo_tmp(2);
 
-			destino += "	mov DS:[" + converte_hex(endereco) + "], DX\n";
+			destino +=
+				"	mov DS:[" + converte_hex(endereco) + "], DX\n"
+				"; Fim da comparacao de strings\n";
 	};
 
 	// Ação 17
@@ -1166,7 +1180,8 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& en
 					rot_verdadeiro + ":\n"
 					"	mov AX, 1\n" +
 					rot_fim + ":\n"
-					"	mov DS:[" + converte_hex(endereco) + "], AX\n";
+					"	mov DS:[" + converte_hex(endereco) + "], AX\n"
+					"; Fim da comparacao de escalares\n";
 			}
 
 			tipo = TP_BOOL;
@@ -1193,6 +1208,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& e
 	if (token_lido->tipo_token == TK_OP_MENOS)
 	{
 		consome_token(TK_OP_MENOS);
+		// Ação 31
 		nega = true;
 	}
 
@@ -1427,7 +1443,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 			destino +=
 				"\n"
-				"; Leitura de [" + lex + "]\n";
+				"; Carregamento de [" + lex + "]\n";
 
 			// [ "[" Exp "]" ]
 			if (token_lido->tipo_token == TK_GRU_A_COL)
@@ -1456,17 +1472,17 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 
 				destino +=
 					"\n"
-					"	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio\n";
+					"	mov SI, DS:[" + converte_hex(endereco) + "] ; Recupera desvio\n";
 
 				if (tipo == TP_INT || tipo == TP_BOOL)
-					destino += "	add BX, BX ; int e boolean ocupa 2 bytes\n";
+					destino += "	add SI, SI ; int e boolean ocupa 2 bytes\n";
 
-				destino += "	add BX, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n";
+				destino += "	add SI, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n";
 
 				endereco = novo_tmp(1 + (tipo != TP_CHAR));
 
 				destino +=
-					"	mov CX, DS:[BX] ; Recupera valor na posicao calculada\n"
+					"	mov CX, DS:[SI] ; Recupera valor na posicao calculada\n"
 					"	mov DS:[" + converte_hex(endereco) + "], CX ; Armazena valor em um temporario\n"
 					"\n"
 					"; Fim do calculo do endereco + desvio do vetor [" + lex + "]\n"
@@ -1496,7 +1512,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, std::string& destino, int& 
 				endereco = rt->endereco;
 
 			destino +=
-				"; Fim da leitura de [" + lex + "]\n";
+				"; Fim do carregamento de [" + lex + "]\n";
 
 			break;
 
