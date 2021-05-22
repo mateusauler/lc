@@ -11,7 +11,7 @@ CmdS -> ID (10) [ "[" Exp1 (11) "]" ] (43) := Exp2 (12)
 CmdS -> readln "(" ID (13) [ "[" Exp (14) "]" ] (32) ")"
 CmdS -> (write | writeln) "(" Exp1 (33) {, Exp2 (34) } ")" (35)
 
-CmdFor -> for "(" [Cmd {, Cmd}] ; (36) Exp (15) ; [Cmd {, Cmd}] ")" (CmdT | BlocoCmd) (37)
+CmdFor -> for "(" [Cmd {, Cmd}] ; (36) Exp (15) ; [ (44) Cmd {, Cmd} (45)] ")" (CmdT | BlocoCmd) (37)
 CmdIf -> if "(" Exp (16) ")" then (CmdT | BlocoCmd) [else (38) (CmdT | BlocoCmd) (39)] (40)
 
 Cmd -> CmdS | CmdFor | CmdIf
@@ -336,13 +336,17 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
         "int 21h"
 }
 36- {
-    rot_loop = novo_rotulo
+    rot_exp = novo_rotulo
     rot_fim = novo_rotulo
 
-    "rot_loop:"
+    "rot_exp:"
 }
 37- {
-    "jmp rot_loop"
+    se houve prologo
+        "jmp rot_prologo"
+    senao
+        "jmp rot_exp"
+
     "rot_fim:"
 }
 38- {
@@ -380,4 +384,15 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
 43- {
     "mov BX, ID.simbolo.end"
     "push BX"
+}
+44- {
+    rot_bloco = novo_rotulo
+    rot_prologo = novo_rotulo
+
+    "jmp rot_bloco"
+    "rot_prologo:"
+}
+45- {
+    "jmp rot_exp"
+    "rot_bloco:"
 }

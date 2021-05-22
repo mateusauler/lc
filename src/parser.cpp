@@ -839,7 +839,8 @@ void parser::cmd_for(std::string& destino)
 
 	tipo_dados_t tipo_exp;
 	int tamanho_exp, endereco;
-	std::string codigo_final = "", rot_loop = novo_rotulo(), rot_fim = novo_rotulo();
+	bool prologo = false;
+	std::string rot_exp = novo_rotulo(), rot_fim = novo_rotulo(), rot_prologo;
 
 	consome_token(TK_RES_FOR);   // for
 	consome_token(TK_GRU_A_PAR); // (
@@ -864,9 +865,9 @@ void parser::cmd_for(std::string& destino)
 
 	int linha_erro = num_linha;
 
-	destino += "\n" + rot_loop + ":\n";
-
 	destino +=
+		"\n" +
+		rot_exp + ":\n"
 		"\n"
 		"; Expressao do loop\n";
 
@@ -889,14 +890,29 @@ void parser::cmd_for(std::string& destino)
 	// [Cmd {, Cmd}]
 	if (token_lido->tipo_token != TK_GRU_F_PAR)
 	{
-		cmd(codigo_final);
+		prologo = true;
+		std::string rot_bloco = novo_rotulo();
+		rot_prologo = novo_rotulo();
+
+		destino +=
+			"	jmp " + rot_bloco + "\n"
+			"; Inicio do prologo do loop\n" +
+			rot_prologo + ":\n";
+
+		cmd(destino);
 
 		// {, Cmd}
 		while (token_lido->tipo_token == TK_OP_VIRGULA)
 		{
 			consome_token(TK_OP_VIRGULA); // ,
-			cmd(codigo_final);
+			cmd(destino);
 		}
+
+		destino +=
+			"\n"
+			"; Fim do prologo do loop\n"
+			"	jmp " + rot_exp + "\n" +
+			rot_bloco + ":\n";
 	}
 
 	consome_token(TK_GRU_F_PAR); // )
@@ -905,9 +921,8 @@ void parser::cmd_for(std::string& destino)
 	if (token_lido->tipo_token == TK_GRU_A_CHA) bloco_cmd(destino);
 	else                                        cmd_t(destino);
 
-	destino += codigo_final;
 	destino +=
-		"	jmp " + rot_loop + "\n"
+		"	jmp " + (prologo ? rot_prologo : rot_exp) + "\n"
 		"; Final do loop\n" +
 		rot_fim + ":\n";
 }
