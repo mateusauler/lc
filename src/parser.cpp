@@ -1479,12 +1479,12 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, int& endereco)
 
 		switch (operador)
 		{
-			case TK_OP_MUL:      // *
-			case TK_RES_AND:     // and
+			case TK_OP_MUL:  // *
+			case TK_RES_AND: // and
 				concatena_saida("	imul BX\n");
 				break;
 
-			case TK_OP_BARRA:    // /
+			case TK_OP_BARRA: // /
 				concatena_saida
 				(
 					"	cwd\n"
@@ -1545,6 +1545,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 
 			concatena_saida
 			(
+				"; Nega um fator\n"
 				"	mov BX, DS:[" + converte_hex(endereco) + "]\n"
 				"	neg BX\n"
 				"	add BX, 1\n"
@@ -1569,12 +1570,11 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 			consome_token(TK_ID); // ID
 
 			// Ação 26
-			if (rt->classe != CL_NULL)
-			{
-				tipo = rt->tipo;
-				tamanho = rt->tam;
-			}
-			else throw id_nao_declarado(lex, linha_erro);
+			if (rt->classe == CL_NULL)
+				throw id_nao_declarado(lex, linha_erro);
+
+			tipo    = rt->tipo;
+			tamanho = rt->tam;
 
 			concatena_saida
 			(
