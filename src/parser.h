@@ -24,10 +24,10 @@ private:
 	int rotulo = 0;
 
 	// Nome do arquivo de saida
-	std::string nome_arq_saida;
+	const std::string nome_arq_saida;
 
 	// Arquivo de saida
-	FILE * arq_saida = nullptr;
+	FILE *arq_saida = nullptr;
 
 	// Aloca um bloco de `bytes` bytes na memoria de variaveis e retorna o endereco do inicio deste bloco
 	int aloca(int bytes);
