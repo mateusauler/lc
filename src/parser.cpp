@@ -397,12 +397,6 @@ void parser::cmd_s()
 			end_tmp = 0;
 			exp(tipo_exp, tamanho_exp, endereco);
 
-			concatena_saida
-			(
-				"\n"
-				"; Fim do calculo do desvio de [" + lex + "]\n"
-			);
-
 			// Ação 11
 			if (tipo_exp != TP_INT || tamanho_exp > 0 || tamanho == 0)
 				throw tipo_incompativel(linha_erro);
@@ -411,6 +405,8 @@ void parser::cmd_s()
 
 			concatena_saida
 			(
+				"\n"
+				"; Fim do calculo do desvio de [" + lex + "]\n"
 				"\n"
 				"	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n"
 			);
@@ -450,8 +446,10 @@ void parser::cmd_s()
 			"\n"
 			"; Inicio do calculo do valor da atribuicao a [" + lex + "]\n"
 		);
+
 		end_tmp = 0;
 		exp(tipo_exp, tamanho_exp, endereco);
+
 		concatena_saida
 		(
 			"\n"
@@ -478,12 +476,8 @@ void parser::cmd_s()
 				"\n"
 				"	pop DI ; Endereco do vetor\n"
 				"	mov SI, " + converte_hex(endereco) + " ; Endereco da origem\n"
-			);
-
-			concatena_saida("\n" + rot_copia_str + ":\n");
-
-			concatena_saida
-			(
+				"\n" +
+				rot_copia_str + ":\n"
 				"	mov AL, DS:[SI] ; Le o proximo caractere\n"
 				"	mov DS:[DI], AL ; Armazena este caractere em [" + lex + "]\n"
 				"	add DI, 1\n"
@@ -513,12 +507,8 @@ void parser::cmd_s()
 				"\n"
 				"	pop DI ; Endereco do vetor\n"
 				"	mov SI, " + converte_hex(endereco) + " ; Endereco da origem\n"
-			);
-
-			concatena_saida("\n" + rot_copia_vet + ":\n");
-
-			concatena_saida
-			(
+				"\n" +
+				rot_copia_vet + ":\n"
 				"	mov AL, DS:[SI] ; Le o proximo caractere\n"
 				"	mov DS:[DI], AL ; Armazena este caractere em [" + lex + "]\n"
 				"	add DI, 1\n"
@@ -1331,6 +1321,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, int& endereco)
 	// Ação 19
 	linha_erro = num_linha;
 	termo(tipo, tamanho, endereco);
+
 	if (nega && (tipo != TP_INT || tamanho > 0)) throw tipo_incompativel(linha_erro);
 
 	if (nega)
