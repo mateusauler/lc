@@ -739,7 +739,7 @@ void parser::cmd_s()
 				"	int 21h\n"
 				"	mov AH, 0\n"
 				"	mov DI, " + converte_hex(rt->endereco) + "\n"
-				"	mov SI, " + std::to_string(buffer_leitura + 2) + "\n" +
+				"	mov SI, " + converte_hex(buffer_leitura + 2) + "\n" +
 				rot_loop + ":\n"
 				"	mov AL, DS:[SI]\n"
 				"	cmp AL, 0Dh\n"
