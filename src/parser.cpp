@@ -177,7 +177,7 @@ void parser::dec_const()
 
 	consome_token(TK_RES_FINAL); // final
 
-	registro_tabela_simbolos *rt = token_lido->simbolo;
+	registro_tabela_simbolos *simbolo = token_lido->simbolo;
 	std::string lex = token_lido->lex;
 	int linha_erro = num_linha;
 	bool nega = false;
@@ -185,10 +185,10 @@ void parser::dec_const()
 	consome_token(TK_ID); // ID
 
 	// Ação 5
-	if (rt->classe != CL_NULL)
+	if (simbolo->classe != CL_NULL)
 		throw id_ja_declarado(lex, linha_erro);
 
-	rt->classe = CL_CONST;
+	simbolo->classe = CL_CONST;
 
 	consome_token(TK_OP_EQ); // =
 
@@ -216,12 +216,12 @@ void parser::dec_const()
 
 	// Gera a alocacao da constante e preenche o valor
 
-	rt->tipo = tipo_constante;
-	rt->endereco = aloca(byte_tipo(rt->tipo));
+	simbolo->tipo = tipo_constante;
+	simbolo->endereco = aloca(byte_tipo(simbolo->tipo));
 
 	std::string valor;
 
-	if (rt->tipo == TP_BOOL)
+	if (simbolo->tipo == TP_BOOL)
 		valor = std::to_string(lex_const == "TRUE");
 	else
 		valor = (nega ? "-" : "") + lex_const;
@@ -236,7 +236,7 @@ void parser::var(tipo_dados_t tipo)
 {
 	// ID [:= [-] CONST | "[" CONST "]" ]
 
-	registro_tabela_simbolos *rt = token_lido->simbolo;
+	registro_tabela_simbolos *simbolo = token_lido->simbolo;
 	std::string lex = token_lido->lex;
 	std::string lex_id = lex;
 	std::string lex_const;
@@ -251,11 +251,11 @@ void parser::var(tipo_dados_t tipo)
 	consome_token(TK_ID); // ID
 
 	// Ação 7
-	if (rt->classe != CL_NULL)
+	if (simbolo->classe != CL_NULL)
 		throw id_ja_declarado(lex, linha_erro);
 
-	rt->classe = CL_VAR;
-	rt->tipo = tipo;
+	simbolo->classe = CL_VAR;
+	simbolo->tipo = tipo;
 
 	switch (token_lido->tipo_token)
 	{
@@ -288,8 +288,8 @@ void parser::var(tipo_dados_t tipo)
 
 			// Gera a alocacao da variavel e preenche o valor
 
-			rt->endereco = aloca(byte_tipo(rt->tipo));
-			if (rt->tipo == TP_BOOL)
+			simbolo->endereco = aloca(byte_tipo(simbolo->tipo));
+			if (simbolo->tipo == TP_BOOL)
 				valor = std::to_string(lex_const == "TRUE");
 			else
 				valor = (nega ? "-" : "") + lex_const;
@@ -318,19 +318,19 @@ void parser::var(tipo_dados_t tipo)
 			if (valor_array * byte_tipo(tipo) > 8192)
 				throw tam_vet_excede_max(linha_erro);
 
-			rt->tam = valor_array;
+			simbolo->tam = valor_array;
 
 			consome_token(TK_GRU_F_COL); // ]
 
 			// Aloca os bytes necessarios para o vetor
-			rt->endereco = aloca(byte_tipo(rt->tipo) * rt->tam);
-			concatena_saida((tipo == TP_CHAR ? "	byte " : "	sword ") + std::to_string(rt->tam) + " DUP(?) ; " + lex_id + "\n");
+			simbolo->endereco = aloca(byte_tipo(simbolo->tipo) * simbolo->tam);
+			concatena_saida((tipo == TP_CHAR ? "	byte " : "	sword ") + std::to_string(simbolo->tam) + " DUP(?) ; " + lex_id + "\n");
 
 			break;
 
 		default:
 			// Aloca uma variavel vazia
-			rt->endereco = aloca(byte_tipo(rt->tipo));
+			simbolo->endereco = aloca(byte_tipo(simbolo->tipo));
 			concatena_saida((tipo == TP_CHAR ? "	byte ? ; " : "	sword ? ; ") + lex + "\n");
 			break;
 	}
@@ -355,25 +355,22 @@ void parser::cmd_s()
 	// readln "(" ID [ "[" Exp "]" ] ")"
 	// (write | writeln) "(" Exp {, Exp} ")"
 
-	registro_tabela_simbolos *rt;
-	std::string lex;
-
 	tipo_dados_t tipo_exp;
 	int tamanho_exp, tamanho, linha_erro, endereco = 0;
 
 	if (token_lido->tipo_token == TK_ID) // ID [ "[" Exp "]" ] := Exp
 	{
-		rt = token_lido->simbolo;
-		lex = token_lido->lex;
+		registro_tabela_simbolos *simbolo = token_lido->simbolo;
+		std::string lex = token_lido->lex;
 		linha_erro = num_linha;
 
 		consome_token(TK_ID); // ID
 
 		// Ação 10
-		if (rt->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
-		if (rt->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
+		if (simbolo->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
+		if (simbolo->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
 
-		tamanho = rt->tam;
+		tamanho = simbolo->tam;
 
 		concatena_saida("\n; Inicio da atribuicao a [" + lex + "]\n");
 
@@ -411,12 +408,12 @@ void parser::cmd_s()
 				"	mov BX, DS:[" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n"
 			);
 
-			if (rt->tipo == TP_INT || rt->tipo == TP_BOOL)
+			if (simbolo->tipo == TP_INT || simbolo->tipo == TP_BOOL)
 				concatena_saida("	add BX, BX ; int e boolean ocupa 2 bytes\n");
 
 			concatena_saida
 			(
-				"	add BX, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n"
+				"	add BX, " + converte_hex(simbolo->endereco) + " ; Combina endereco base com desvio\n"
 				"	push BX ; Armazena endereco na pilha\n"
 				"\n"
 				"; Fim do calculo de endereco do vetor [" + lex + "]\n"
@@ -431,7 +428,7 @@ void parser::cmd_s()
 			(
 				"\n"
 				"; Armazena endereco da variavel [" + lex + "] na pilha\n"
-				"	mov BX, " + converte_hex(rt->endereco) + " ; Recupera endereco da variavel [" + lex + "]\n"
+				"	mov BX, " + converte_hex(simbolo->endereco) + " ; Recupera endereco da variavel [" + lex + "]\n"
 				"	push BX ; Armazena endereco na pilha\n"
 			);
 		}
@@ -457,9 +454,9 @@ void parser::cmd_s()
 		);
 
 		// Ação 12
-		if (tipo_exp != rt->tipo)
+		if (tipo_exp != simbolo->tipo)
 		{
-			if ((rt->tipo != TP_CHAR && tipo_exp != TP_STR))
+			if ((simbolo->tipo != TP_CHAR && tipo_exp != TP_STR))
 				throw tipo_incompativel(linha_erro);
 
 			if (tamanho < tamanho_exp)
@@ -490,7 +487,7 @@ void parser::cmd_s()
 		}
 		else if (tamanho > 0)
 		{
-			if (rt->tipo != TP_CHAR || tamanho_exp == 0)
+			if (simbolo->tipo != TP_CHAR || tamanho_exp == 0)
 				throw tipo_incompativel(linha_erro);
 
 			if (tamanho < tamanho_exp)
@@ -526,7 +523,7 @@ void parser::cmd_s()
 			// Atribuicao escalar de uma variavel
 			// Copia o conteudo calculado pela expressao e guarda na memoria
 
-			if (rt->tipo == TP_CHAR)
+			if (simbolo->tipo == TP_CHAR)
 			{
 				// Caso for char, deve-se copiar somente 1 byte
 				concatena_saida
@@ -561,18 +558,18 @@ void parser::cmd_s()
 		consome_token(TK_RES_READLN); // readln
 		consome_token(TK_GRU_A_PAR);  // (
 
-		rt = token_lido->simbolo;
+		registro_tabela_simbolos *simbolo = token_lido->simbolo;
+		std::string lex = token_lido->lex;
 		linha_erro = num_linha;
-		lex = token_lido->lex;
 
 		consome_token(TK_ID); // ID
 
 		// Ação 13
-		if (rt->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
-		if (rt->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
-		if (rt->tipo == TP_BOOL)    throw tipo_incompativel(linha_erro);
+		if (simbolo->classe == CL_NULL)  throw id_nao_declarado(lex, linha_erro);
+		if (simbolo->classe == CL_CONST) throw classe_id_incompativel(lex, linha_erro);
+		if (simbolo->tipo   == TP_BOOL)  throw tipo_incompativel(linha_erro);
 
-		tamanho = rt->tam;
+		tamanho = simbolo->tam;
 
 		// [ "[" Exp "]" ]
 		if (token_lido->tipo_token == TK_GRU_A_COL)
@@ -601,11 +598,11 @@ void parser::cmd_s()
 			concatena_saida
 			(
 				"\n"
-				"	mov DI, " + converte_hex(rt->endereco) + "\n"
+				"	mov DI, " + converte_hex(simbolo->endereco) + "\n"
 				"	mov AX, DS:[" + converte_hex(endereco) + "]\n"
 			);
 
-			if (rt->tipo != TP_CHAR)
+			if (simbolo->tipo != TP_CHAR)
 				concatena_saida("	add AX, AX\n");
 
 			concatena_saida
@@ -616,15 +613,15 @@ void parser::cmd_s()
 			);
 		}
 		else
-			concatena_saida("	mov DI, " + converte_hex(rt->endereco) + "\n");
+			concatena_saida("	mov DI, " + converte_hex(simbolo->endereco) + "\n");
 
 		// Ação 32
-		if (tamanho > 0 && rt->tipo != TP_CHAR)
+		if (tamanho > 0 && simbolo->tipo != TP_CHAR)
 			throw tipo_incompativel(linha_erro);
 
 		if (tamanho == 0)
 		{
-			if (rt->tipo == TP_CHAR)
+			if (simbolo->tipo == TP_CHAR)
 			{
 				int buffer_leitura = novo_tmp(4);
 
@@ -706,8 +703,8 @@ void parser::cmd_s()
 		{
 			int tamanho_buffer = 255;
 
-			if (rt->tam < tamanho_buffer)
-				tamanho_buffer = rt->tam;
+			if (simbolo->tam < tamanho_buffer)
+				tamanho_buffer = simbolo->tam;
 
 			int buffer_leitura = novo_tmp(tamanho_buffer + 3);
 
@@ -727,7 +724,7 @@ void parser::cmd_s()
 				"	mov DL, 0Ah\n"
 				"	int 21h\n"
 				"	mov AH, 0\n"
-				"	mov DI, " + converte_hex(rt->endereco) + "\n"
+				"	mov DI, " + converte_hex(simbolo->endereco) + "\n"
 				"	mov SI, " + converte_hex(buffer_leitura + 2) + "\n" +
 				rot_loop + ":\n"
 				"	mov AL, DS:[SI]\n"
@@ -1521,7 +1518,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 
 	int linha_erro;
 
-	registro_tabela_simbolos *rt = token_lido->simbolo;
+	registro_tabela_simbolos *simbolo = token_lido->simbolo;
 	std::string lex = token_lido->lex;
 	std::string valor = lex;
 
@@ -1570,11 +1567,11 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 			consome_token(TK_ID); // ID
 
 			// Ação 26
-			if (rt->classe == CL_NULL)
+			if (simbolo->classe == CL_NULL)
 				throw id_nao_declarado(lex, linha_erro);
 
-			tipo    = rt->tipo;
-			tamanho = rt->tam;
+			tipo    = simbolo->tipo;
+			tamanho = simbolo->tam;
 
 			concatena_saida
 			(
@@ -1606,7 +1603,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 				);
 
 				// Ação 27
-				if (rt->tam == 0 || tipo_exp != TP_INT || tamanho_exp > 0)
+				if (simbolo->tam == 0 || tipo_exp != TP_INT || tamanho_exp > 0)
 					throw tipo_incompativel(linha_erro);
 
 				tamanho = 0;
@@ -1620,7 +1617,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 				if (tipo == TP_INT || tipo == TP_BOOL)
 					concatena_saida("	add SI, SI ; int e boolean ocupa 2 bytes\n");
 
-				concatena_saida("	add SI, " + converte_hex(rt->endereco) + " ; Combina endereco base com desvio\n");
+				concatena_saida("	add SI, " + converte_hex(simbolo->endereco) + " ; Combina endereco base com desvio\n");
 
 				endereco = novo_tmp(1 + (tipo != TP_CHAR));
 
@@ -1643,7 +1640,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 					endereco = novo_tmp(1);
 					concatena_saida
 					(
-						"	mov BL, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
+						"	mov BL, DS:[" + converte_hex(simbolo->endereco) + "] ; Recupera valor de [" + lex + "]\n"
 						"	mov DS:[" + converte_hex(endereco) + "], BL ; Armazena valor em um temporario\n"
 					);
 				}
@@ -1652,13 +1649,13 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, int& endereco)
 					endereco = novo_tmp(2);
 					concatena_saida
 					(
-						"	mov BX, DS:[" + converte_hex(rt->endereco) + "] ; Recupera valor de [" + lex + "]\n"
+						"	mov BX, DS:[" + converte_hex(simbolo->endereco) + "] ; Recupera valor de [" + lex + "]\n"
 						"	mov DS:[" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n"
 					);
 				}
 			}
 			else // Se for um vetor, armazena seu endereco
-				endereco = rt->endereco;
+				endereco = simbolo->endereco;
 
 			concatena_saida("; Fim do carregamento de [" + lex + "]\n");
 
