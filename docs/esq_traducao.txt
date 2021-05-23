@@ -283,21 +283,57 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
             "mov DS:[Fator.end], BX"
 }
 32- {
-    se tamanho == 0 && ID.simbolo.tipo == char
-        buffer = novo_tmp
+    se ID.simbolo.tipo == char
+        se tamanho == 0
+            buffer = novo_tmp
 
-        "mov DX, buffer.end"
-        "mov AL, 04h"
-        "mov DS:[buffer.end], AL"
-        "mov AH, 0Ah"
-        "int 21h"
-        "mov AH, 02h"
-        "mov DL, 0Dh"
-        "int 21h"
-        "mov DL, 0Ah"
-        "int 21h"
-        "mov AL, DS:[buffer.end]"
-        "mov DS:[DI], AL"
+            "mov DX, buffer.end"
+            "mov AL, 04h"
+            "mov DS:[buffer.end], AL"
+            "mov AH, 0Ah"
+            "int 21h"
+            "mov AH, 02h"
+            "mov DL, 0Dh"
+            "int 21h"
+            "mov DL, 0Ah"
+            "int 21h"
+            "mov AL, DS:[buffer.end]"
+            "mov DS:[DI], AL"
+        senao
+            tamanho_buffer = 255
+
+			se ID.simbolo.tamanho < tamanho_buffer
+				tamanho_buffer = ID.simbolo.tamanho
+
+			buffer_leitura = novo_tmp
+
+			rot_loop = novo_rotulo
+            rot_fim = novo_rotulo
+
+            "mov DX, buffer_leitura"
+            "mov AL, tamanho_buffer"
+            "mov DS:[buffer_leitura], AL"
+            "mov AH, 0Ah"
+            "int 21h"
+            "mov AH, 02h"
+            "mov DL, 0Dh"
+            "int 21h"
+            "mov DL, 0Ah"
+            "int 21h"
+            "mov AH, 0"
+            "mov DI, ID.simbolo.endereco"
+            "mov SI, buffer_leitura + 2"
+            "rot_loop:"
+            "mov AL, DS:[SI]"
+            "cmp AL, 0Dh"
+            "je rot_fim"
+            "mov DS:[DI], AL"
+            "add DI, 1"
+            "add SI, 1"
+            "jmp rot_loop"
+            "rot_fim:"
+            "mov AL, '$'"
+            "mov DS:[DI], AL"
     senao
         Gerar leitura de acordo com o pdf
 }
