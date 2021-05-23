@@ -1,5 +1,4 @@
 #include <sstream>
-#include <string>
 
 #include "parser.h"
 #include "excessoes.h"
