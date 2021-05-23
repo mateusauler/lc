@@ -1173,128 +1173,128 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, int& endereco)
 	soma(tipo, tamanho, endereco);
 
 	// [(=|<>|>|<|>=|<=) Soma]
-	switch (token_lido->tipo_token)
+	if
+	(
+		token_lido->tipo_token == TK_OP_EQ || // =
+		token_lido->tipo_token == TK_OP_NE || // <>
+		token_lido->tipo_token == TK_OP_GT || // >
+		token_lido->tipo_token == TK_OP_LT || // <
+		token_lido->tipo_token == TK_OP_GE || // >=
+		token_lido->tipo_token == TK_OP_LE    // <=
+	)
 	{
-		case TK_OP_EQ: // =
-		case TK_OP_NE: // <>
-		case TK_OP_GT: // >
-		case TK_OP_LT: // <
-		case TK_OP_GE: // >=
-		case TK_OP_LE: // <=
+		operador = token_lido->tipo_token;
 
-			operador = token_lido->tipo_token;
+		consome_token(token_lido->tipo_token); // (=|<>|>|<|>=|<=)
 
-			consome_token(token_lido->tipo_token); // (=|<>|>|<|>=|<=)
+		linha_erro = num_linha;
 
-			linha_erro = num_linha;
+		soma(tipo_soma, tamanho_soma, endereco_soma);
 
-			soma(tipo_soma, tamanho_soma, endereco_soma);
-
-			// Ação 18
-			if (tipo != tipo_soma)
+		// Ação 18
+		if (tipo != tipo_soma)
+		{
+			if ((tipo == TP_CHAR && tipo_soma == TP_STR) ||
+				(tipo == TP_STR  && tipo_soma == TP_CHAR))
 			{
-				if ((tipo == TP_CHAR && tipo_soma == TP_STR) ||
-					(tipo == TP_STR  && tipo_soma == TP_CHAR))
-				{
-					if (tamanho == 0 || tamanho_soma == 0 || operador != TK_OP_EQ)
-						throw tipo_incompativel(linha_erro);
-				}
-				else throw tipo_incompativel(linha_erro);
-
-				compara_strings();
+				if (tamanho == 0 || tamanho_soma == 0 || operador != TK_OP_EQ)
+					throw tipo_incompativel(linha_erro);
 			}
-			else if (tamanho > 0 || tamanho_soma > 0)
-			{
-				if (tipo == TP_CHAR || tipo == TP_STR)
-				{
-					if (tamanho == 0 || tamanho_soma == 0 || operador != TK_OP_EQ)
-						throw tipo_incompativel(linha_erro);
-				}
-				else throw tipo_incompativel(linha_erro);
+			else throw tipo_incompativel(linha_erro);
 
-				compara_strings();
+			// Comparacao de vetor de char com constante string
+			compara_strings();
+		}
+		else if (tamanho > 0 || tamanho_soma > 0)
+		{
+			if (tipo == TP_CHAR || tipo == TP_STR)
+			{
+				if (tamanho == 0 || tamanho_soma == 0 || operador != TK_OP_EQ)
+					throw tipo_incompativel(linha_erro);
 			}
-			else
+			else throw tipo_incompativel(linha_erro);
+
+			// Comparacao de vetores de char ou constantes string
+			compara_strings();
+		}
+		else
+		{
+			// Comparacao de escalares
+
+			concatena_saida
+			(
+				"\n"
+				"; Comparacao de escalares\n"
+			);
+
+			if (tipo == TP_CHAR)
 			{
-				concatena_saida
-				(
-					"\n"
-					"; Comparacao de escalares\n"
-				);
-
-				if (tipo == TP_CHAR)
-				{
-					reg_a = "AL";
-					reg_b = "BL";
-
-					concatena_saida
-					(
-						"	mov AH, 0\n"
-						"	mov BH, 0\n"
-					);
-				}
-
-				rot_verdadeiro = novo_rotulo();
-				rot_fim = novo_rotulo();
+				reg_a = "AL";
+				reg_b = "BL";
 
 				concatena_saida
 				(
-					"	mov " + reg_a + ", DS:[" + converte_hex(endereco) + "]\n"
-					"	mov " + reg_b + ", DS:[" + converte_hex(endereco_soma) + "]\n"
-					"	cmp " + reg_a + ", " + reg_b + "\n"
-				);
-
-				switch (operador)
-				{
-					case TK_OP_EQ: // =
-						concatena_saida("	je " + rot_verdadeiro + "\n");
-						break;
-
-					case TK_OP_NE: // <>
-						concatena_saida("	jne " + rot_verdadeiro + "\n");
-						break;
-
-					case TK_OP_GT: // >
-						concatena_saida("	jg " + rot_verdadeiro + "\n");
-						break;
-
-					case TK_OP_LT: // <
-						concatena_saida("	jl " + rot_verdadeiro + "\n");
-						break;
-
-					case TK_OP_GE: // >=
-						concatena_saida("	jge " + rot_verdadeiro + "\n");
-						break;
-
-					case TK_OP_LE: // <=
-						concatena_saida("	jle " + rot_verdadeiro + "\n");
-						break;
-
-					default:
-						break;
-				}
-
-				endereco = novo_tmp(2);
-
-				concatena_saida
-				(
-					"	mov AX, 0\n"
-					"	jmp " + rot_fim + "\n" +
-					rot_verdadeiro + ":\n"
-					"	mov AX, 1\n" +
-					rot_fim + ":\n"
-					"	mov DS:[" + converte_hex(endereco) + "], AX\n"
-					"; Fim da comparacao de escalares\n"
+					"	mov AH, 0\n"
+					"	mov BH, 0\n"
 				);
 			}
 
-			tipo = TP_BOOL;
-			tamanho = 0;
+			rot_verdadeiro = novo_rotulo();
+			rot_fim = novo_rotulo();
 
-			break;
+			concatena_saida
+			(
+				"	mov " + reg_a + ", DS:[" + converte_hex(endereco) + "]\n"
+				"	mov " + reg_b + ", DS:[" + converte_hex(endereco_soma) + "]\n"
+				"	cmp " + reg_a + ", " + reg_b + "\n"
+			);
 
-		default:
-			break;
+			switch (operador)
+			{
+				case TK_OP_EQ: // =
+					concatena_saida("	je " + rot_verdadeiro + "\n");
+					break;
+
+				case TK_OP_NE: // <>
+					concatena_saida("	jne " + rot_verdadeiro + "\n");
+					break;
+
+				case TK_OP_GT: // >
+					concatena_saida("	jg " + rot_verdadeiro + "\n");
+					break;
+
+				case TK_OP_LT: // <
+					concatena_saida("	jl " + rot_verdadeiro + "\n");
+					break;
+
+				case TK_OP_GE: // >=
+					concatena_saida("	jge " + rot_verdadeiro + "\n");
+					break;
+
+				case TK_OP_LE: // <=
+					concatena_saida("	jle " + rot_verdadeiro + "\n");
+					break;
+
+				default:
+					break;
+			}
+
+			endereco = novo_tmp(2);
+
+			concatena_saida
+			(
+				"	mov AX, 0\n"
+				"	jmp " + rot_fim + "\n" +
+				rot_verdadeiro + ":\n"
+				"	mov AX, 1\n" +
+				rot_fim + ":\n"
+				"	mov DS:[" + converte_hex(endereco) + "], AX\n"
+				"; Fim da comparacao de escalares\n"
+			);
+		}
+
+		tipo = TP_BOOL;
+		tamanho = 0;
 	}
 }
 
@@ -1359,13 +1359,21 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, int& endereco)
 		if (tamanho_termo != 0 || tamanho != 0)
 			throw tipo_incompativel(linha_erro);
 
-		if (operador == TK_RES_OR)
+		switch (tipo)
 		{
-			if (tipo != TP_BOOL)
+			case TP_INT:
+				if (operador == TK_RES_OR)
+					throw tipo_incompativel(linha_erro);
+				break;
+
+			case TP_BOOL:
+				if (operador != TK_RES_OR)
+					throw tipo_incompativel(linha_erro);
+				break;
+
+			default:
 				throw tipo_incompativel(linha_erro);
 		}
-		else if (tipo != TP_INT)
-			throw tipo_incompativel(linha_erro);
 
 		tamanho = 0;
 
@@ -1445,13 +1453,21 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, int& endereco)
 		if (tamanho_fator != 0 || tamanho != 0)
 			throw tipo_incompativel(linha_erro);
 
-		if (operador == TK_RES_AND)
+		switch (tipo)
 		{
-			if (tipo != TP_BOOL)
+			case TP_INT:
+				if (operador == TK_RES_AND)
+					throw tipo_incompativel(linha_erro);
+				break;
+
+			case TP_BOOL:
+				if (operador != TK_RES_AND)
+					throw tipo_incompativel(linha_erro);
+				break;
+
+			default:
 				throw tipo_incompativel(linha_erro);
 		}
-		else if (tipo != TP_INT)
-			throw tipo_incompativel(linha_erro);
 
 		tamanho = 0;
 
