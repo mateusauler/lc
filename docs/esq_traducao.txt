@@ -378,8 +378,8 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
     "rot_exp:"
 }
 37- {
-    se houve prologo
-        "jmp rot_prologo"
+    se houve epilogo
+        "jmp rot_epilogo"
     senao
         "jmp rot_exp"
 
@@ -423,10 +423,10 @@ Fator -> not (23) Fator1 (24) | "(" Exp1 (25) ")" | ID (26) [ "[" Exp2 (27) "]" 
 }
 44- {
     rot_bloco = novo_rotulo
-    rot_prologo = novo_rotulo
+    rot_epilogo = novo_rotulo
 
     "jmp rot_bloco"
-    "rot_prologo:"
+    "rot_epilogo:"
 }
 45- {
     "jmp rot_exp"

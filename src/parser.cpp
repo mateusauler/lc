@@ -893,8 +893,8 @@ void parser::cmd_for()
 
 	tipo_dados_t tipo_exp;
 	int tamanho_exp, endereco;
-	bool prologo = false;
-	std::string rot_exp = novo_rotulo(), rot_fim = novo_rotulo(), rot_prologo;
+	bool epilogo = false;
+	std::string rot_exp = novo_rotulo(), rot_fim = novo_rotulo(), rot_epilogo;
 
 	consome_token(TK_RES_FOR);   // for
 	consome_token(TK_GRU_A_PAR); // (
@@ -950,15 +950,15 @@ void parser::cmd_for()
 	// [Cmd {, Cmd}]
 	if (token_lido->tipo_token != TK_GRU_F_PAR)
 	{
-		prologo = true;
+		epilogo = true;
 		std::string rot_bloco = novo_rotulo();
-		rot_prologo = novo_rotulo();
+		rot_epilogo = novo_rotulo();
 
 		concatena_saida
 		(
 			"	jmp " + rot_bloco + "\n"
-			"; Inicio do prologo do loop\n" +
-			rot_prologo + ":\n"
+			"; Inicio do epilogo do loop\n" +
+			rot_epilogo + ":\n"
 		);
 
 		cmd();
@@ -973,7 +973,7 @@ void parser::cmd_for()
 		concatena_saida
 		(
 			"\n"
-			"; Fim do prologo do loop\n"
+			"; Fim do epilogo do loop\n"
 			"	jmp " + rot_exp + "\n" +
 			rot_bloco + ":\n"
 		);
@@ -987,7 +987,7 @@ void parser::cmd_for()
 
 	concatena_saida
 	(
-		"	jmp " + (prologo ? rot_prologo : rot_exp) + "\n"
+		"	jmp " + (epilogo ? rot_epilogo : rot_exp) + "\n"
 		"; Final do loop\n" +
 		rot_fim + ":\n"
 	);
