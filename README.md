@@ -1,6 +1,6 @@
 # lc
 
-This compiler was built for our 'Compilers' discipline.
+This compiler was built for our 'Compilers' class.
 
 It is for a simple language based on C and Pascal named `L`.
 
