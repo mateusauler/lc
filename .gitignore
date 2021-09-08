@@ -10,3 +10,4 @@ vgcore.*
 *.asm
 *.EXE
 *.T
+testes/resultado/exe/*

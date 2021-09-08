@@ -18,12 +18,10 @@ for f in $(ls $dir_fonte); do
     $dir_base/lc $dir_fonte/$f $destino
 done
 
-if [ ! -z "$(command -v dosbox)" ] && [ ! -z "$(command -v jwasm)" ] ; then
-	make -C $dir_result --no-print-directory
+make -C $dir_result --no-print-directory
 
-	cd $dir_exe
-	cmd=$(ls *.EXE | sed -E "s/(^|\\s+)(.+)(\.EXE)/ -c \\2\\3/g")
-	dosbox -c "mount c ." -c "c:" $cmd > /dev/null
-
-	cd $dir_base
-fi
+cd $dir_exe
+ls $dir_exe/* >> progs.sh
+chmod +x progs.sh
+./progs.sh
+rm progs.sh

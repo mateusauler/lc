@@ -31,10 +31,10 @@ public:
 private:
 
 	// Primeiro endereco de memoria disponivel
-	int endereco = 0x4000;
+	unsigned long endereco = 0x4000;
 
 	// Primeiro endereco de memoria para temporarios disponivel
-	int end_tmp = 0;
+	unsigned long end_tmp = 0;
 
 	// Proximo sufixo de rotulo
 	int rotulo = 0;
@@ -46,10 +46,10 @@ private:
 	FILE *arq_saida = nullptr;
 
 	// Aloca um bloco de `bytes` bytes na memoria de variaveis e retorna o endereco do inicio deste bloco
-	int aloca(int bytes);
+	unsigned long aloca(unsigned long bytes);
 
 	// Aloca um bloco de `bytes` bytes na memoria de temporarios e retorna o endereco do inicio deste bloco
-	int novo_tmp(int bytes);
+	unsigned long novo_tmp(unsigned long bytes);
 
 	// Gera um novo rotulo unico
 	std::string novo_rotulo();
@@ -91,15 +91,15 @@ private:
 	void cmd_t();
 
 	// Expressao
-	void exp(tipo_dados_t& tipo, int& tamanho, int& endereco);
+	void exp(tipo_dados_t& tipo, int& tamanho, unsigned long& endereco);
 
 	// Lista de somas
-	void soma(tipo_dados_t& tipo, int& tamanho, int& endereco);
+	void soma(tipo_dados_t& tipo, int& tamanho, unsigned long& endereco);
 
 	// Termo de somas (lista de multiplicacoes)
-	void termo(tipo_dados_t& tipo, int& tamanho, int& endereco);
+	void termo(tipo_dados_t& tipo, int& tamanho, unsigned long& endereco);
 
 	// Fator de multiplicacoes
-	void fator(tipo_dados_t& tipo, int& tamanho, int& endereco);
+	void fator(tipo_dados_t& tipo, int& tamanho, unsigned long& endereco);
 
 };

@@ -2,12 +2,16 @@ SRCDIR=asm
 DESTDIR=exe
 
 SRC != cd ${SRCDIR} ; ls *.asm
-OBJ  = ${SRC:%.asm=${DESTDIR}/%.EXE}
+OBJ  = ${SRC:%.asm=${DESTDIR}/%}
 
 all: ${DESTDIR} ${OBJ}
 
-${OBJ}: ${DESTDIR}/%.EXE:${SRCDIR}/%.asm
-	jwasm -mz -q -Fo $@ $<
+${OBJ}: ${DESTDIR}/%:${SRCDIR}/%.asm
+	@echo "$<:"
+	nasm $< -g -w-zeroing -f elf64 -o $@.o
+	ld $@.o -o $@
+	rm $@.o
+	@echo
 
 ${DESTDIR}:
 	mkdir -p ${DESTDIR}

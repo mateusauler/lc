@@ -26,7 +26,7 @@ struct registro_tabela_simbolos
 	classe_t classe = CL_NULL;
 	tipo_dados_t tipo = TP_NULL;
 	int tam = 0;
-	int endereco = 0;
+	unsigned long endereco = 0;
 
 	registro_tabela_simbolos() {}
 
