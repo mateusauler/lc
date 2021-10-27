@@ -21,6 +21,7 @@ done
 make -C $dir_result --no-print-directory
 
 cd $dir_exe
+rm -f progs.sh
 ls $dir_exe/* >> progs.sh
 chmod +x progs.sh
 ./progs.sh
