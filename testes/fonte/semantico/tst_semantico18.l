@@ -1,4 +1,4 @@
-int a, b[4096];
+int a, b[2048];
 char c;
 boolean d;
 

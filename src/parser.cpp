@@ -25,7 +25,7 @@ static int byte_tipo(tipo_dados_t tipo)
 	{
 		case TP_INT:
 		case TP_BOOL:
-			return 2;
+			return 4;
 
 		case TP_CHAR:
 			return 1;
@@ -236,7 +236,7 @@ void parser::dec_const()
 		valor = (nega ? "-" : "") + lex_const;
 
 	// Aloca 1 ou 2 bytes (dependendo do tipo da constante) e preenche o valor
-	concatena_saida((tipo_constante == TP_CHAR ? "	db " : "	dw ") + valor + " ; " + lex + "\n");
+	concatena_saida((tipo_constante == TP_CHAR ? "	db " : "	dd ") + valor + " ; " + lex + "\n");
 
 	consome_token(TK_FIM_DECL); // ;
 }
@@ -304,7 +304,7 @@ void parser::var(tipo_dados_t tipo)
 				valor = (nega ? "-" : "") + lex_const;
 
 			// Aloca 1 ou 2 bytes (dependendo do tipo da variavel) e preenche o valor
-			concatena_saida((tipo == TP_CHAR ? "	db " : "	dw ") + valor + " ; " + lex + "\n");
+			concatena_saida((tipo == TP_CHAR ? "	db " : "	dd ") + valor + " ; " + lex + "\n");
 
 			break;
 
@@ -333,14 +333,14 @@ void parser::var(tipo_dados_t tipo)
 
 			// Aloca os bytes necessarios para o vetor
 			simbolo->endereco = aloca(byte_tipo(simbolo->tipo) * simbolo->tam);
-			concatena_saida((tipo == TP_CHAR ? "	resb " : "	resw ") + std::to_string(simbolo->tam) + " ; " + lex_id + "\n");
+			concatena_saida((tipo == TP_CHAR ? "	resb " : "	resd ") + std::to_string(simbolo->tam) + " ; " + lex_id + "\n");
 
 			break;
 
 		default:
 			// Aloca uma variavel vazia
 			simbolo->endereco = aloca(byte_tipo(simbolo->tipo));
-			concatena_saida((tipo == TP_CHAR ? "	resb 1 ; " : "	resw 1 ; ") + lex + "\n");
+			concatena_saida((tipo == TP_CHAR ? "	resb 1 ; " : "	resd 1 ; ") + lex + "\n");
 			break;
 	}
 }
@@ -416,11 +416,11 @@ void parser::cmd_s()
 				"; Fim do calculo do desvio de [" + lex + "]\n"
 				"\n"
 				"	mov RBX, 0\n"
-				"	mov BX, [dsec+" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n"
+				"	mov EBX, [dsec+" + converte_hex(endereco) + "] ; Recupera desvio (calculado pela expressao)\n"
 			);
 
 			if (simbolo->tipo == TP_INT || simbolo->tipo == TP_BOOL)
-				concatena_saida("	add BX, BX ; int e boolean ocupa 2 bytes\n");
+				concatena_saida("	sal RBX, 2 ; int e boolean ocupa 4 bytes\n");
 
 			concatena_saida
 			(
@@ -552,8 +552,8 @@ void parser::cmd_s()
 				(
 					"\n"
 					"	pop RDI ; Recupera endereco de [" + lex + "]\n"
-					"	mov CX, [dsec+" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
-					"	mov [RDI], CX ; Armazena resultado na memoria\n"
+					"	mov ECX, [dsec+" + converte_hex(endereco) + "] ; Recupera resultado da expressao\n"
+					"	mov [RDI], ECX ; Armazena resultado na memoria\n"
 				);
 			}
 		}
@@ -609,23 +609,23 @@ void parser::cmd_s()
 			concatena_saida
 			(
 				"\n"
-				"	mov RDI, dsec+" + converte_hex(simbolo->endereco) + "\n"
+				"	mov RSI, dsec+" + converte_hex(simbolo->endereco) + "\n"
 				"	mov RAX, 0\n"
-				"	mov AX, [dsec+" + converte_hex(endereco) + "]\n"
+				"	mov EAX, [dsec+" + converte_hex(endereco) + "]\n"
 			);
 
 			if (simbolo->tipo != TP_CHAR)
-				concatena_saida("	add AX, AX\n");
+				concatena_saida("	sal RAX, 2\n");
 
 			concatena_saida
 			(
-				"	add RDI, RAX\n"
+				"	add RSI, RAX\n"
 				"; Fim do calculo do desvio de [" + lex + "]\n"
 				"\n"
 			);
 		}
 		else
-			concatena_saida("	mov RDI, dsec+" + converte_hex(simbolo->endereco) + "\n");
+			concatena_saida("	mov RSI, dsec+" + converte_hex(simbolo->endereco) + "                                    ; Endereço inicial da string\n");
 
 		// Ação 32
 		if (tamanho > 0 && simbolo->tipo != TP_CHAR)
@@ -642,7 +642,6 @@ void parser::cmd_s()
 				(
 					"; Executa a leitura de N caracteres e armazena-os no endereço especificado\n"
 					"	mov RAX, 0                                              ; Chamada de leitura\n"
-					"	mov RSI, RDI                                            ; Endereço inicial da string\n"
 					"	mov RDI, 0                                              ; Ler da entrada padrão\n"
 					"	mov RDX, 1                                              ; Tamanho da string (incluindo o delimitador)\n"
 					"	syscall                                                 ; Chama o kernel\n"
@@ -688,7 +687,7 @@ void parser::cmd_s()
 
 				concatena_saida
 				(
-					"	push RDI"
+					"	push RSI"
 					"; Executa a leitura de N caracteres e armazena-os no endereço especificado\n"
 					"	mov RAX, 0                                              ; Chamada de leitura\n"
 					"	mov RDI, 0                                              ; Ler da entrada padrão\n"
@@ -724,15 +723,15 @@ void parser::cmd_s()
 					"	mov [RBX], AL                                           ; Armazena o delimitador na memória\n"
 					"\n"
 					"; Conversão da string lida para inteiro\n"
-					"	mov AX, 0                                              ; RAX será utilizado como acumulador\n"
-					"	mov BX, 0                                              ; RBX será utilizado para ler os caracteres\n"
-					"	mov CX, 1                                              ; RCX será utilizado para armazenar o sinal\n"
+					"	mov EAX, 0                                              ; RAX será utilizado como acumulador\n"
+					"	mov EBX, 0                                              ; RBX será utilizado para ler os caracteres\n"
+					"	mov ECX, 1                                              ; RCX será utilizado para armazenar o sinal\n"
 					"	mov RSI, dsec+" + converte_hex(buffer_leitura) + "           ; Endereço da string (na região dos temporários)\n"
 					"	mov BL, [RSI]                                           ; Carrega o primeiro caractere\n"
 					"	cmp BL, '-'                                             ; Verifica se é um sinal -\n"
 					"	jne " + rot_loop_conversao + "                                       ; Caso não seja, inicia a conversão\n"
 					"\n"
-					"	mov CX, -1                                             ; Armazena o sinal negativo em RCX\n"
+					"	mov ECX, -1                                             ; Armazena o sinal negativo em RCX\n"
 					"	inc RSI                                                 ; Incrementa o ponteiro da string\n"
 					"\n" +
 					rot_loop_conversao + ":\n"
@@ -740,18 +739,18 @@ void parser::cmd_s()
 					"	cmp BL, 0                                               ; Verifica se ele é o fim de string\n"
 					"	je " + rot_fim_conversao + "                                         ; Caso seja, acabou a conversão\n"
 					"\n"
-					"	mov DX, 10                                             ; Carrega a base\n"
-					"	imul DX                                                ; Multiplica RDX:RAX por RDX (o valor em RDX será ignorado)\n"
+					"	mov EDX, 10                                             ; Carrega a base\n"
+					"	imul EDX                                                ; Multiplica RDX:RAX por RDX (o valor em RDX será ignorado)\n"
 					"	sub BL, '0'                                             ; Converte o dígito para seu valor numérico\n"
-					"	add AX, BX                                            ; Adiciona o valor recuperado ao acumulador\n"
+					"	add EAX, EBX                                            ; Adiciona o valor recuperado ao acumulador\n"
 					"	inc RSI                                                 ; Incrementa o ponteiro da string\n"
 					"\n"
 					"	jmp " + rot_loop_conversao + "                          ; Continua a conversão\n"
 					"\n" +
 					rot_fim_conversao + ":\n"
-					"	imul CX                                                ; Multiplica o número calculado pelo seu sinal\n"
+					"	imul ECX                                                ; Multiplica o número calculado pelo seu sinal\n"
 					"	pop RDI\n"
-					"	mov [RDI], AX                                     ; Armazena o número convertido\n"
+					"	mov [RDI], EAX                                     ; Armazena o número convertido\n"
 				);
 			}
 		}
@@ -772,7 +771,6 @@ void parser::cmd_s()
 				"; Executa a leitura de N caracteres e armazena-os no endereço especificado\n"
 				"	mov RAX, 0                                              ; Chamada de leitura\n"
 				"	mov RDI, 0                                              ; Ler da entrada padrão\n"
-				"	mov RSI, dsec+" + converte_hex(simbolo->endereco) + "        ; Endereço inicial da string\n"
 				"	mov RDX, " + std::to_string(tamanho_buffer) + "         ; Tamanho da string (incluindo o delimitador)\n"
 				"	syscall                                                 ; Chama o kernel\n"
 				"\n"
@@ -883,27 +881,27 @@ void parser::cmd_s()
 				concatena_saida
 				(
 					"	mov RCX, 0                                              ; Inicializa contador para 0\n"
-					"	mov BX, 10                                              ; Armazena o divisor\n"
-					"	mov AX, [dsec+" + converte_hex(endereco) + "]                ; Carrega o número\n"
+					"	mov EBX, 10                                              ; Armazena o divisor\n"
+					"	mov EAX, [dsec+" + converte_hex(endereco) + "]                ; Carrega o número\n"
 					"	mov RDI, dsec+" + converte_hex(temp_impressao) + "           ; Carrega o endereço do buffer (primeiro endereço livre no espaço de temporários)\n"
-					"	cmp AX, -1                                              ; Verifica se o número é negativo\n"
+					"	cmp EAX, -1                                              ; Verifica se o número é negativo\n"
 					"	jg " + rot_loop_conversao + "                           ; Caso não for, começa a conversão\n"
 					"	mov DL, '-'                                             ; Carrega o caractere - no byte baixo do registrador RDX\n"
 					"	mov [RDI], DL                                           ; Armazena o sinal na primeira posição do buffer\n"
 					"	inc RDI                                                 ; Incrementa o ponteiro para a próxima posição disponível\n"
-					"	neg AX                                                  ; Inverte o número, para deixá-lo positivo\n"
+					"	neg EAX                                                  ; Inverte o número, para deixá-lo positivo\n"
 					"\n" +
 					rot_loop_conversao + ":\n"
-					"	mov DX, 0                                               ; Limpa a parte alta do dividendo\n"
-					"	idiv BX                                                 ; Divide RDX:RAX por RBX (contendo o valor 10) e armazena o resultado em RAX e o resto em RDX\n"
-					"	push DX                                                 ; Empurra o resto na pilha (dígito menos significativo)\n"
+					"	mov EDX, 0                                               ; Limpa a parte alta do dividendo\n"
+					"	idiv EBX                                                 ; Divide RDX:RAX por RBX (contendo o valor 10) e armazena o resultado em RAX e o resto em RDX\n"
+					"	push RDX                                                 ; Empurra o resto na pilha (dígito menos significativo)\n"
 					"	inc RCX                                                 ; Incrementa o contador\n"
-					"	cmp AX, 0                                               ; Verifica se ainda resta valor para converter\n"
+					"	cmp EAX, 0                                               ; Verifica se ainda resta valor para converter\n"
 					"	jne " + rot_loop_conversao + "                          ; Continua a conversão caso necessário\n"
 					"\n" +
 					rot_loop_monta_str + ":\n"
-					"	pop AX                                                  ; Recupera o próximo dígito\n"
-					"	add AX, '0'                                             ; Adiciona o valor do caractere '0', para obter o valor do caractere do dígito\n"
+					"	pop RAX                                                  ; Recupera o próximo dígito\n"
+					"	add EAX, '0'                                             ; Adiciona o valor do caractere '0', para obter o valor do caractere do dígito\n"
 					"	mov [RDI], AL                                           ; Escreve o caractere na próxima posição livre do buffer\n"
 					"	inc RDI                                                 ; Incrementa o ponteiro do buffer\n"
 					"	dec RCX                                                 ; Decrementa o contador\n"
@@ -1026,9 +1024,9 @@ void parser::cmd_for()
 	(
 		"\n"
 		"; Verifica se a expressao foi verdadeira\n"
-		"	mov AX, [dsec+" + converte_hex(endereco) + "]\n"
-		"	cmp AX, 1\n"
-		"	jne " + rot_fim + "\n"
+		"	mov EAX, [dsec+" + converte_hex(endereco) + "]\n"
+		"	cmp EAX, 0\n"
+		"	je " + rot_fim + "\n"
 	);
 
 	consome_token(TK_FIM_DECL); // ;
@@ -1116,9 +1114,9 @@ void parser::cmd_if()
 	(
 		"\n"
 		"; Verifica resultado da expressao\n"
-		"	mov AX, [dsec+" + converte_hex(endereco) + "]\n"
-		"	cmp AX, 1\n"
-		"	jne " + rot_caso_falso + "\n"
+		"	mov EAX, [dsec+" + converte_hex(endereco) + "]\n"
+		"	cmp EAX, 0\n"
+		"	je " + rot_caso_falso + "\n"
 	);
 
 	// (CmdT | BlocoCmd)
@@ -1216,7 +1214,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 
 	tipo_token_t operador;
 
-	std::string reg_a = "AX", reg_b = "BX", rot_verdadeiro, rot_fim;
+	std::string reg_a = "EAX", reg_b = "EBX", rot_verdadeiro, rot_fim;
 
 	auto compara_strings = [&]()
 	{
@@ -1228,7 +1226,7 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 		(
 			"\n"
 			"; Comparacao de strings\n"
-			"	mov DX, 1\n"
+			"	mov EDX, 1\n"
 			"	mov RSI, dsec+" + converte_hex(endereco) + "\n"
 			"	mov RDI, dsec+" + converte_hex(endereco_soma) + "\n" +
 			rot_loop + ":\n"
@@ -1238,19 +1236,19 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 			"	jne " + rot_falso + "\n"
 			"	cmp AL, 0\n"
 			"	je " + rot_fim + "\n"
-			"	add RSI, 1\n"
-			"	add RDI, 1\n"
+			"	inc RSI\n"
+			"	inc RDI\n"
 			"	jmp " + rot_loop + "\n" +
 			rot_falso + ":\n"
-			"	mov DX, 0\n" +
+			"	mov EDX, 0\n" +
 			rot_fim + ":\n"
 		);
 
-		endereco = novo_tmp(2);
+		endereco = novo_tmp(byte_tipo(TP_BOOL));
 
 		concatena_saida
 		(
-			"	mov [dsec+" + converte_hex(endereco) + "], DX\n"
+			"	mov [dsec+" + converte_hex(endereco) + "], EDX\n"
 			"; Fim da comparacao de strings\n"
 		);
 	};
@@ -1317,12 +1315,6 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 			{
 				reg_a = "AL";
 				reg_b = "BL";
-
-				concatena_saida
-				(
-					"	mov AH, 0\n"
-					"	mov BH, 0\n"
-				);
 			}
 
 			rot_verdadeiro = novo_rotulo();
@@ -1337,44 +1329,25 @@ void parser::exp(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 
 			switch (operador)
 			{
-				case TK_OP_EQ: // =
-					concatena_saida("	je " + rot_verdadeiro + "\n");
-					break;
-
-				case TK_OP_NE: // <>
-					concatena_saida("	jne " + rot_verdadeiro + "\n");
-					break;
-
-				case TK_OP_GT: // >
-					concatena_saida("	jg " + rot_verdadeiro + "\n");
-					break;
-
-				case TK_OP_LT: // <
-					concatena_saida("	jl " + rot_verdadeiro + "\n");
-					break;
-
-				case TK_OP_GE: // >=
-					concatena_saida("	jge " + rot_verdadeiro + "\n");
-					break;
-
-				case TK_OP_LE: // <=
-					concatena_saida("	jle " + rot_verdadeiro + "\n");
-					break;
-
-				default:
-					break;
+				case TK_OP_EQ: concatena_saida("	je "  + rot_verdadeiro + "\n"); break; // =
+				case TK_OP_NE: concatena_saida("	jne " + rot_verdadeiro + "\n"); break; // <>
+				case TK_OP_GT: concatena_saida("	jg "  + rot_verdadeiro + "\n"); break; // >
+				case TK_OP_LT: concatena_saida("	jl "  + rot_verdadeiro + "\n"); break; // <
+				case TK_OP_GE: concatena_saida("	jge " + rot_verdadeiro + "\n"); break; // >=
+				case TK_OP_LE: concatena_saida("	jle " + rot_verdadeiro + "\n"); break; // <=
+				default: break;
 			}
 
-			endereco = novo_tmp(2);
+			endereco = novo_tmp(byte_tipo(TP_BOOL));
 
 			concatena_saida
 			(
-				"	mov AX, 0\n"
+				"	mov EAX, 0\n"
 				"	jmp " + rot_fim + "\n" +
 				rot_verdadeiro + ":\n"
-				"	mov AX, 1\n" +
+				"	mov EAX, 1\n" +
 				rot_fim + ":\n"
-				"	mov [dsec+" + converte_hex(endereco) + "], AX\n"
+				"	mov [dsec+" + converte_hex(endereco) + "], EAX\n"
 				"; Fim da comparacao de escalares\n"
 			);
 		}
@@ -1417,9 +1390,9 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 		(
 			"\n"
 			"; Nega o primeiro termo\n"
-			"	mov BX, [dsec+" + converte_hex(endereco) + "]\n"
-			"	neg BX\n"
-			"	mov [dsec+" + converte_hex(endereco) + "], BX\n"
+			"	mov EBX, [dsec+" + converte_hex(endereco) + "]\n"
+			"	neg EBX\n"
+			"	mov [dsec+" + converte_hex(endereco) + "], EBX\n"
 		);
 	}
 
@@ -1466,31 +1439,31 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 
 		concatena_saida
 		(
-			"	mov AX, [dsec+" + converte_hex(endereco) + "]\n"
-			"	mov BX, [dsec+" + converte_hex(endereco_termo) + "]\n"
+			"	mov EAX, [dsec+" + converte_hex(endereco) + "]\n"
+			"	mov EBX, [dsec+" + converte_hex(endereco_termo) + "]\n"
 		);
 
 		switch (operador)
 		{
 			case TK_OP_MAIS:  // +
-				concatena_saida("	add AX, BX\n");
+				concatena_saida("	add EAX, EBX\n");
 				break;
 
 			case TK_OP_MENOS: // -
-				concatena_saida("	sub AX, BX\n");
+				concatena_saida("	sub EAX, EBX\n");
 				break;
 
 			case TK_RES_OR:   // or
 				concatena_saida
 				(
-					"	neg AX\n"
-					"	add AX, 1\n"
-					"	neg BX\n"
-					"	add BX, 1\n"
-					"	mov DX, 0\n"
-					"	imul BX\n"
-					"	neg AX\n"
-					"	add AX, 1\n"
+					"	neg EAX\n"
+					"	add EAX, 1\n"
+					"	neg EBX\n"
+					"	add EBX, 1\n"
+					"	mov EDX, 0\n"
+					"	imul EBX\n"
+					"	neg EAX\n"
+					"	add EAX, 1\n"
 				);
 				break;
 
@@ -1498,7 +1471,7 @@ void parser::soma(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 				break;
 		}
 
-		concatena_saida("	mov [dsec+" + converte_hex(endereco) + "], AX\n");
+		concatena_saida("	mov [dsec+" + converte_hex(endereco) + "], EAX\n");
 	}
 }
 
@@ -1561,31 +1534,31 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 
 		concatena_saida
 		(
-			"	mov AX, [dsec+" + converte_hex(endereco) + "]\n"
-			"	mov BX, [dsec+" + converte_hex(endereco_fator) + "]\n"
+			"	mov EAX, [dsec+" + converte_hex(endereco) + "]\n"
+			"	mov EBX, [dsec+" + converte_hex(endereco_fator) + "]\n"
 		);
 
 		switch (operador)
 		{
 			case TK_OP_MUL:  // *
 			case TK_RES_AND: // and
-				concatena_saida("	imul BX\n");
+				concatena_saida("	imul EBX\n");
 				break;
 
 			case TK_OP_BARRA: // /
 				concatena_saida
 				(
-					"	cwd\n"
-					"	idiv BX\n"
+					"	cdq\n"
+					"	idiv EBX\n"
 				);
 				break;
 
 			case TK_OP_PORCENTO: // %
 				concatena_saida
 				(
-					"	cwd\n"
-					"	idiv BX\n"
-					"	mov AX, DX\n"
+					"	cdq\n"
+					"	idiv EBX\n"
+					"	mov EAX, EDX\n"
 				);
 				break;
 
@@ -1593,7 +1566,7 @@ void parser::termo(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 				break;
 		}
 
-		concatena_saida("	mov [dsec+" + converte_hex(endereco) + "], AX\n");
+		concatena_saida("	mov [dsec+" + converte_hex(endereco) + "], EAX\n");
 	}
 }
 
@@ -1634,10 +1607,10 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 			concatena_saida
 			(
 				"; Nega um fator\n"
-				"	mov BX, [dsec+" + converte_hex(endereco) + "]\n"
-				"	neg BX\n"
-				"	add BX, 1\n"
-				"	mov [dsec+" + converte_hex(endereco) + "], BX\n"
+				"	mov EBX, [dsec+" + converte_hex(endereco) + "]\n"
+				"	neg EBX\n"
+				"	add EBX, 1\n"
+				"	mov [dsec+" + converte_hex(endereco) + "], EBX\n"
 			);
 
 			break;
@@ -1703,20 +1676,20 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 				(
 					"\n"
 					"	mov RSI, 0\n"
-					"	mov SI, [dsec+" + converte_hex(endereco) + "] ; Recupera desvio\n"
+					"	mov ESI, [dsec+" + converte_hex(endereco) + "] ; Recupera desvio\n"
 				);
 
 				if (tipo == TP_INT || tipo == TP_BOOL)
-					concatena_saida("	add RSI, RSI ; int e boolean ocupa 2 bytes\n");
+					concatena_saida("	sal RSI, 2 ; int e boolean ocupa 4 bytes\n");
 
 				concatena_saida("	add RSI, dsec+" + converte_hex(simbolo->endereco) + " ; Combina endereco base com desvio\n");
 
-				endereco = novo_tmp(1 + (tipo != TP_CHAR));
+				endereco = novo_tmp(byte_tipo(tipo));
 
 				concatena_saida
 				(
-					"	mov CX, [RSI] ; Recupera valor na posicao calculada\n"
-					"	mov [dsec+" + converte_hex(endereco) + "], CX ; Armazena valor em um temporario\n"
+					"	mov ECX, [RSI] ; Recupera valor na posicao calculada\n"
+					"	mov [dsec+" + converte_hex(endereco) + "], ECX ; Armazena valor em um temporario\n"
 					"\n"
 					"; Fim do calculo do endereco + desvio do vetor [" + lex + "]\n"
 					"\n"
@@ -1729,7 +1702,7 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 				// Caso seja uma variavel escalar ou constante, copia ele para um temporario
 				if (tipo == TP_CHAR)
 				{
-					endereco = novo_tmp(1);
+					endereco = novo_tmp(byte_tipo(tipo));
 					concatena_saida
 					(
 						"	mov BL, [dsec+" + converte_hex(simbolo->endereco) + "] ; Recupera valor de [" + lex + "]\n"
@@ -1738,11 +1711,11 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 				}
 				else
 				{
-					endereco = novo_tmp(2);
+					endereco = novo_tmp(byte_tipo(tipo));
 					concatena_saida
 					(
-						"	mov BX, [dsec+" + converte_hex(simbolo->endereco) + "] ; Recupera valor de [" + lex + "]\n"
-						"	mov [dsec+" + converte_hex(endereco) + "], BX ; Armazena valor em um temporario\n"
+						"	mov EBX, [dsec+" + converte_hex(simbolo->endereco) + "] ; Recupera valor de [" + lex + "]\n"
+						"	mov [dsec+" + converte_hex(endereco) + "], EBX ; Armazena valor em um temporario\n"
 					);
 				}
 			}
@@ -1803,8 +1776,8 @@ void parser::fator(tipo_dados_t &tipo, int &tamanho, unsigned long& endereco)
 					// Caso for um int ou boolean, deve-se movimentar 2 bytes
 					concatena_saida
 					(
-						"	mov BX, " + valor + "\n"
-						"	mov [dsec+" + converte_hex(endereco) + "], BX\n"
+						"	mov EBX, " + valor + "\n"
+						"	mov [dsec+" + converte_hex(endereco) + "], EBX\n"
 					);
 				}
 			}
